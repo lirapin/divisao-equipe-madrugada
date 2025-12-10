@@ -419,22 +419,43 @@ function processarArquivo(file) {
       const wb = XLSX.read(data, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
       
-      // Ler como JSON com cabeçalhos
-      const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      // Ler todos os dados como array
+      const jsonArray = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
       
-      if (json.length === 0) {
-        showToast('❌ Planilha vazia', 'danger');
+      // Encontrar a linha do cabeçalho (primeira linha não vazia)
+      let headerIndex = 0;
+      for (let i = 0; i < jsonArray.length; i++) {
+        if (jsonArray[i].some(cell => cell && String(cell).trim() !== '')) {
+          headerIndex = i;
+          break;
+        }
+      }
+      
+      const headers = jsonArray[headerIndex];
+      const dataRows = jsonArray.slice(headerIndex + 1);
+      
+      // Converter para objetos
+      dadosPlanilha = dataRows
+        .filter(row => row.some(cell => cell && String(cell).trim() !== ''))
+        .map(row => {
+          const obj = {};
+          headers.forEach((header, index) => {
+            obj[String(header).trim()] = row[index] || '';
+          });
+          return obj;
+        });
+      
+      if (dadosPlanilha.length === 0) {
+        showToast('❌ Nenhum dado encontrado na planilha', 'danger');
         hideLoading();
         return;
       }
-      
-      dadosPlanilha = json;
       
       calcularDivisao();
       hideLoading();
       
     } catch (err) {
-      console.error('Erro:', err);
+      console.error('Erro detalhado:', err);
       showToast('❌ Erro ao processar planilha: ' + err.message, 'danger');
       hideLoading();
     }
@@ -453,33 +474,31 @@ function calcularDivisao() {
   const primeiraLinha = dadosPlanilha[0];
   const todasColunas = Object.keys(primeiraLinha);
   
-  // Encontrar coluna do nome (pode ser NOME ou similar)
-  const colunaNome = todasColunas.find(col => 
-    col.toUpperCase().includes('NOME')
-  );
+  // Encontrar coluna do nome - buscar variações
+  const colunaNome = todasColunas.find(col => {
+    const colUpper = col.toUpperCase().trim();
+    return colUpper === 'NOME' || colUpper.includes('NOME');
+  });
   
   if (!colunaNome) {
-    showToast('❌ Coluna NOME não encontrada', 'danger');
+    showToast('❌ Coluna NOME não encontrada. Colunas disponíveis: ' + todasColunas.join(', '), 'danger');
     return;
   }
   
-  // Identificar colunas de dias - procurar por números no início
+  // Identificar colunas de dias - números de 1 a 31
   const colunaDias = todasColunas.filter(col => {
-    // Tentar extrair número do início da string
-    const match = col.match(/^(\d+)/);
-    if (match) {
-      const num = parseInt(match[1]);
-      return num >= 1 && num <= 31;
-    }
-    return false;
+    const colStr = String(col).trim();
+    // Tentar pegar apenas o número
+    const numero = parseInt(colStr);
+    return !isNaN(numero) && numero >= 1 && numero <= 31;
   }).sort((a, b) => {
-    const numA = parseInt(a.match(/^(\d+)/)[1]);
-    const numB = parseInt(b.match(/^(\d+)/)[1]);
+    const numA = parseInt(String(a).match(/\d+/)?.[0] || '0');
+    const numB = parseInt(String(b).match(/\d+/)?.[0] || '0');
     return numA - numB;
   });
   
   if (colunaDias.length === 0) {
-    showToast('❌ Nenhuma coluna de dias encontrada. Certifique-se de que as colunas começam com números (1, 2, 3...)', 'warning');
+    showToast('❌ Nenhuma coluna de dias encontrada. Certifique-se de que as colunas têm números de 1 a 31.', 'warning');
     return;
   }
   
@@ -487,14 +506,14 @@ function calcularDivisao() {
   
   // Para cada dia
   colunaDias.forEach(colunaDia => {
-    const diaNumero = parseInt(colunaDia.match(/^(\d+)/)[1]);
+    const diaNumero = parseInt(String(colunaDia).match(/\d+/)?.[0] || colunaDia);
     const trabalhandoHoje = [];
     const ausentesHoje = [];
     
     // Verificar quem está trabalhando
     dadosPlanilha.forEach(funcionario => {
       const nome = String(funcionario[colunaNome] || '').trim().toUpperCase();
-      if (!nome) return;
+      if (!nome || nome === '') return;
       
       const valorCelula = funcionario[colunaDia];
       const status = String(valorCelula || '').trim().toUpperCase();
