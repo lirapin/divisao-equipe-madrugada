@@ -9,6 +9,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.10/build/pdfmake.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.10/build/vfs_fonts.js"></script>
 
   <style>
     :root {
@@ -308,7 +310,7 @@
 <body>
 <header class="app-header py-3">
   <div class="container-fluid d-flex justify-content-between align-items-center">
-    <h1 class="h4 m-0 fw-bold"><span class="brand-dot"></span>Portal de Divisão de Tarefas</h1>
+    <h1 class="h4 m-0 fw-bold"><span class="brand-dot"></span>Portal de divisão de tarefas</h1>
   </div>
 </header>
 
@@ -332,9 +334,14 @@
         <div class="card-custom p-4 mb-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="section-title mb-0">Divisão de tarefas por dia</h5>
-            <button class="btn btn-primary btn-sm" onclick="location.reload()">
-              <i class="bi bi-arrow-clockwise me-1"></i> Nova planilha
-            </button>
+            <div>
+              <button class="btn btn-danger btn-sm me-2" id="btnExportarPDF">
+                <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise me-1"></i> Nova planilha
+              </button>
+            </div>
           </div>
         </div>
 
@@ -347,7 +354,7 @@
 
 <!-- Assinatura -->
 <div class="assinatura">
-  <strong>Desenvolvido por:</strong> N5923221
+  <strong>Desenvolvido por:</strong> N6105010 e N5923221
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -375,6 +382,7 @@ const PRIORIDADES = {
 };
 
 let dadosPlanilha = [];
+let resultadosGlobal = [];
 
 // Upload handlers
 const dropArea = document.getElementById('dropArea');
@@ -410,41 +418,24 @@ function processarArquivo(file) {
       const data = new Uint8Array(e.target.result);
       const wb = XLSX.read(data, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(ws, { defval: '', header: 1 });
       
-      // Encontrar linha do cabeçalho
-      let headerRowIndex = json.findIndex(row => 
-        Array.isArray(row) && row.some(cell => 
-          String(cell).toLowerCase().includes('nome')
-        )
-      );
+      // Ler como JSON com cabeçalhos
+      const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
       
-      if (headerRowIndex === -1) {
-        showToast('❌ Planilha inválida. Certifique-se de que há uma coluna "NOME".', 'danger');
+      if (json.length === 0) {
+        showToast('❌ Planilha vazia', 'danger');
         hideLoading();
         return;
       }
       
-      const header = json[headerRowIndex];
-      const dataRows = json.slice(headerRowIndex + 1).filter(r => 
-        Array.isArray(r) && r.some(cell => String(cell).trim() !== '')
-      );
-      
-      // Processar dados
-      dadosPlanilha = dataRows.map(row => {
-        const obj = {};
-        header.forEach((h, i) => {
-          obj[String(h).trim()] = row[i];
-        });
-        return obj;
-      });
+      dadosPlanilha = json;
       
       calcularDivisao();
       hideLoading();
       
     } catch (err) {
-      console.error(err);
-      showToast('❌ Erro ao processar planilha', 'danger');
+      console.error('Erro:', err);
+      showToast('❌ Erro ao processar planilha: ' + err.message, 'danger');
       hideLoading();
     }
   };
@@ -453,30 +444,42 @@ function processarArquivo(file) {
 }
 
 function calcularDivisao() {
-  if (dadosPlanilha.length === 0) return;
+  if (dadosPlanilha.length === 0) {
+    showToast('❌ Nenhum dado encontrado na planilha', 'danger');
+    return;
+  }
   
-  console.log('Dados da planilha:', dadosPlanilha);
-  
-  // Identificar colunas de datas - procurar por padrão "número (DIA)"
+  // Pegar as chaves do primeiro objeto
   const primeiraLinha = dadosPlanilha[0];
-  const colunas = Object.keys(primeiraLinha);
+  const todasColunas = Object.keys(primeiraLinha);
   
-  console.log('Todas as colunas:', colunas);
+  // Encontrar coluna do nome (pode ser NOME ou similar)
+  const colunaNome = todasColunas.find(col => 
+    col.toUpperCase().includes('NOME')
+  );
   
-  // Filtrar colunas que são dias (1-31 ou que contenham números seguidos de dia da semana)
-  const colunaDias = colunas.filter(col => {
+  if (!colunaNome) {
+    showToast('❌ Coluna NOME não encontrada', 'danger');
+    return;
+  }
+  
+  // Identificar colunas de dias - procurar por números no início
+  const colunaDias = todasColunas.filter(col => {
+    // Tentar extrair número do início da string
     const match = col.match(/^(\d+)/);
     if (match) {
       const num = parseInt(match[1]);
       return num >= 1 && num <= 31;
     }
     return false;
+  }).sort((a, b) => {
+    const numA = parseInt(a.match(/^(\d+)/)[1]);
+    const numB = parseInt(b.match(/^(\d+)/)[1]);
+    return numA - numB;
   });
   
-  console.log('Colunas de dias encontradas:', colunaDias);
-  
   if (colunaDias.length === 0) {
-    showToast('❌ Nenhuma coluna de dias encontrada na planilha', 'danger');
+    showToast('❌ Nenhuma coluna de dias encontrada. Certifique-se de que as colunas começam com números (1, 2, 3...)', 'warning');
     return;
   }
   
@@ -490,41 +493,210 @@ function calcularDivisao() {
     
     // Verificar quem está trabalhando
     dadosPlanilha.forEach(funcionario => {
-      const nome = String(funcionario.NOME || '').trim().toUpperCase();
+      const nome = String(funcionario[colunaNome] || '').trim().toUpperCase();
       if (!nome) return;
       
-      const status = String(funcionario[colunaDia] || '').trim().toUpperCase();
+      const valorCelula = funcionario[colunaDia];
+      const status = String(valorCelula || '').trim().toUpperCase();
       
-      console.log(`Dia ${diaNumero} - ${nome}: status = "${status}"`);
+      // Lista de siglas que indicam AUSÊNCIA
+      const siglasAusencia = ['DSR', 'COM', 'FF', 'FS'];
       
-      // Considera AUSENTE se tem uma das siglas
-      const ausente = ['DSR', 'COM', 'FF', 'FS', '22'].includes(status);
+      // Verifica se o status é uma das siglas de ausência
+      const estaAusente = siglasAusencia.includes(status);
       
-      // Considera TRABALHANDO se célula vazia ou não tem sigla
-      if (!ausente || status === '') {
+      // Verifica se é "22" (trabalhando)
+      const estaTrabalhandoComCodigo = status === '22';
+      
+      // Está trabalhando se: tem código "22" OU célula vazia
+      if (estaTrabalhandoComCodigo || status === '') {
         trabalhandoHoje.push(nome);
-      } else {
-        ausentesHoje.push({ nome, motivo: status || 'N/A' });
+      } else if (estaAusente) {
+        ausentesHoje.push({ nome, motivo: status });
       }
     });
     
-    console.log(`Dia ${diaNumero} - Trabalhando:`, trabalhandoHoje);
-    
-    // Calcular divisão baseado no número de pessoas
-    const numPessoas = trabalhandoHoje.length;
-    const divisao = calcularDivisaoPorNumero(numPessoas, trabalhandoHoje);
-    
-    resultados.push({
-      dia: diaNumero,
-      numPessoas,
-      trabalhando: trabalhandoHoje,
-      ausentes: ausentesHoje,
-      divisao
-    });
+    // Só adiciona resultado se houver pessoas trabalhando
+    if (trabalhandoHoje.length > 0) {
+      const numPessoas = trabalhandoHoje.length;
+      const divisao = calcularDivisaoPorNumero(numPessoas, trabalhandoHoje);
+      
+      resultados.push({
+        dia: diaNumero,
+        numPessoas,
+        trabalhando: trabalhandoHoje,
+        ausentes: ausentesHoje,
+        divisao
+      });
+    }
   });
   
-  console.log('Resultados finais:', resultados);
+  if (resultados.length === 0) {
+    showToast('⚠️ Nenhum dia com pessoas trabalhando foi encontrado', 'warning');
+    return;
+  }
+  
   exibirResultados(resultados);
+}
+
+function gerarPDF() {
+  if (resultadosGlobal.length === 0) {
+    showToast('❌ Nenhum resultado para exportar', 'danger');
+    return;
+  }
+  
+  const docDefinition = {
+    pageSize: 'A4',
+    pageOrientation: 'portrait',
+    pageMargins: [40, 60, 40, 60],
+    content: [
+      {
+        text: 'Portal de divisão de tarefas',
+        style: 'header',
+        alignment: 'center',
+        margin: [0, 0, 0, 20]
+      },
+      {
+        text: `Relatório gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
+        style: 'subheader',
+        alignment: 'center',
+        margin: [0, 0, 0, 30]
+      }
+    ],
+    styles: {
+      header: {
+        fontSize: 22,
+        bold: true,
+        color: '#2e7d32'
+      },
+      subheader: {
+        fontSize: 10,
+        color: '#666666',
+        italics: true
+      },
+      diaHeader: {
+        fontSize: 14,
+        bold: true,
+        color: '#2e7d32',
+        margin: [0, 15, 0, 10]
+      },
+      areaTitle: {
+        fontSize: 11,
+        bold: true,
+        color: '#1a1a1a',
+        margin: [0, 5, 0, 3]
+      },
+      funcionarioText: {
+        fontSize: 10,
+        color: '#333333',
+        margin: [15, 2, 0, 2]
+      },
+      statusHeader: {
+        fontSize: 11,
+        bold: true,
+        color: '#666666',
+        margin: [0, 10, 0, 5]
+      },
+      statusText: {
+        fontSize: 9,
+        color: '#555555',
+        margin: [10, 1, 0, 1]
+      },
+      divider: {
+        margin: [0, 10, 0, 10]
+      }
+    }
+  };
+  
+  resultadosGlobal.forEach((resultado, index) => {
+    // Cabeçalho do dia
+    docDefinition.content.push({
+      text: `Dia ${resultado.dia} - ${resultado.numPessoas} pessoa(s) trabalhando`,
+      style: 'diaHeader'
+    });
+    
+    // Divisão de áreas
+    docDefinition.content.push({
+      text: 'Divisão de áreas:',
+      style: 'statusHeader'
+    });
+    
+    Object.entries(resultado.divisao).forEach(([area, pessoa]) => {
+      docDefinition.content.push({
+        text: area,
+        style: 'areaTitle'
+      });
+      docDefinition.content.push({
+        text: `• ${pessoa}`,
+        style: 'funcionarioText'
+      });
+    });
+    
+    // Status da equipe
+    docDefinition.content.push({
+      text: 'Status da equipe:',
+      style: 'statusHeader',
+      margin: [0, 15, 0, 5]
+    });
+    
+    // Trabalhando
+    docDefinition.content.push({
+      text: `Trabalhando (${resultado.trabalhando.length}):`,
+      style: 'areaTitle'
+    });
+    
+    resultado.trabalhando.forEach(nome => {
+      docDefinition.content.push({
+        text: `✓ ${nome}`,
+        style: 'statusText',
+        color: '#4caf50'
+      });
+    });
+    
+    // Ausentes
+    if (resultado.ausentes.length > 0) {
+      docDefinition.content.push({
+        text: `Ausentes (${resultado.ausentes.length}):`,
+        style: 'areaTitle',
+        margin: [0, 8, 0, 3]
+      });
+      
+      resultado.ausentes.forEach(({nome, motivo}) => {
+        docDefinition.content.push({
+          text: `✗ ${nome} (${motivo})`,
+          style: 'statusText',
+          color: '#f44336'
+        });
+      });
+    }
+    
+    // Divisória entre dias (exceto no último)
+    if (index < resultadosGlobal.length - 1) {
+      docDefinition.content.push({
+        canvas: [
+          {
+            type: 'line',
+            x1: 0, y1: 0,
+            x2: 515, y2: 0,
+            lineWidth: 1,
+            lineColor: '#e0e0e0'
+          }
+        ],
+        style: 'divider'
+      });
+    }
+  });
+  
+  // Rodapé
+  docDefinition.content.push({
+    text: '\n\nDesenvolvido por: N6105010 e N5923221',
+    style: 'subheader',
+    alignment: 'center',
+    margin: [0, 30, 0, 0]
+  });
+  
+  pdfMake.createPdf(docDefinition).download(`divisao-tarefas-${new Date().toISOString().split('T')[0]}.pdf`);
+  showToast('✅ PDF exportado com sucesso!', 'success');
 }
 
 function calcularDivisaoPorNumero(num, trabalhandoHoje) {
