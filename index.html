@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Portal de Divisão de Tarefas</title>
+
+  <!-- CSS & Libs -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #2e7d32;
+      --primary-dark: #1b5e20;
+      --primary-light: #4caf50;
+      --secondary: #a5d6a7;
+      --accent: #81c784;
+      --light-bg: linear-gradient(135deg, #f8fdf8 0%, #f0f7ff 100%);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --card-bg-hover: rgba(255, 255, 255, 0.98);
+      --text-dark: #1a1a1a;
+      --text-muted: #5a5a5a;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --info: #2196f3;
+      --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.12);
+      --shadow-lg: 0 16px 50px rgba(0, 0, 0, 0.15);
+      --glass: rgba(255, 255, 255, 0.25);
+      --glass-border: rgba(255, 255, 255, 0.18);
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: var(--light-bg);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: var(--text-dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 50px;
+    }
+    
+    .app-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .app-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+      opacity: 0.1;
+    }
+    
+    .brand-dot {
+      width: .75rem;
+      height: .75rem;
+      border-radius: 50%;
+      background: #fff;
+      display: inline-block;
+      margin-right: .5rem;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+    
+    .upload-drop {
+      border: 2px dashed var(--accent);
+      border-radius: 16px;
+      padding: 3rem;
+      text-align: center;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .upload-drop::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(33, 150, 243, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .upload-drop:hover, .upload-drop.dragover {
+      background: var(--glass);
+      border-color: var(--primary);
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .upload-drop:hover::before, .upload-drop.dragover::before {
+      opacity: 1;
+    }
+    
+    .card-custom {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: cardEntrance 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    @keyframes cardEntrance {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .card-custom:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: var(--shadow-lg);
+      background: var(--card-bg-hover);
+    }
+    
+    .section-title {
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border-color);
+      position: relative;
+      font-size: 1.25rem;
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--info));
+      border-radius: 2px;
+    }
+    
+    .area-badge {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      box-shadow: var(--shadow-sm);
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+    
+    .funcionario-item {
+      padding: 10px 15px;
+      margin: 5px 0;
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(33, 150, 243, 0.1) 100%);
+      border-radius: 8px;
+      border-left: 4px solid var(--primary);
+      transition: all 0.3s ease;
+    }
+    
+    .funcionario-item:hover {
+      transform: translateX(5px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .dia-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--glass-border);
+      animation: slideInUp 0.5s ease-out;
+    }
+    
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .dia-header {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border-color);
+    }
+    
+    .ausente-badge {
+      background: linear-gradient(135deg, var(--danger) 0%, #ef5350 100%);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    
+    .presente-badge {
+      background: linear-gradient(135deg, var(--success) 0%, #66bb6a 100%);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    
+    .assinatura {
+      position: fixed;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(150, 150, 150, 0.1);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.65rem;
+      color: #666;
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      animation: fadeIn 0.8s ease-out;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(10px);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border: none;
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    @media (max-width: 768px) {
+      .upload-drop {
+        padding: 2rem;
+      }
+      
+      .assinatura {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        transform: none;
+        margin: 20px auto 10px;
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+<header class="app-header py-3">
+  <div class="container-fluid d-flex justify-content-between align-items-center">
+    <h1 class="h4 m-0 fw-bold"><span class="brand-dot"></span>Portal de Divisão de Tarefas</h1>
+  </div>
+</header>
+
+<div class="container-fluid py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+      
+      <!-- Upload Area -->
+      <div class="card-custom p-4 mb-4" id="uploadSection">
+        <h5 class="section-title">Upload da Planilha de Escalas</h5>
+        <div class="upload-drop" id="dropArea">
+          <i class="bi bi-cloud-arrow-up fs-1 text-primary mb-3"></i>
+          <p class="mb-1 fw-semibold">Arraste e solte sua planilha aqui</p>
+          <span class="small text-muted">Suporta XLSX, XLS e CSV</span>
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+        </div>
+      </div>
+
+      <!-- Results Area -->
+      <div id="resultsSection" style="display: none;">
+        <div class="card-custom p-4 mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="section-title mb-0">Divisão de Tarefas por Dia</h5>
+            <button class="btn btn-primary btn-sm" onclick="location.reload()">
+              <i class="bi bi-arrow-clockwise me-1"></i> Nova Planilha
+            </button>
+          </div>
+        </div>
+
+        <div id="resultContent"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Assinatura -->
+<div class="assinatura">
+  <strong>Desenvolvido por:</strong> N6105010 e N5923221
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Regras de prioridade
+const PRIORIDADES = {
+  3: {
+    'CO/NO/NE': ['CRISTIANE HERMOGENES DA SILVA', 'MARISTELLA MARCIA DOS SANTOS', 'RAISSA LIMA DE OLIVEIRA'],
+    'BA/MG/ES': ['LEONARDO FERREIRA LIMA DE ALMEIDA', 'RAISSA LIMA DE OLIVEIRA', 'MARISTELLA MARCIA DOS SANTOS'],
+    'RIO': ['THIAGO PEREIRA DA SILVA', 'ALAN MARINHO DIAS', 'MARISTELLA MARCIA DOS SANTOS', 'RAISSA LIMA DE OLIVEIRA']
+  },
+  4: {
+    'CO/NO': ['CRISTIANE HERMOGENES DA SILVA', 'MARISTELLA MARCIA DOS SANTOS', 'RAISSA LIMA DE OLIVEIRA', 'THIAGO PEREIRA DA SILVA', 'ALAN MARINHO DIAS', 'LEONARDO FERREIRA LIMA DE ALMEIDA'],
+    'NE/BA': ['RAISSA LIMA DE OLIVEIRA', 'MARISTELLA MARCIA DOS SANTOS', 'CRISTIANE HERMOGENES DA SILVA', 'THIAGO PEREIRA DA SILVA', 'LEONARDO FERREIRA LIMA DE ALMEIDA', 'ALAN MARINHO DIAS'],
+    'MG/ES': ['LEONARDO FERREIRA LIMA DE ALMEIDA', 'RAISSA LIMA DE OLIVEIRA', 'ALAN MARINHO DIAS', 'CRISTIANE HERMOGENES DA SILVA', 'MARISTELLA MARCIA DOS SANTOS', 'THIAGO PEREIRA DA SILVA'],
+    'RIO': ['ALAN MARINHO DIAS', 'THIAGO PEREIRA DA SILVA', 'MARISTELLA MARCIA DOS SANTOS', 'RAISSA LIMA DE OLIVEIRA', 'LEONARDO FERREIRA LIMA DE ALMEIDA', 'CRISTIANE HERMOGENES DA SILVA']
+  },
+  5: {
+    'CO/NO': ['CRISTIANE HERMOGENES DA SILVA', 'MARISTELLA MARCIA DOS SANTOS'],
+    'NE/BA': ['RAISSA LIMA DE OLIVEIRA', 'MARISTELLA MARCIA DOS SANTOS'],
+    'MG': ['LEONARDO FERREIRA LIMA DE ALMEIDA', 'RAISSA LIMA DE OLIVEIRA'],
+    'RIO A': ['ALAN MARINHO DIAS', 'MARISTELLA MARCIA DOS SANTOS'],
+    'RIO B': ['THIAGO PEREIRA DA SILVA', 'MARISTELLA MARCIA DOS SANTOS']
+  }
+};
+
+let dadosPlanilha = [];
+
+// Upload handlers
+const dropArea = document.getElementById('dropArea');
+const fileInput = document.getElementById('fileInput');
+
+['dragenter', 'dragover'].forEach(evt => dropArea.addEventListener(evt, e => {
+  e.preventDefault();
+  dropArea.classList.add('dragover');
+}));
+
+['dragleave', 'drop'].forEach(evt => dropArea.addEventListener(evt, e => {
+  e.preventDefault();
+  dropArea.classList.remove('dragover');
+}));
+
+dropArea.addEventListener('drop', e => {
+  const f = e.dataTransfer.files?.[0];
+  if (f) processarArquivo(f);
+});
+
+dropArea.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => {
+  const f = e.target.files?.[0];
+  if (f) processarArquivo(f);
+});
+
+function processarArquivo(file) {
+  showLoading();
+  const reader = new FileReader();
+  
+  reader.onload = e => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(ws, { defval: '', header: 1 });
+      
+      // Encontrar linha do cabeçalho
+      let headerRowIndex = json.findIndex(row => 
+        Array.isArray(row) && row.some(cell => 
+          String(cell).toLowerCase().includes('nome')
+        )
+      );
+      
+      if (headerRowIndex === -1) {
+        showToast('❌ Planilha inválida. Certifique-se de que há uma coluna "NOME".', 'danger');
+        hideLoading();
+        return;
+      }
+      
+      const header = json[headerRowIndex];
+      const dataRows = json.slice(headerRowIndex + 1).filter(r => 
+        Array.isArray(r) && r.some(cell => String(cell).trim() !== '')
+      );
+      
+      // Processar dados
+      dadosPlanilha = dataRows.map(row => {
+        const obj = {};
+        header.forEach((h, i) => {
+          obj[String(h).trim()] = row[i];
+        });
+        return obj;
+      });
+      
+      calcularDivisao();
+      hideLoading();
+      
+    } catch (err) {
+      console.error(err);
+      showToast('❌ Erro ao processar planilha', 'danger');
+      hideLoading();
+    }
+  };
+  
+  reader.readAsArrayBuffer(file);
+}
+
+function calcularDivisao() {
+  if (dadosPlanilha.length === 0) return;
+  
+  // Identificar colunas de datas (colunas numéricas após NOME)
+  const primeiraLinha = dadosPlanilha[0];
+  const colunas = Object.keys(primeiraLinha);
+  const colunaDias = colunas.filter(col => !isNaN(parseInt(col)));
+  
+  const resultados = [];
+  
+  // Para cada dia
+  colunaDias.forEach(dia => {
+    const trabalhandoHoje = [];
+    const ausentesHoje = [];
+    
+    // Verificar quem está trabalhando
+    dadosPlanilha.forEach(funcionario => {
+      const nome = String(funcionario.NOME || '').trim().toUpperCase();
+      const status = String(funcionario[dia] || '').trim().toUpperCase();
+      
+      // Considera trabalhando se célula vazia ou se não tem sigla de ausência
+      const ausente = ['DSR', 'COM', 'FF', 'FS'].includes(status) || status === '22';
+      
+      if (!ausente && nome) {
+        trabalhandoHoje.push(nome);
+      } else if (ausente && nome) {
+        ausentesHoje.push({ nome, motivo: status });
+      }
+    });
+    
+    // Calcular divisão baseado no número de pessoas
+    const numPessoas = trabalhandoHoje.length;
+    const divisao = calcularDivisaoPorNumero(numPessoas, trabalhandoHoje);
+    
+    resultados.push({
+      dia: parseInt(dia),
+      numPessoas,
+      trabalhando: trabalhandoHoje,
+      ausentes: ausentesHoje,
+      divisao
+    });
+  });
+  
+  exibirResultados(resultados);
+}
+
+function calcularDivisaoPorNumero(num, trabalhandoHoje) {
+  const regras = PRIORIDADES[num] || PRIORIDADES[4]; // Default para 4 se não houver regra
+  const divisao = {};
+  
+  Object.keys(regras).forEach(area => {
+    const prioridade = regras[area];
+    
+    // Encontrar primeiro disponível na lista de prioridade
+    for (let pessoa of prioridade) {
+      if (trabalhandoHoje.includes(pessoa)) {
+        divisao[area] = pessoa;
+        break;
+      }
+    }
+    
+    // Se ninguém da prioridade está disponível, pegar qualquer um
+    if (!divisao[area] && trabalhandoHoje.length > 0) {
+      divisao[area] = trabalhandoHoje[0];
+    }
+  });
+  
+  return divisao;
+}
+
+function exibirResultados(resultados) {
+  document.getElementById('uploadSection').style.display = 'none';
+  document.getElementById('resultsSection').style.display = 'block';
+  
+  const content = document.getElementById('resultContent');
+  content.innerHTML = '';
+  
+  resultados.forEach((resultado, index) => {
+    const diaCard = document.createElement('div');
+    diaCard.className = 'dia-card';
+    diaCard.style.animationDelay = `${index * 0.1}s`;
+    
+    let html = `
+      <div class="dia-header">
+        Dia ${resultado.dia} - ${resultado.numPessoas} pessoa(s) trabalhando
+      </div>
+      
+      <div class="row">
+        <div class="col-md-8">
+          <h6 class="text-primary mb-3">Divisão de Áreas:</h6>
+    `;
+    
+    Object.entries(resultado.divisao).forEach(([area, pessoa]) => {
+      html += `
+        <div class="mb-3">
+          <span class="area-badge">${area}</span>
+          <div class="funcionario-item">
+            <i class="bi bi-person-check me-2"></i>${pessoa}
+          </div>
+        </div>
+      `;
+    });
+    
+    html += `
+        </div>
+        <div class="col-md-4">
+          <h6 class="text-muted mb-3">Status da Equipe:</h6>
+          <div class="mb-3">
+            <strong>Trabalhando (${resultado.trabalhandoHoje.length}):</strong>
+    `;
+    
+    resultado.trabalhando.forEach(nome => {
+      html += `<div class="small mt-1"><span class="presente-badge">✓</span> ${nome}</div>`;
+    });
+    
+    if (resultado.ausentes.length > 0) {
+      html += `</div><div class="mb-3 mt-3"><strong>Ausentes (${resultado.ausentes.length}):</strong>`;
+      resultado.ausentes.forEach(({nome, motivo}) => {
+        html += `<div class="small mt-1"><span class="ausente-badge">${motivo}</span> ${nome}</div>`;
+      });
+    }
+    
+    html += `
+          </div>
+        </div>
+      </div>
+    `;
+    
+    diaCard.innerHTML = html;
+    content.appendChild(diaCard);
+  });
+  
+  showToast('✅ Divisão de tarefas calculada com sucesso!', 'success');
+}
+
+function showLoading() {
+  const overlay = document.createElement('div');
+  overlay.className = 'loading-overlay';
+  overlay.id = 'loadingOverlay';
+  overlay.innerHTML = `
+    <div class="text-center">
+      <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+      <p class="mt-3 text-muted fw-semibold">Processando planilha...</p>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function hideLoading() {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) overlay.remove();
+}
+
+function showToast(message, type = 'info') {
+  const existingToasts = document.querySelectorAll('.toast-container');
+  existingToasts.forEach(toast => toast.remove());
+  
+  const toastContainer = document.createElement('div');
+  toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+  
+  const toast = document.createElement('div');
+  toast.className = `toast align-items-center text-white bg-${type} border-0`;
+  toast.setAttribute('role', 'alert');
+  
+  toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">${message}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  `;
+  
+  toastContainer.appendChild(toast);
+  document.body.appendChild(toastContainer);
+  
+  const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+  bsToast.show();
+}
+</script>
+</body>
+</html>
