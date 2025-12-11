@@ -93,6 +93,31 @@
       border-color: var(--primary);
     }
     
+    /* Botão de Atualizar Discreto */
+    .refresh-btn {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: all 0.3s;
+    }
+    
+    .refresh-btn:hover {
+      background: var(--primary-dark);
+      transform: rotate(90deg);
+    }
+    
     /* Configuração de Mês/Ano em Acordeão */
     .config-accordion {
       background: white;
@@ -118,10 +143,6 @@
     
     .config-header i {
       transition: transform 0.3s;
-    }
-    
-    .config-header.collapsed i {
-      transform: rotate(0deg);
     }
     
     .config-header:not(.collapsed) i {
@@ -160,7 +181,7 @@
       background: white;
     }
     
-    /* Calendário Tradicional */
+    /* Calendário Tradicional - FIXED GRID */
     .calendar-container {
       background: white;
       border-radius: 10px;
@@ -209,7 +230,7 @@
       background: #e8e8e8;
     }
     
-    /* Grid do Calendário */
+    /* Grid do Calendário - FIXED LAYOUT */
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -218,6 +239,7 @@
       border: 1px solid var(--border-color);
       border-radius: 8px;
       overflow: hidden;
+      min-height: 400px;
     }
     
     /* Cabeçalho dos dias da semana */
@@ -236,15 +258,16 @@
       color: var(--danger);
     }
     
-    /* Células dos dias */
+    /* Células dos dias - FIXED SIZE */
     .calendar-day {
       background: white;
-      min-height: 70px;
+      min-height: 80px;
       padding: 0.5rem;
       position: relative;
       cursor: pointer;
       transition: all 0.2s;
-      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
     }
     
     .calendar-day:hover {
@@ -290,6 +313,7 @@
       border-radius: 10px;
       display: inline-block;
       font-weight: 500;
+      margin-top: auto;
     }
     
     .calendar-day-absent {
@@ -331,7 +355,7 @@
       padding: 1rem 1.5rem;
     }
     
-    /* Conteúdo do Modal (igual ao anterior) */
+    /* Conteúdo do Modal */
     .day-content {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -341,6 +365,30 @@
     @media (max-width: 768px) {
       .day-content {
         grid-template-columns: 1fr;
+      }
+      
+      .calendar-grid {
+        grid-template-columns: repeat(7, 1fr);
+        min-height: 300px;
+      }
+      
+      .calendar-day {
+        min-height: 70px;
+        padding: 0.4rem;
+      }
+      
+      .calendar-day-number {
+        font-size: 0.8rem;
+      }
+      
+      .calendar-day-week {
+        font-size: 0.7rem;
+      }
+      
+      .calendar-day-stats,
+      .calendar-day-absent {
+        font-size: 0.65rem;
+        padding: 0.1rem 0.3rem;
       }
     }
     
@@ -545,6 +593,11 @@
   </div>
 </header>
 
+<!-- Botão de Atualizar Discreto -->
+<button class="refresh-btn" onclick="location.reload()" title="Recarregar página">
+  <i class="bi bi-arrow-clockwise"></i>
+</button>
+
 <div class="main-container">
   
   <!-- Upload Area -->
@@ -622,7 +675,7 @@
         </div>
       </div>
 
-      <!-- Grid do Calendário -->
+      <!-- Grid do Calendário - AGORA CORRETO -->
       <div class="calendar-grid">
         <!-- Cabeçalhos dos dias da semana -->
         <div class="calendar-weekday">DOM</div>
@@ -642,9 +695,6 @@
     <div class="action-buttons">
       <button class="btn-compact btn-danger-compact" id="btnExportarPDF">
         <i class="bi bi-filetype-pdf"></i> Exportar PDF
-      </button>
-      <button class="btn-compact btn-primary-compact" onclick="location.reload()">
-        <i class="bi bi-arrow-clockwise"></i> Nova Planilha
       </button>
     </div>
 
@@ -1106,7 +1156,7 @@ function atualizarCalendario() {
   document.getElementById('calendarTitle').textContent = 
     `${MESES[mesSelecionado]} de ${anoSelecionado}`;
   
-  // Gerar grid do calendário
+  // Gerar grid do calendário - AGORA CORRETAMENTE
   const calendarDays = document.getElementById('calendarDays');
   calendarDays.innerHTML = '';
   
@@ -1117,7 +1167,7 @@ function atualizarCalendario() {
     calendarDays.appendChild(emptyDay);
   }
   
-  // Dias do mês
+  // Dias do mês - AGORA EM GRADE 7x[5-6]
   for (let dia = 1; dia <= diasNoMes; dia++) {
     const dayDiv = document.createElement('div');
     dayDiv.className = 'calendar-day';
@@ -1146,14 +1196,24 @@ function atualizarCalendario() {
     `;
     
     if (dadosDia) {
-      content += `<div class="calendar-day-stats">${dadosDia.numPessoas} trabalhando</div>`;
+      content += `<div class="calendar-day-stats">${dadosDia.numPessoas} pessoa(s)</div>`;
       if (dadosDia.ausentes.length > 0) {
-        content += `<div class="calendar-day-absent">${dadosDia.ausentes.length} ausentes</div>`;
+        content += `<div class="calendar-day-absent">${dadosDia.ausentes.length} ausente(s)</div>`;
       }
     }
     
     dayDiv.innerHTML = content;
     calendarDays.appendChild(dayDiv);
+  }
+  
+  // Preencher células restantes para completar a grade (máximo 42 células = 6 semanas)
+  const totalCells = primeiroDiaSemana + diasNoMes;
+  const remainingCells = Math.ceil(totalCells / 7) * 7 - totalCells;
+  
+  for (let i = 0; i < remainingCells; i++) {
+    const emptyDay = document.createElement('div');
+    emptyDay.className = 'calendar-day empty';
+    calendarDays.appendChild(emptyDay);
   }
 }
 
