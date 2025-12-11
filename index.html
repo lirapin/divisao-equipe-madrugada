@@ -56,6 +56,7 @@
       box-shadow: var(--shadow-md);
       position: relative;
       overflow: hidden;
+      padding: 1rem 0;
     }
     
     .app-header::before {
@@ -81,12 +82,12 @@
     
     .upload-drop {
       border: 2px dashed var(--accent);
-      border-radius: 16px;
-      padding: 3rem;
+      border-radius: 12px;
+      padding: 2.5rem;
       text-align: center;
       background: var(--glass);
       backdrop-filter: blur(10px);
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
       position: relative;
       overflow: hidden;
@@ -107,7 +108,7 @@
     .upload-drop:hover, .upload-drop.dragover {
       background: var(--glass);
       border-color: var(--primary);
-      transform: translateY(-5px);
+      transform: translateY(-3px);
       box-shadow: var(--shadow-lg);
     }
     
@@ -117,38 +118,22 @@
     
     .card-custom {
       background: var(--card-bg);
-      border-radius: 16px;
+      border-radius: 12px;
       box-shadow: var(--shadow-md);
       border: 1px solid var(--glass-border);
       backdrop-filter: blur(10px);
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       overflow: hidden;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: cardEntrance 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-    
-    @keyframes cardEntrance {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .card-custom:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: var(--shadow-lg);
-      background: var(--card-bg-hover);
     }
     
     .section-title {
       color: var(--primary);
       font-weight: 700;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
       border-bottom: 2px solid var(--border-color);
       position: relative;
-      font-size: 1.25rem;
+      font-size: 1.15rem;
     }
     
     .section-title::after {
@@ -156,88 +141,270 @@
       position: absolute;
       bottom: -2px;
       left: 0;
-      width: 60px;
+      width: 50px;
       height: 2px;
       background: linear-gradient(90deg, var(--primary), var(--info));
       border-radius: 2px;
     }
     
-    .area-badge {
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: white;
-      box-shadow: var(--shadow-sm);
-      display: inline-block;
-      margin-bottom: 10px;
-    }
-    
-    .funcionario-item {
-      padding: 10px 15px;
-      margin: 5px 0;
-      background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(33, 150, 243, 0.1) 100%);
-      border-radius: 8px;
-      border-left: 4px solid var(--primary);
+    /* Accordion Styles */
+    .accordion-item {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
       transition: all 0.3s ease;
     }
     
-    .funcionario-item:hover {
-      transform: translateX(5px);
+    .accordion-item:hover {
+      border-color: var(--accent);
       box-shadow: var(--shadow-sm);
     }
     
-    .dia-card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow-md);
-      border: 1px solid var(--glass-border);
-      animation: slideInUp 0.5s ease-out;
+    .accordion-header {
+      padding: 0;
+      margin: 0;
     }
     
-    @keyframes slideInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .accordion-button {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 0.85rem 1.25rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      border: none;
+      border-radius: 10px 10px 0 0;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
     
-    .dia-header {
+    .accordion-button:not(.collapsed) {
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--primary);
+      box-shadow: none;
+    }
+    
+    .accordion-button:focus {
+      box-shadow: none;
+      border-color: var(--accent);
+    }
+    
+    .accordion-button::after {
+      content: '\F282';
+      font-family: 'bootstrap-icons';
+      font-size: 0.875rem;
+      background-image: none;
+      transform: rotate(0deg);
+      transition: transform 0.3s ease;
+    }
+    
+    .accordion-button:not(.collapsed)::after {
+      transform: rotate(180deg);
+    }
+    
+    .accordion-body {
+      padding: 1.25rem;
+      background: rgba(255, 255, 255, 0.95);
+      border-top: 1px solid var(--border-color);
+    }
+    
+    /* Day Header Styles */
+    .day-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    
+    .day-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .day-number {
       font-size: 1.1rem;
       font-weight: 700;
       color: var(--primary);
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--border-color);
+      min-width: 2rem;
     }
     
-    .ausente-badge {
-      background: linear-gradient(135deg, var(--danger) 0%, #ef5350 100%);
+    .day-week {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .day-stats {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+    
+    .badge-count {
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
       color: white;
-      padding: 4px 10px;
-      border-radius: 12px;
+      padding: 0.25rem 0.5rem;
+      border-radius: 10px;
       font-size: 0.75rem;
       font-weight: 600;
-      margin-left: 10px;
+      min-width: 80px;
+      text-align: center;
     }
     
-    .presente-badge {
+    /* Area Styles (More Discrete) */
+    .area-section {
+      margin-bottom: 1.25rem;
+      padding: 0.5rem;
+    }
+    
+    .area-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary-dark);
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px dashed var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .area-badge {
+      background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+      color: var(--text-dark);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+    }
+    
+    .funcionario-item {
+      padding: 0.65rem 0.85rem;
+      margin: 0.25rem 0;
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(33, 150, 243, 0.02) 100%);
+      border-radius: 6px;
+      border-left: 3px solid var(--primary-light);
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+    
+    .funcionario-item:hover {
+      transform: translateX(3px);
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(33, 150, 243, 0.05) 100%);
+    }
+    
+    /* Status Styles */
+    .status-section {
+      padding: 0.5rem;
+    }
+    
+    .status-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .status-list {
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+    
+    .status-list::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    .status-list::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 2px;
+    }
+    
+    .status-list::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 2px;
+    }
+    
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      font-size: 0.85rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .status-item:last-child {
+      border-bottom: none;
+    }
+    
+    .status-badge {
+      padding: 0.2rem 0.5rem;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      min-width: 50px;
+      text-align: center;
+    }
+    
+    .badge-presente {
       background: linear-gradient(135deg, var(--success) 0%, #66bb6a 100%);
       color: white;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-left: 10px;
     }
     
+    .badge-ausente {
+      background: linear-gradient(135deg, var(--danger) 0%, #ef5350 100%);
+      color: white;
+    }
+    
+    /* Copy Button */
+    .copy-btn {
+      background: linear-gradient(135deg, var(--info) 0%, #2196f3 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+    }
+    
+    .copy-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+      background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+    }
+    
+    .copy-btn:active {
+      transform: translateY(0);
+    }
+    
+    .copy-btn.copied {
+      background: linear-gradient(135deg, var(--success) 0%, #66bb6a 100%);
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    
+    /* Assinatura */
     .assinatura {
       position: fixed;
       bottom: 8px;
@@ -277,10 +444,11 @@
     .btn-primary {
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       border: none;
-      border-radius: 12px;
-      padding: 10px 20px;
-      font-weight: 600;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: var(--shadow-sm);
       position: relative;
       overflow: hidden;
@@ -291,9 +459,34 @@
       box-shadow: var(--shadow-md);
     }
     
+    /* Toast Custom */
+    .toast-container {
+      z-index: 99999;
+    }
+    
+    /* Responsive */
     @media (max-width: 768px) {
       .upload-drop {
-        padding: 2rem;
+        padding: 1.5rem;
+      }
+      
+      .accordion-button {
+        padding: 0.75rem 1rem;
+      }
+      
+      .day-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+      }
+      
+      .day-stats {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      
+      .action-buttons {
+        flex-wrap: wrap;
       }
       
       .assinatura {
@@ -310,16 +503,16 @@
 <body>
 <header class="app-header py-3">
   <div class="container-fluid d-flex justify-content-between align-items-center">
-    <h1 class="h4 m-0 fw-bold"><span class="brand-dot"></span>Portal de divisão de tarefas</h1>
+    <h1 class="h5 m-0 fw-bold"><span class="brand-dot"></span>Portal de divisão de tarefas</h1>
   </div>
 </header>
 
-<div class="container-fluid py-5">
+<div class="container-fluid py-4">
   <div class="row justify-content-center">
     <div class="col-12 col-lg-10">
       
       <!-- Upload Area -->
-      <div class="card-custom p-4 mb-4" id="uploadSection">
+      <div class="card-custom p-3 mb-4" id="uploadSection">
         <h5 class="section-title">Upload da planilha de escalas</h5>
         <div class="upload-drop" id="dropArea">
           <i class="bi bi-cloud-arrow-up fs-1 text-primary mb-3"></i>
@@ -331,21 +524,23 @@
 
       <!-- Results Area -->
       <div id="resultsSection" style="display: none;">
-        <div class="card-custom p-4 mb-4">
+        <div class="card-custom p-3 mb-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="section-title mb-0">Divisão de tarefas por dia</h5>
-            <div>
-              <button class="btn btn-danger btn-sm me-2" id="btnExportarPDF">
-                <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
+            <div class="action-buttons">
+              <button class="btn btn-danger btn-sm" id="btnExportarPDF">
+                <i class="bi bi-filetype-pdf me-1"></i> PDF
               </button>
               <button class="btn btn-primary btn-sm" onclick="location.reload()">
-                <i class="bi bi-arrow-clockwise me-1"></i> Nova planilha
+                <i class="bi bi-arrow-clockwise me-1"></i> Nova
               </button>
             </div>
           </div>
         </div>
 
-        <div id="resultContent"></div>
+        <div class="accordion" id="daysAccordion">
+          <div id="resultContent"></div>
+        </div>
       </div>
 
     </div>
@@ -380,6 +575,9 @@ const PRIORIDADES = {
     'RIO B': ['THIAGO PEREIRA DA SILVA', 'MARISTELLA MARCIA DOS SANTOS']
   }
 };
+
+// Mapeamento de dias da semana
+const DIAS_SEMANA = ['DOMINGO', 'SEGUNDA', 'TERÇA', 'QUARTA', 'QUINTA', 'SEXTA', 'SÁBADO'];
 
 let dadosPlanilha = [];
 let resultadosGlobal = [];
@@ -430,15 +628,13 @@ function processarArquivo(file) {
       // Ler como array de arrays primeiro (mais confiável)
       const rawData = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
       
-      console.log('Dados brutos da planilha:', rawData);
-      
       if (!rawData || rawData.length === 0) {
         showToast('❌ Planilha vazia', 'danger');
         hideLoading();
         return;
       }
       
-      // Encontrar a linha de cabeçalho (pode não ser a primeira linha)
+      // Encontrar a linha de cabeçalho
       let headerRowIndex = 0;
       let encontrouNome = false;
       
@@ -455,7 +651,6 @@ function processarArquivo(file) {
       }
       
       const headers = rawData[headerRowIndex];
-      console.log('Cabeçalhos encontrados na linha', headerRowIndex + 1, ':', headers);
       
       // Converter para objetos a partir da linha após o cabeçalho
       const dados = [];
@@ -469,14 +664,11 @@ function processarArquivo(file) {
           obj[header] = row[j] || '';
         }
         
-        // Só adicionar se tiver nome na primeira coluna
         const primeiroValor = obj[headers[0]];
         if (primeiroValor && String(primeiroValor).trim() !== '') {
           dados.push(obj);
         }
       }
-      
-      console.log('Dados processados:', dados);
       
       if (dados.length === 0) {
         showToast('❌ Nenhum dado válido encontrado na planilha', 'danger');
@@ -513,8 +705,6 @@ function calcularDivisao() {
       return;
     }
     
-    console.log('Iniciando cálculo de divisão com dados:', dadosPlanilha);
-    
     const primeiraLinha = dadosPlanilha[0];
     const todasColunas = Object.keys(primeiraLinha);
     
@@ -528,7 +718,6 @@ function calcularDivisao() {
       }
     }
     
-    // Se não encontrou, usar a primeira coluna que tenha valores de nome
     if (!colunaNome) {
       for (let col of todasColunas) {
         const valores = dadosPlanilha.map(row => String(row[col] || '').trim()).filter(v => v);
@@ -540,36 +729,29 @@ function calcularDivisao() {
     }
     
     if (!colunaNome) {
-      colunaNome = todasColunas[0]; // Usar primeira coluna como fallback
+      colunaNome = todasColunas[0];
     }
     
-    console.log('Coluna NOME usada:', colunaNome);
-    
-    // Encontrar colunas de dias - diferentes formatos possíveis
+    // Encontrar colunas de dias
     const colunaDias = [];
     
     for (let col of todasColunas) {
       const colStr = String(col).trim();
-      if (colStr === colunaNome) continue; // Pular coluna de nome
+      if (colStr === colunaNome) continue;
       
       let diaNumero = null;
       
-      // Tentar diferentes padrões
-      // 1. Números diretos: "1", "2", "3"
       if (/^\d+$/.test(colStr)) {
         diaNumero = parseInt(colStr);
       }
-      // 2. Números com parênteses: "1 (SEG)", "2 (TER)"
       else if (/^(\d+)\s*[\(\[]/.test(colStr)) {
         const match = colStr.match(/^(\d+)/);
         diaNumero = parseInt(match[1]);
       }
-      // 3. Datas: "01/01", "01-01"
       else if (/^\d{1,2}[\/\-]\d{1,2}/.test(colStr)) {
         const match = colStr.match(/^(\d{1,2})[\/\-]/);
         diaNumero = parseInt(match[1]);
       }
-      // 4. Números no meio do texto
       else {
         const match = colStr.match(/\b(\d{1,2})\b/);
         if (match) {
@@ -582,7 +764,6 @@ function calcularDivisao() {
       }
     }
     
-    // Se não encontrou dias, verificar se há colunas como "DIA 1", "DIA 2"
     if (colunaDias.length === 0) {
       for (let col of todasColunas) {
         const colUpper = String(col).toUpperCase();
@@ -598,19 +779,15 @@ function calcularDivisao() {
       }
     }
     
-    // Ordenar por dia
     colunaDias.sort((a, b) => a.dia - b.dia);
     
-    console.log('Colunas de dias identificadas:', colunaDias);
-    
     if (colunaDias.length === 0) {
-      showToast('❌ Não foi possível identificar colunas de dias. Formato esperado: números (1, 2, 3) ou datas (01/01, 02/01)', 'danger');
+      showToast('❌ Não foi possível identificar colunas de dias.', 'danger');
       return;
     }
     
     const resultados = [];
     
-    // Processar cada dia
     for (let diaInfo of colunaDias) {
       const colunaDia = diaInfo.coluna;
       const diaNumero = diaInfo.dia;
@@ -618,27 +795,18 @@ function calcularDivisao() {
       const trabalhandoHoje = [];
       const ausentesHoje = [];
       
-      console.log(`\nProcessando dia ${diaNumero} (coluna: ${colunaDia}):`);
-      
-      // Verificar cada funcionário
       for (let funcionario of dadosPlanilha) {
         let nome = String(funcionario[colunaNome] || '').trim().toUpperCase();
         
-        // Pular linhas vazias
         if (!nome || nome === '' || nome === 'TOTAL' || nome === 'TOTAIS') continue;
         
-        // Pegar valor da célula do dia
         let valorCelula = funcionario[colunaDia];
         let status = String(valorCelula || '').trim().toUpperCase();
         
-        console.log(`  ${nome}: "${status}"`);
-        
-        // Determinar se está trabalhando ou ausente
         const ausente = ['DSR', 'COM', 'FF', 'FS', 'FERIADO', 'FOLGA', 'AFASTADO', 'AUSENTE', 'FALT', 'LICEN'].some(
           cod => status.includes(cod)
         );
         
-        // Considerar como presente se estiver vazio, "X", "22", ou qualquer número
         const trabalhando = status === '' || 
                            status === 'X' || 
                            status === '22' || 
@@ -652,40 +820,29 @@ function calcularDivisao() {
         } else if (ausente) {
           ausentesHoje.push({ nome, motivo: status || 'AUSENTE' });
         } else {
-          // Para valores não reconhecidos, verificar se é um horário (ex: "08:00-17:00")
           const horarioMatch = status.match(/\d{1,2}[:\.]\d{2}/);
           if (horarioMatch) {
             trabalhandoHoje.push(nome);
           } else if (status && status !== '') {
-            // Se tem algum valor mas não reconhecemos, considerar como ausente
             ausentesHoje.push({ nome, motivo: status });
           } else {
-            // Vazio = presente
             trabalhandoHoje.push(nome);
           }
         }
       }
       
-      console.log(`  Trabalhando: ${trabalhandoHoje.length} pessoas`);
-      console.log(`  Ausentes: ${ausentesHoje.length} pessoas`);
-      
-      // Só adicionar se houver alguém trabalhando
       if (trabalhandoHoje.length > 0) {
         const divisao = calcularDivisaoPorNumero(trabalhandoHoje.length, trabalhandoHoje);
         
         resultados.push({
           dia: diaNumero,
           numPessoas: trabalhandoHoje.length,
-          trabalhando: [...trabalhandoHoje], // Cópia
-          ausentes: [...ausentesHoje], // Cópia
+          trabalhando: [...trabalhandoHoje],
+          ausentes: [...ausentesHoje],
           divisao
         });
-      } else if (ausentesHoje.length > 0) {
-        console.log(`Dia ${diaNumero}: Todos ausentes`);
       }
     }
-    
-    console.log('Resultados finais:', resultados);
     
     if (resultados.length === 0) {
       showToast('⚠️ Nenhum dia com pessoas trabalhando foi encontrado', 'warning');
@@ -774,13 +931,11 @@ function gerarPDF() {
     };
     
     resultadosGlobal.forEach((resultado, index) => {
-      // Cabeçalho do dia
       docDefinition.content.push({
         text: `Dia ${resultado.dia} - ${resultado.numPessoas} pessoa(s) trabalhando`,
         style: 'diaHeader'
       });
       
-      // Divisão de áreas
       if (Object.keys(resultado.divisao).length > 0) {
         docDefinition.content.push({
           text: 'Divisão de áreas:',
@@ -801,14 +956,12 @@ function gerarPDF() {
         });
       }
       
-      // Status da equipe
       docDefinition.content.push({
         text: 'Status da equipe:',
         style: 'statusHeader',
         margin: [0, 15, 0, 5]
       });
       
-      // Trabalhando
       docDefinition.content.push({
         text: `Trabalhando (${resultado.trabalhando.length}):`,
         style: 'areaTitle'
@@ -822,7 +975,6 @@ function gerarPDF() {
         });
       });
       
-      // Ausentes
       if (resultado.ausentes.length > 0) {
         docDefinition.content.push({
           text: `Ausentes (${resultado.ausentes.length}):`,
@@ -839,7 +991,6 @@ function gerarPDF() {
         });
       }
       
-      // Divisória entre dias (exceto no último)
       if (index < resultadosGlobal.length - 1) {
         docDefinition.content.push({
           canvas: [
@@ -856,7 +1007,6 @@ function gerarPDF() {
       }
     });
     
-    // Rodapé
     docDefinition.content.push({
       text: '\n\nDesenvolvido por: N6105010 e N5923221',
       style: 'subheader',
@@ -875,34 +1025,25 @@ function gerarPDF() {
 }
 
 function calcularDivisaoPorNumero(num, trabalhandoHoje) {
-  // Ajustar número de pessoas para o conjunto de regras disponível
   let numPessoas = num;
   if (num < 3) numPessoas = 3;
   if (num > 5) numPessoas = 5;
   
   const regras = PRIORIDADES[numPessoas];
-  if (!regras) {
-    console.error(`Não há regras definidas para ${numPessoas} pessoas`);
-    return {};
-  }
+  if (!regras) return {};
   
   const divisao = {};
   const pessoasAlocadas = new Set();
   const pessoasDisponiveis = [...trabalhandoHoje];
   
-  console.log(`Calculando divisão para ${num} pessoas (usando regras para ${numPessoas}):`, pessoasDisponiveis);
-  
-  // Para cada área, tentar alocar alguém da lista de prioridade
   Object.keys(regras).forEach(area => {
     const prioridade = regras[area];
     
-    // Encontrar primeiro disponível na lista de prioridade que ainda não foi alocado
     for (let pessoa of prioridade) {
       if (pessoasDisponiveis.includes(pessoa) && !pessoasAlocadas.has(pessoa)) {
         divisao[area] = pessoa;
         pessoasAlocadas.add(pessoa);
         
-        // Remover da lista de disponíveis
         const index = pessoasDisponiveis.indexOf(pessoa);
         if (index > -1) {
           pessoasDisponiveis.splice(index, 1);
@@ -911,7 +1052,6 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
       }
     }
     
-    // Se ninguém da prioridade está disponível, pegar qualquer um restante
     if (!divisao[area] && pessoasDisponiveis.length > 0) {
       const pessoaRestante = pessoasDisponiveis[0];
       divisao[area] = pessoaRestante;
@@ -920,7 +1060,6 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
     }
   });
   
-  console.log('Divisão calculada:', divisao);
   return divisao;
 }
 
@@ -932,18 +1071,56 @@ function exibirResultados(resultados) {
   content.innerHTML = '';
   
   resultados.forEach((resultado, index) => {
-    const diaCard = document.createElement('div');
-    diaCard.className = 'dia-card';
-    diaCard.style.animationDelay = `${index * 0.1}s`;
+    const diaSemana = DIAS_SEMANA[(resultado.dia + 6) % 7]; // Ajuste para começar na segunda
     
-    let html = `
-      <div class="dia-header">
-        Dia ${resultado.dia} - ${resultado.numPessoas} pessoa(s) trabalhando
+    const accordionItem = document.createElement('div');
+    accordionItem.className = 'accordion-item';
+    accordionItem.id = `day-${resultado.dia}`;
+    
+    const accordionHeader = document.createElement('h2');
+    accordionHeader.className = 'accordion-header';
+    
+    const accordionButton = document.createElement('button');
+    accordionButton.className = 'accordion-button collapsed';
+    accordionButton.type = 'button';
+    accordionButton.setAttribute('data-bs-toggle', 'collapse');
+    accordionButton.setAttribute('data-bs-target', `#collapse-${resultado.dia}`);
+    accordionButton.setAttribute('aria-expanded', 'false');
+    accordionButton.setAttribute('aria-controls', `collapse-${resultado.dia}`);
+    
+    // Cabeçalho do acordeão
+    accordionButton.innerHTML = `
+      <div class="day-header">
+        <div class="day-info">
+          <span class="day-number">${resultado.dia}</span>
+          <span class="day-week">${diaSemana}</span>
+          <span class="badge-count">${resultado.numPessoas} trabalhando</span>
+        </div>
+        <div class="action-buttons">
+          <button class="copy-btn" onclick="copiarDia(${index})" title="Copiar dados do dia">
+            <i class="bi bi-copy"></i> Copiar
+          </button>
+        </div>
       </div>
-      
+    `;
+    
+    const collapseDiv = document.createElement('div');
+    collapseDiv.id = `collapse-${resultado.dia}`;
+    collapseDiv.className = 'accordion-collapse collapse';
+    collapseDiv.setAttribute('data-bs-parent', '#daysAccordion');
+    
+    const accordionBody = document.createElement('div');
+    accordionBody.className = 'accordion-body';
+    
+    // Conteúdo do acordeão
+    let html = `
       <div class="row">
         <div class="col-md-8">
-          <h6 class="text-primary mb-3">Divisão de Áreas:</h6>
+          <div class="area-section">
+            <div class="area-title">
+              <i class="bi bi-diagram-3"></i>
+              <span>Divisão de Áreas</span>
+            </div>
     `;
     
     if (Object.keys(resultado.divisao).length > 0) {
@@ -951,7 +1128,7 @@ function exibirResultados(resultados) {
         if (pessoa) {
           html += `
             <div class="mb-3">
-              <span class="area-badge">${area}</span>
+              <div class="area-badge mb-1">${area}</div>
               <div class="funcionario-item">
                 <i class="bi bi-person-check me-2"></i>${pessoa}
               </div>
@@ -960,39 +1137,121 @@ function exibirResultados(resultados) {
         }
       });
     } else {
-      html += `<p class="text-muted">Não foi possível fazer a divisão para este número de pessoas.</p>`;
-    }
-    
-    html += `
-        </div>
-        <div class="col-md-4">
-          <h6 class="text-muted mb-3">Status da Equipe:</h6>
-          <div class="mb-3">
-            <strong>Trabalhando (${resultado.trabalhando.length}):</strong>
-    `;
-    
-    resultado.trabalhando.forEach(nome => {
-      html += `<div class="small mt-1"><span class="presente-badge">✓</span> ${nome}</div>`;
-    });
-    
-    if (resultado.ausentes.length > 0) {
-      html += `</div><div class="mb-3 mt-3"><strong>Ausentes (${resultado.ausentes.length}):</strong>`;
-      resultado.ausentes.forEach(({nome, motivo}) => {
-        html += `<div class="small mt-1"><span class="ausente-badge">${motivo}</span> ${nome}</div>`;
-      });
+      html += `<p class="text-muted small">Não foi possível fazer a divisão para este número de pessoas.</p>`;
     }
     
     html += `
           </div>
         </div>
+        <div class="col-md-4">
+          <div class="status-section">
+            <div class="status-title">
+              <i class="bi bi-people"></i>
+              <span>Status da Equipe</span>
+            </div>
+            <div class="status-list">
+              <div class="mb-2">
+                <small class="text-muted">Trabalhando (${resultado.trabalhando.length}):</small>
+                ${resultado.trabalhando.map(nome => `
+                  <div class="status-item">
+                    <span class="status-badge badge-presente">✓</span>
+                    <span>${nome}</span>
+                  </div>
+                `).join('')}
+              </div>
+    `;
+    
+    if (resultado.ausentes.length > 0) {
+      html += `
+              <div class="mt-3">
+                <small class="text-muted">Ausentes (${resultado.ausentes.length}):</small>
+                ${resultado.ausentes.map(({nome, motivo}) => `
+                  <div class="status-item">
+                    <span class="status-badge badge-ausente">${motivo}</span>
+                    <span>${nome}</span>
+                  </div>
+                `).join('')}
+              </div>
+      `;
+    }
+    
+    html += `
+            </div>
+          </div>
+        </div>
       </div>
     `;
     
-    diaCard.innerHTML = html;
-    content.appendChild(diaCard);
+    accordionBody.innerHTML = html;
+    collapseDiv.appendChild(accordionBody);
+    accordionHeader.appendChild(accordionButton);
+    accordionItem.appendChild(accordionHeader);
+    accordionItem.appendChild(collapseDiv);
+    content.appendChild(accordionItem);
+    
+    // Expandir automaticamente o primeiro item
+    if (index === 0) {
+      setTimeout(() => {
+        accordionButton.classList.remove('collapsed');
+        collapseDiv.classList.add('show');
+      }, 100);
+    }
   });
   
-  showToast('✅ Divisão de tarefas calculada com sucesso!', 'success');
+  showToast('✅ Divisão calculada! Clique em cada dia para expandir.', 'success');
+}
+
+function copiarDia(index) {
+  const resultado = resultadosGlobal[index];
+  if (!resultado) return;
+  
+  const texto = formatarParaCopiar(resultado);
+  
+  navigator.clipboard.writeText(texto).then(() => {
+    showToast('✅ Dados do dia copiados para a área de transferência!', 'success');
+    
+    // Feedback visual no botão
+    const btn = event.target.closest('.copy-btn');
+    if (btn) {
+      const originalHTML = btn.innerHTML;
+      btn.classList.add('copied');
+      btn.innerHTML = '<i class="bi bi-check"></i> Copiado!';
+      
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = originalHTML;
+      }, 2000);
+    }
+  }).catch(err => {
+    console.error('Erro ao copiar:', err);
+    showToast('❌ Erro ao copiar dados', 'danger');
+  });
+}
+
+function formatarParaCopiar(resultado) {
+  const diaSemana = DIAS_SEMANA[(resultado.dia + 6) % 7];
+  let texto = `DIA ${resultado.dia} (${diaSemana})\n`;
+  texto += `====================\n\n`;
+  
+  texto += `TRABALHANDO (${resultado.numPessoas}):\n`;
+  resultado.trabalhando.forEach((nome, i) => {
+    texto += `${i + 1}. ${nome}\n`;
+  });
+  
+  texto += `\nDIVISÃO DE ÁREAS:\n`;
+  Object.entries(resultado.divisao).forEach(([area, pessoa]) => {
+    texto += `${area}: ${pessoa}\n`;
+  });
+  
+  if (resultado.ausentes.length > 0) {
+    texto += `\nAUSENTES (${resultado.ausentes.length}):\n`;
+    resultado.ausentes.forEach(({nome, motivo}) => {
+      texto += `${nome} (${motivo})\n`;
+    });
+  }
+  
+  texto += `\n---\n`;
+  return texto;
 }
 
 function showLoading() {
@@ -1001,7 +1260,7 @@ function showLoading() {
   overlay.id = 'loadingOverlay';
   overlay.innerHTML = `
     <div class="text-center">
-      <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+      <div class="spinner-border text-primary" style="width: 2.5rem; height: 2.5rem;" role="status">
         <span class="visually-hidden">Carregando...</span>
       </div>
       <p class="mt-3 text-muted fw-semibold">Processando planilha...</p>
