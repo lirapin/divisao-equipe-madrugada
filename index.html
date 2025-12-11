@@ -26,6 +26,10 @@
       --success: #4caf50;
       --danger: #f44336;
       --info: #2196f3;
+      --calendar-bg: #ffffff;
+      --calendar-header: #f5f5f5;
+      --calendar-weekend: #f9f9f9;
+      --calendar-today: #e8f5e9;
     }
     
     * {
@@ -57,14 +61,14 @@
       margin-right: .4rem;
     }
     
-    /* Container Principal Compacto */
+    /* Container Principal */
     .main-container {
       max-width: 1000px;
       margin: 0 auto;
       padding: 0 1rem;
     }
     
-    /* Upload Area Compacta */
+    /* Upload Area */
     .upload-section {
       background: white;
       border-radius: 10px;
@@ -89,21 +93,50 @@
       border-color: var(--primary);
     }
     
-    /* Configuração de Mês/Ano */
-    .config-section {
+    /* Configuração de Mês/Ano em Acordeão */
+    .config-accordion {
       background: white;
       border-radius: 10px;
-      padding: 1.25rem;
       margin-bottom: 1.5rem;
+      overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       border: 1px solid var(--border-color);
+    }
+    
+    .config-header {
+      padding: 0.75rem 1rem;
+      background: #f8fff8;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--primary);
+    }
+    
+    .config-header i {
+      transition: transform 0.3s;
+    }
+    
+    .config-header.collapsed i {
+      transform: rotate(0deg);
+    }
+    
+    .config-header:not(.collapsed) i {
+      transform: rotate(180deg);
+    }
+    
+    .config-body {
+      padding: 1rem;
+      background: white;
     }
     
     .config-row {
       display: flex;
       gap: 1rem;
       align-items: flex-end;
-      margin-top: 1rem;
     }
     
     .config-group {
@@ -127,113 +160,182 @@
       background: white;
     }
     
-    /* Accordion Compacto */
-    .accordion-item {
+    /* Calendário Tradicional */
+    .calendar-container {
       background: white;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border: 1px solid var(--border-color);
+    }
+    
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .calendar-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin: 0;
+    }
+    
+    .calendar-nav {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .calendar-nav-btn {
+      background: #f5f5f5;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--text-dark);
+    }
+    
+    .calendar-nav-btn:hover {
+      background: #e8e8e8;
+    }
+    
+    /* Grid do Calendário */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background: var(--border-color);
       border: 1px solid var(--border-color);
       border-radius: 8px;
-      margin-bottom: 0.5rem;
       overflow: hidden;
     }
     
-    .accordion-button {
-      padding: 0.6rem 1rem;
-      font-size: 0.9rem;
-      background: white;
-      border: none;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    
-    .accordion-button:not(.collapsed) {
-      background: #f8fff8;
-      color: var(--primary);
-    }
-    
-    .accordion-button::after {
-      content: '\F282';
-      font-family: 'bootstrap-icons';
-      font-size: 0.8rem;
-      background-image: none;
-    }
-    
-    .accordion-body {
-      padding: 1rem;
-      border-top: 1px solid var(--border-color);
-      background: #fafafa;
-    }
-    
-    /* Cabeçalho do Dia Compacto */
-    .day-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-    
-    .day-number {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--primary);
-      min-width: 1.8rem;
-    }
-    
-    .day-week {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      min-width: 3.5rem;
-      text-transform: uppercase;
-      font-weight: 500;
-    }
-    
-    .day-stats {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-left: auto;
-    }
-    
-    .badge-count {
-      background: var(--primary-light);
-      color: white;
-      padding: 0.2rem 0.6rem;
-      border-radius: 10px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      min-width: 70px;
+    /* Cabeçalho dos dias da semana */
+    .calendar-weekday {
+      background: var(--calendar-header);
+      padding: 0.75rem 0.5rem;
       text-align: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      text-transform: uppercase;
     }
     
-    .copy-btn {
-      background: var(--info);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 0.3rem 0.7rem;
-      font-size: 0.8rem;
-      font-weight: 400;
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
+    .calendar-weekday.weekend {
+      background: #f0f0f0;
+      color: var(--danger);
+    }
+    
+    /* Células dos dias */
+    .calendar-day {
+      background: white;
+      min-height: 70px;
+      padding: 0.5rem;
+      position: relative;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
+      border-bottom: 1px solid var(--border-color);
     }
     
-    .copy-btn:hover {
-      background: #1976d2;
+    .calendar-day:hover {
+      background: #f8fff8;
     }
     
-    .copy-btn.copied {
-      background: var(--success);
+    .calendar-day.empty {
+      background: #f9f9f9;
+      cursor: default;
     }
     
-    /* Layout Compacto do Conteúdo */
+    .calendar-day.empty:hover {
+      background: #f9f9f9;
+    }
+    
+    .calendar-day.today {
+      background: var(--calendar-today);
+    }
+    
+    .calendar-day.has-data {
+      border-left: 3px solid var(--primary-light);
+    }
+    
+    .calendar-day-number {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 0.25rem;
+    }
+    
+    .calendar-day-week {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+    
+    .calendar-day-stats {
+      font-size: 0.7rem;
+      color: var(--primary);
+      background: #e8f5e9;
+      padding: 0.15rem 0.4rem;
+      border-radius: 10px;
+      display: inline-block;
+      font-weight: 500;
+    }
+    
+    .calendar-day-absent {
+      font-size: 0.7rem;
+      color: var(--danger);
+      background: #ffebee;
+      padding: 0.15rem 0.4rem;
+      border-radius: 10px;
+      display: inline-block;
+      margin-top: 0.2rem;
+      font-weight: 500;
+    }
+    
+    /* Modal para Detalhes do Dia */
+    .day-modal .modal-content {
+      border-radius: 10px;
+      border: none;
+    }
+    
+    .day-modal .modal-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border-radius: 10px 10px 0 0;
+      padding: 1rem 1.5rem;
+      border: none;
+    }
+    
+    .day-modal .modal-title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    
+    .day-modal .modal-body {
+      padding: 1.5rem;
+    }
+    
+    .day-modal .modal-footer {
+      border-top: 1px solid var(--border-color);
+      padding: 1rem 1.5rem;
+    }
+    
+    /* Conteúdo do Modal (igual ao anterior) */
     .day-content {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      gap: 1.5rem;
     }
     
     @media (max-width: 768px) {
@@ -242,29 +344,28 @@
       }
     }
     
-    /* Áreas Compactas */
     .area-section {
       background: white;
-      border-radius: 6px;
-      padding: 0.75rem;
+      border-radius: 8px;
+      padding: 1rem;
       border: 1px solid var(--border-color);
     }
     
     .area-title {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 600;
       color: var(--primary-dark);
       margin-bottom: 0.75rem;
-      padding-bottom: 0.25rem;
+      padding-bottom: 0.5rem;
       border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.5rem;
     }
     
     .area-grid {
       display: grid;
-      gap: 0.5rem;
+      gap: 0.75rem;
     }
     
     .area-item {
@@ -274,49 +375,47 @@
     }
     
     .area-label {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       font-weight: 500;
       color: var(--text-muted);
-      min-width: 80px;
+      min-width: 90px;
       flex-shrink: 0;
     }
     
     .funcionario-name {
-      font-size: 0.85rem;
-      padding: 0.4rem 0.6rem;
+      font-size: 0.9rem;
+      padding: 0.5rem 0.75rem;
       background: #f8fff8;
-      border-radius: 4px;
-      border-left: 3px solid var(--primary-light);
+      border-radius: 6px;
+      border-left: 4px solid var(--primary-light);
       flex-grow: 1;
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: 280px;
     }
     
-    /* Status Compacto - Sem Scroll */
     .status-section {
       background: white;
-      border-radius: 6px;
-      padding: 0.75rem;
+      border-radius: 8px;
+      padding: 1rem;
       border: 1px solid var(--border-color);
     }
     
     .status-title {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 600;
       color: var(--text-muted);
       margin-bottom: 0.75rem;
-      padding-bottom: 0.25rem;
+      padding-bottom: 0.5rem;
       border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.5rem;
     }
     
     .status-group {
-      margin-bottom: 0.75rem;
+      margin-bottom: 1rem;
     }
     
     .status-group:last-child {
@@ -324,32 +423,32 @@
     }
     
     .status-group-title {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.5rem;
       font-weight: 500;
     }
     
     .status-list {
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 0.5rem;
     }
     
     .status-item {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.85rem;
-      min-height: 28px;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+      min-height: 32px;
     }
     
     .status-badge {
-      padding: 0.15rem 0.5rem;
-      border-radius: 10px;
-      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
       font-weight: 500;
-      min-width: 45px;
+      min-width: 50px;
       text-align: center;
       flex-shrink: 0;
     }
@@ -364,22 +463,23 @@
       color: white;
     }
     
-    /* Ações Compactas */
+    /* Botões de Ação */
     .action-buttons {
       display: flex;
       gap: 0.5rem;
-      margin-top: 1rem;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
     }
     
     .btn-compact {
-      padding: 0.4rem 0.8rem;
+      padding: 0.5rem 1rem;
       font-size: 0.85rem;
       border-radius: 6px;
       border: none;
       font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 0.3rem;
+      gap: 0.4rem;
     }
     
     .btn-primary-compact {
@@ -392,21 +492,25 @@
       color: white;
     }
     
-    /* Assinatura Compacta */
+    .btn-primary-compact:hover {
+      background: var(--primary-dark);
+    }
+    
+    .btn-danger-compact:hover {
+      background: #c82333;
+    }
+    
+    /* Assinatura */
     .assinatura {
       text-align: center;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       color: #888;
       margin-top: 2rem;
       padding-top: 1rem;
       border-top: 1px solid var(--border-color);
     }
     
-    /* Toast Compacto */
-    .toast-container {
-      z-index: 99999;
-    }
-    
+    /* Loading */
     .loading-overlay {
       position: fixed;
       top: 0;
@@ -420,12 +524,17 @@
       z-index: 9999;
     }
     
-    /* Mensagem quando não há dados */
+    /* Mensagens */
     .empty-message {
       text-align: center;
-      padding: 2rem;
+      padding: 3rem 2rem;
       color: var(--text-muted);
-      font-size: 0.9rem;
+    }
+    
+    .empty-message i {
+      font-size: 3rem;
+      color: #ddd;
+      margin-bottom: 1rem;
     }
   </style>
 </head>
@@ -451,77 +560,120 @@
     </div>
   </div>
 
-  <!-- Configuração de Mês/Ano -->
-  <div class="config-section" id="configSection" style="display: none;">
-    <h5 class="mb-3" style="font-size: 0.95rem; color: var(--primary); font-weight: 600;">
-      <i class="bi bi-calendar me-2"></i>Configurar mês de referência
-    </h5>
-    <p class="mb-2 text-muted" style="font-size: 0.85rem;">
-      Selecione o mês e ano correspondente à planilha para garantir o alinhamento correto dos dias da semana.
-    </p>
-    <div class="config-row">
-      <div class="config-group">
-        <label for="mesSelect">Mês</label>
-        <select id="mesSelect" class="form-select form-select-sm">
-          <option value="0">Janeiro</option>
-          <option value="1">Fevereiro</option>
-          <option value="2">Março</option>
-          <option value="3">Abril</option>
-          <option value="4">Maio</option>
-          <option value="5">Junho</option>
-          <option value="6">Julho</option>
-          <option value="7">Agosto</option>
-          <option value="8">Setembro</option>
-          <option value="9">Outubro</option>
-          <option value="10">Novembro</option>
-          <option value="11">Dezembro</option>
-        </select>
+  <!-- Configuração de Mês/Ano em Acordeão -->
+  <div class="config-accordion" id="configAccordion" style="display: none;">
+    <div class="config-header collapsed" data-bs-toggle="collapse" data-bs-target="#configBody">
+      <span><i class="bi bi-calendar me-2"></i>Configurar mês de referência</span>
+      <i class="bi bi-chevron-down"></i>
+    </div>
+    <div id="configBody" class="collapse">
+      <div class="config-body">
+        <p class="mb-2 text-muted" style="font-size: 0.85rem;">
+          Selecione o mês e ano correspondente à planilha para garantir o alinhamento correto do calendário.
+        </p>
+        <div class="config-row">
+          <div class="config-group">
+            <label for="mesSelect">Mês</label>
+            <select id="mesSelect" class="form-select form-select-sm">
+              <option value="0">Janeiro</option>
+              <option value="1">Fevereiro</option>
+              <option value="2">Março</option>
+              <option value="3">Abril</option>
+              <option value="4">Maio</option>
+              <option value="5">Junho</option>
+              <option value="6">Julho</option>
+              <option value="7">Agosto</option>
+              <option value="8">Setembro</option>
+              <option value="9">Outubro</option>
+              <option value="10">Novembro</option>
+              <option value="11">Dezembro</option>
+            </select>
+          </div>
+          <div class="config-group">
+            <label for="anoSelect">Ano</label>
+            <select id="anoSelect" class="form-select form-select-sm">
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="aplicarConfiguracao()" style="padding: 0.4rem 1rem;">
+            Aplicar
+          </button>
+        </div>
       </div>
-      <div class="config-group">
-        <label for="anoSelect">Ano</label>
-        <select id="anoSelect" class="form-select form-select-sm">
-          <option value="2024">2024</option>
-          <option value="2025">2025</option>
-          <option value="2026">2026</option>
-        </select>
+    </div>
+  </div>
+
+  <!-- Calendário -->
+  <div id="calendarSection" style="display: none;">
+    
+    <!-- Cabeçalho do Calendário com Navegação -->
+    <div class="calendar-container">
+      <div class="calendar-header">
+        <h5 class="calendar-title" id="calendarTitle"></h5>
+        <div class="calendar-nav">
+          <button class="calendar-nav-btn" onclick="mudarMes(-1)">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <button class="calendar-nav-btn" onclick="mudarMes(1)">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
       </div>
-      <button class="btn btn-primary btn-sm" onclick="aplicarConfiguracao()" style="padding: 0.4rem 1rem;">
-        Aplicar
+
+      <!-- Grid do Calendário -->
+      <div class="calendar-grid">
+        <!-- Cabeçalhos dos dias da semana -->
+        <div class="calendar-weekday">DOM</div>
+        <div class="calendar-weekday">SEG</div>
+        <div class="calendar-weekday">TER</div>
+        <div class="calendar-weekday">QUA</div>
+        <div class="calendar-weekday">QUI</div>
+        <div class="calendar-weekday">SEX</div>
+        <div class="calendar-weekday weekend">SÁB</div>
+        
+        <!-- Dias serão inseridos aqui pelo JavaScript -->
+        <div id="calendarDays"></div>
+      </div>
+    </div>
+
+    <!-- Ações -->
+    <div class="action-buttons">
+      <button class="btn-compact btn-danger-compact" id="btnExportarPDF">
+        <i class="bi bi-filetype-pdf"></i> Exportar PDF
+      </button>
+      <button class="btn-compact btn-primary-compact" onclick="location.reload()">
+        <i class="bi bi-arrow-clockwise"></i> Nova Planilha
       </button>
     </div>
+
   </div>
 
-  <!-- Results Area -->
-  <div id="resultsSection" style="display: none;">
-    
-    <!-- Cabeçalho com ações -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="m-0" style="font-size: 0.95rem; color: var(--primary); font-weight: 600;">
-        <i class="bi bi-calendar-week me-2"></i>Divisão de tarefas
-      </h5>
-      <div class="action-buttons" style="margin-top: 0;">
-        <button class="btn-compact btn-danger-compact" id="btnExportarPDF">
-          <i class="bi bi-filetype-pdf"></i> PDF
-        </button>
-        <button class="btn-compact btn-primary-compact" onclick="location.reload()">
-          <i class="bi bi-arrow-clockwise"></i> Nova
-        </button>
+  <!-- Mensagem quando não há dados -->
+  <div id="emptyMessage" class="empty-message" style="display: none;">
+    <i class="bi bi-calendar-x"></i>
+    <p>Nenhum dado encontrado na planilha.</p>
+  </div>
+  
+</div>
+
+<!-- Modal para Detalhes do Dia -->
+<div class="modal fade day-modal" id="dayModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dayModalTitle"></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="dayModalContent"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
       </div>
     </div>
-
-    <!-- Lista de dias -->
-    <div class="accordion" id="daysAccordion">
-      <div id="resultContent"></div>
-    </div>
-
-    <!-- Mensagem quando não há resultados -->
-    <div id="emptyMessage" class="empty-message" style="display: none;">
-      <i class="bi bi-calendar-x" style="font-size: 2rem; color: #ccc; margin-bottom: 1rem;"></i>
-      <p>Nenhum dia com pessoas trabalhando encontrado.</p>
-    </div>
-    
   </div>
-
 </div>
 
 <!-- Assinatura -->
@@ -555,14 +707,19 @@ const PRIORIDADES = {
   }
 };
 
-// Mapeamento de dias da semana abreviados
-const DIAS_SEMANA = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'];
+// Mapeamento de dias da semana
+const DIAS_SEMANA = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+const MESES = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+];
 
 // Variáveis globais
 let dadosPlanilha = [];
 let resultadosGlobal = [];
 let mesSelecionado = new Date().getMonth();
 let anoSelecionado = new Date().getFullYear();
+let dadosProcessados = {};
 
 // Upload handlers
 const dropArea = document.getElementById('dropArea');
@@ -593,11 +750,13 @@ fileInput.addEventListener('change', e => {
 document.addEventListener('DOMContentLoaded', function() {
   const anoSelect = document.getElementById('anoSelect');
   const mesSelect = document.getElementById('mesSelect');
-  
-  // Definir mês e ano atuais como padrão
   const hoje = new Date();
-  mesSelect.value = hoje.getMonth();
-  anoSelect.value = hoje.getFullYear();
+  
+  mesSelecionado = hoje.getMonth();
+  anoSelecionado = hoje.getFullYear();
+  
+  mesSelect.value = mesSelecionado;
+  anoSelect.value = anoSelecionado;
   
   // Adicionar listener para o botão de PDF
   const btnPDF = document.getElementById('btnExportarPDF');
@@ -611,11 +770,32 @@ function aplicarConfiguracao() {
   anoSelecionado = parseInt(document.getElementById('anoSelect').value);
   
   if (dadosPlanilha.length > 0) {
-    showToast('✅ Configuração aplicada! Recalculando...', 'success');
-    setTimeout(() => calcularDivisao(), 300);
+    showToast('✅ Configuração aplicada!', 'success');
+    setTimeout(() => {
+      processarDadosPlanilha();
+      atualizarCalendario();
+    }, 300);
   } else {
     showToast('✅ Configuração salva', 'success');
   }
+}
+
+function mudarMes(delta) {
+  mesSelecionado += delta;
+  
+  if (mesSelecionado < 0) {
+    mesSelecionado = 11;
+    anoSelecionado--;
+  } else if (mesSelecionado > 11) {
+    mesSelecionado = 0;
+    anoSelecionado++;
+  }
+  
+  // Atualizar selects
+  document.getElementById('mesSelect').value = mesSelecionado;
+  document.getElementById('anoSelect').value = anoSelecionado;
+  
+  atualizarCalendario();
 }
 
 function processarArquivo(file) {
@@ -628,7 +808,6 @@ function processarArquivo(file) {
       const wb = XLSX.read(data, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
       
-      // Ler como array de arrays
       const rawData = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
       
       if (!rawData || rawData.length === 0) {
@@ -682,10 +861,11 @@ function processarArquivo(file) {
       dadosPlanilha = dados;
       
       // Mostrar seção de configuração
-      document.getElementById('configSection').style.display = 'block';
+      document.getElementById('configAccordion').style.display = 'block';
       
       setTimeout(() => {
-        calcularDivisao();
+        processarDadosPlanilha();
+        atualizarCalendario();
         hideLoading();
       }, 100);
       
@@ -704,12 +884,9 @@ function processarArquivo(file) {
   reader.readAsArrayBuffer(file);
 }
 
-function calcularDivisao() {
+function processarDadosPlanilha() {
   try {
-    if (!dadosPlanilha || dadosPlanilha.length === 0) {
-      showToast('❌ Nenhum dado encontrado', 'danger');
-      return;
-    }
+    if (!dadosPlanilha || dadosPlanilha.length === 0) return;
     
     const primeiraLinha = dadosPlanilha[0];
     const todasColunas = Object.keys(primeiraLinha);
@@ -792,18 +969,19 @@ function calcularDivisao() {
       return;
     }
     
-    const resultados = [];
+    dadosProcessados = {};
     
-    // Calcular dia da semana para o primeiro dia do mês
-    const primeiroDiaMes = new Date(anoSelecionado, mesSelecionado, 1);
-    const diaSemanaPrimeiro = primeiroDiaMes.getDay(); // 0=Domingo, 1=Segunda, etc.
-    
+    // Processar cada dia encontrado na planilha
     for (let diaInfo of colunaDias) {
       const colunaDia = diaInfo.coluna;
       const diaNumero = diaInfo.dia;
       
-      // Calcular dia da semana correto considerando o mês/ano
+      // Calcular dia da semana considerando o mês/ano selecionado
       const dataDia = new Date(anoSelecionado, mesSelecionado, diaNumero);
+      
+      // Verificar se o dia pertence ao mês selecionado
+      if (dataDia.getMonth() !== mesSelecionado) continue;
+      
       const diaSemanaNumero = dataDia.getDay();
       const diaSemanaNome = DIAS_SEMANA[diaSemanaNumero];
       
@@ -849,180 +1027,33 @@ function calcularDivisao() {
       if (trabalhandoHoje.length > 0) {
         const divisao = calcularDivisaoPorNumero(trabalhandoHoje.length, trabalhandoHoje);
         
-        resultados.push({
+        dadosProcessados[diaNumero] = {
           dia: diaNumero,
           diaSemana: diaSemanaNome,
           numPessoas: trabalhandoHoje.length,
           trabalhando: [...trabalhandoHoje],
           ausentes: [...ausentesHoje],
           divisao
-        });
+        };
       }
     }
     
-    if (resultados.length === 0) {
+    // Mostrar calendário
+    document.getElementById('calendarSection').style.display = 'block';
+    document.getElementById('uploadSection').style.display = 'none';
+    
+    if (Object.keys(dadosProcessados).length === 0) {
       document.getElementById('emptyMessage').style.display = 'block';
       showToast('⚠️ Nenhum dia com pessoas trabalhando encontrado', 'warning');
     } else {
       document.getElementById('emptyMessage').style.display = 'none';
+      showToast('✅ Dados processados! Clique em um dia para ver detalhes.', 'success');
     }
-    
-    resultadosGlobal = resultados;
-    exibirResultados(resultados);
     
   } catch (error) {
-    console.error('Erro em calcularDivisao:', error);
-    showToast('❌ Erro ao calcular divisão: ' + error.message, 'danger');
+    console.error('Erro ao processar dados:', error);
+    showToast('❌ Erro ao processar dados: ' + error.message, 'danger');
   }
-}
-
-function exibirResultados(resultados) {
-  document.getElementById('uploadSection').style.display = 'none';
-  document.getElementById('resultsSection').style.display = 'block';
-  
-  const content = document.getElementById('resultContent');
-  content.innerHTML = '';
-  
-  if (resultados.length === 0) {
-    document.getElementById('emptyMessage').style.display = 'block';
-    return;
-  }
-  
-  // Ordenar resultados por dia
-  resultados.sort((a, b) => a.dia - b.dia);
-  
-  resultados.forEach((resultado, index) => {
-    const accordionItem = document.createElement('div');
-    accordionItem.className = 'accordion-item';
-    
-    const accordionHeader = document.createElement('h2');
-    accordionHeader.className = 'accordion-header';
-    
-    const accordionButton = document.createElement('button');
-    accordionButton.className = 'accordion-button collapsed';
-    accordionButton.type = 'button';
-    accordionButton.setAttribute('data-bs-toggle', 'collapse');
-    accordionButton.setAttribute('data-bs-target', `#collapse-${resultado.dia}`);
-    accordionButton.setAttribute('aria-expanded', 'false');
-    
-    // Cabeçalho compacto
-    accordionButton.innerHTML = `
-      <div class="day-header">
-        <span class="day-number">${resultado.dia}</span>
-        <span class="day-week">${resultado.diaSemana}</span>
-        <span class="badge-count">${resultado.numPessoas} trabalhando</span>
-        <div class="day-stats">
-          <button class="copy-btn" onclick="event.stopPropagation(); copiarDia(${index})">
-            <i class="bi bi-copy"></i> Copiar
-          </button>
-        </div>
-      </div>
-    `;
-    
-    const collapseDiv = document.createElement('div');
-    collapseDiv.id = `collapse-${resultado.dia}`;
-    collapseDiv.className = 'accordion-collapse collapse';
-    collapseDiv.setAttribute('data-bs-parent', '#daysAccordion');
-    
-    const accordionBody = document.createElement('div');
-    accordionBody.className = 'accordion-body';
-    
-    // Conteúdo compacto
-    let html = `
-      <div class="day-content">
-        <div class="area-section">
-          <div class="area-title">
-            <i class="bi bi-diagram-3"></i>
-            <span>Áreas</span>
-          </div>
-          <div class="area-grid">
-    `;
-    
-    if (Object.keys(resultado.divisao).length > 0) {
-      Object.entries(resultado.divisao).forEach(([area, pessoa]) => {
-        if (pessoa) {
-          html += `
-            <div class="area-item">
-              <span class="area-label">${area}</span>
-              <div class="funcionario-name" title="${pessoa}">${pessoa}</div>
-            </div>
-          `;
-        }
-      });
-    } else {
-      html += `<div class="text-muted small">Não foi possível fazer a divisão.</div>`;
-    }
-    
-    html += `
-          </div>
-        </div>
-        
-        <div class="status-section">
-          <div class="status-title">
-            <i class="bi bi-people"></i>
-            <span>Equipe</span>
-          </div>
-          
-          <div class="status-group">
-            <div class="status-group-title">Trabalhando (${resultado.trabalhando.length})</div>
-            <div class="status-list">
-    `;
-    
-    resultado.trabalhando.forEach(nome => {
-      html += `
-        <div class="status-item">
-          <span class="status-badge badge-presente">✓</span>
-          <span>${nome}</span>
-        </div>
-      `;
-    });
-    
-    html += `
-            </div>
-          </div>
-    `;
-    
-    if (resultado.ausentes.length > 0) {
-      html += `
-          <div class="status-group">
-            <div class="status-group-title">Ausentes (${resultado.ausentes.length})</div>
-            <div class="status-list">
-      `;
-      
-      resultado.ausentes.forEach(({nome, motivo}) => {
-        html += `
-          <div class="status-item">
-            <span class="status-badge badge-ausente">${motivo}</span>
-            <span>${nome}</span>
-          </div>
-        `;
-      });
-      
-      html += `</div></div>`;
-    }
-    
-    html += `
-        </div>
-      </div>
-    `;
-    
-    accordionBody.innerHTML = html;
-    collapseDiv.appendChild(accordionBody);
-    accordionHeader.appendChild(accordionButton);
-    accordionItem.appendChild(accordionHeader);
-    accordionItem.appendChild(collapseDiv);
-    content.appendChild(accordionItem);
-    
-    // Expandir primeiro item
-    if (index === 0) {
-      setTimeout(() => {
-        accordionButton.classList.remove('collapsed');
-        collapseDiv.classList.add('show');
-      }, 100);
-    }
-  });
-  
-  showToast('✅ Divisão calculada!', 'success');
 }
 
 function calcularDivisaoPorNumero(num, trabalhandoHoje) {
@@ -1064,59 +1095,163 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
   return divisao;
 }
 
-function copiarDia(index) {
-  const resultado = resultadosGlobal[index];
-  if (!resultado) return;
+function atualizarCalendario() {
+  const hoje = new Date();
+  const primeiroDiaMes = new Date(anoSelecionado, mesSelecionado, 1);
+  const ultimoDiaMes = new Date(anoSelecionado, mesSelecionado + 1, 0);
+  const diasNoMes = ultimoDiaMes.getDate();
+  const primeiroDiaSemana = primeiroDiaMes.getDay(); // 0 = Domingo, 1 = Segunda, etc.
   
-  const texto = formatarParaCopiar(resultado);
+  // Atualizar título do calendário
+  document.getElementById('calendarTitle').textContent = 
+    `${MESES[mesSelecionado]} de ${anoSelecionado}`;
   
-  navigator.clipboard.writeText(texto).then(() => {
-    showToast('✅ Dados copiados!', 'success');
-    
-    const btn = event.target.closest('.copy-btn');
-    if (btn) {
-      const originalHTML = btn.innerHTML;
-      btn.classList.add('copied');
-      btn.innerHTML = '<i class="bi bi-check"></i> OK';
-      
-      setTimeout(() => {
-        btn.classList.remove('copied');
-        btn.innerHTML = originalHTML;
-      }, 1500);
-    }
-  }).catch(err => {
-    console.error('Erro ao copiar:', err);
-    showToast('❌ Erro ao copiar', 'danger');
-  });
-}
-
-function formatarParaCopiar(resultado) {
-  let texto = `DIA ${resultado.dia} (${resultado.diaSemana})\n`;
-  texto += `================================\n\n`;
+  // Gerar grid do calendário
+  const calendarDays = document.getElementById('calendarDays');
+  calendarDays.innerHTML = '';
   
-  texto += `TRABALHANDO (${resultado.numPessoas}):\n`;
-  resultado.trabalhando.forEach((nome, i) => {
-    texto += `${i + 1}. ${nome}\n`;
-  });
-  
-  texto += `\nDIVISÃO DE ÁREAS:\n`;
-  Object.entries(resultado.divisao).forEach(([area, pessoa]) => {
-    texto += `${area}: ${pessoa}\n`;
-  });
-  
-  if (resultado.ausentes.length > 0) {
-    texto += `\nAUSENTES:\n`;
-    resultado.ausentes.forEach(({nome, motivo}) => {
-      texto += `${nome} (${motivo})\n`;
-    });
+  // Dias vazios no início (para alinhar o primeiro dia)
+  for (let i = 0; i < primeiroDiaSemana; i++) {
+    const emptyDay = document.createElement('div');
+    emptyDay.className = 'calendar-day empty';
+    calendarDays.appendChild(emptyDay);
   }
   
-  return texto;
+  // Dias do mês
+  for (let dia = 1; dia <= diasNoMes; dia++) {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'calendar-day';
+    
+    const dataDia = new Date(anoSelecionado, mesSelecionado, dia);
+    const diaSemanaNumero = dataDia.getDay();
+    const diaSemanaNome = DIAS_SEMANA[diaSemanaNumero];
+    
+    // Verificar se é hoje
+    if (hoje.getDate() === dia && 
+        hoje.getMonth() === mesSelecionado && 
+        hoje.getFullYear() === anoSelecionado) {
+      dayDiv.classList.add('today');
+    }
+    
+    // Verificar se há dados para este dia
+    const dadosDia = dadosProcessados[dia];
+    if (dadosDia) {
+      dayDiv.classList.add('has-data');
+      dayDiv.onclick = () => mostrarDetalhesDia(dia);
+    }
+    
+    let content = `
+      <div class="calendar-day-number">${dia}</div>
+      <div class="calendar-day-week">${diaSemanaNome}</div>
+    `;
+    
+    if (dadosDia) {
+      content += `<div class="calendar-day-stats">${dadosDia.numPessoas} trabalhando</div>`;
+      if (dadosDia.ausentes.length > 0) {
+        content += `<div class="calendar-day-absent">${dadosDia.ausentes.length} ausentes</div>`;
+      }
+    }
+    
+    dayDiv.innerHTML = content;
+    calendarDays.appendChild(dayDiv);
+  }
+}
+
+function mostrarDetalhesDia(dia) {
+  const dadosDia = dadosProcessados[dia];
+  if (!dadosDia) return;
+  
+  const modal = new bootstrap.Modal(document.getElementById('dayModal'));
+  const modalTitle = document.getElementById('dayModalTitle');
+  const modalContent = document.getElementById('dayModalContent');
+  
+  modalTitle.textContent = `Dia ${dia} (${dadosDia.diaSemana}) - ${dadosDia.numPessoas} pessoa(s) trabalhando`;
+  
+  let html = `
+    <div class="day-content">
+      <div class="area-section">
+        <div class="area-title">
+          <i class="bi bi-diagram-3"></i>
+          <span>Divisão de Áreas</span>
+        </div>
+        <div class="area-grid">
+  `;
+  
+  if (Object.keys(dadosDia.divisao).length > 0) {
+    Object.entries(dadosDia.divisao).forEach(([area, pessoa]) => {
+      if (pessoa) {
+        html += `
+          <div class="area-item">
+            <span class="area-label">${area}</span>
+            <div class="funcionario-name" title="${pessoa}">${pessoa}</div>
+          </div>
+        `;
+      }
+    });
+  } else {
+    html += `<div class="text-muted small">Não foi possível fazer a divisão.</div>`;
+  }
+  
+  html += `
+        </div>
+      </div>
+      
+      <div class="status-section">
+        <div class="status-title">
+          <i class="bi bi-people"></i>
+          <span>Status da Equipe</span>
+        </div>
+        
+        <div class="status-group">
+          <div class="status-group-title">Trabalhando (${dadosDia.trabalhando.length})</div>
+          <div class="status-list">
+  `;
+  
+  dadosDia.trabalhando.forEach(nome => {
+    html += `
+      <div class="status-item">
+        <span class="status-badge badge-presente">✓</span>
+        <span>${nome}</span>
+      </div>
+    `;
+  });
+  
+  html += `
+          </div>
+        </div>
+  `;
+  
+  if (dadosDia.ausentes.length > 0) {
+    html += `
+        <div class="status-group">
+          <div class="status-group-title">Ausentes (${dadosDia.ausentes.length})</div>
+          <div class="status-list">
+    `;
+    
+    dadosDia.ausentes.forEach(({nome, motivo}) => {
+      html += `
+        <div class="status-item">
+          <span class="status-badge badge-ausente">${motivo}</span>
+          <span>${nome}</span>
+        </div>
+      `;
+    });
+    
+    html += `</div></div>`;
+  }
+  
+  html += `
+      </div>
+    </div>
+  `;
+  
+  modalContent.innerHTML = html;
+  modal.show();
 }
 
 function gerarPDF() {
-  if (!resultadosGlobal || resultadosGlobal.length === 0) {
-    showToast('❌ Nenhum resultado para exportar', 'danger');
+  if (Object.keys(dadosProcessados).length === 0) {
+    showToast('❌ Nenhum dado para exportar', 'danger');
     return;
   }
   
@@ -1135,7 +1270,7 @@ function gerarPDF() {
           margin: [0, 0, 0, 15]
         },
         {
-          text: `Mês: ${document.getElementById('mesSelect').options[mesSelecionado].text}/${anoSelecionado}`,
+          text: `${MESES[mesSelecionado]} de ${anoSelecionado}`,
           style: 'subheader',
           alignment: 'center',
           margin: [0, 0, 0, 25]
@@ -1182,19 +1317,26 @@ function gerarPDF() {
       }
     };
     
-    resultadosGlobal.forEach((resultado, index) => {
+    // Ordenar dias
+    const diasOrdenados = Object.keys(dadosProcessados)
+      .map(Number)
+      .sort((a, b) => a - b);
+    
+    diasOrdenados.forEach((dia, index) => {
+      const dadosDia = dadosProcessados[dia];
+      
       docDefinition.content.push({
-        text: `Dia ${resultado.dia} (${resultado.diaSemana}) - ${resultado.numPessoas} pessoas`,
+        text: `Dia ${dia} (${dadosDia.diaSemana}) - ${dadosDia.numPessoas} pessoas`,
         style: 'diaHeader'
       });
       
-      if (Object.keys(resultado.divisao).length > 0) {
+      if (Object.keys(dadosDia.divisao).length > 0) {
         docDefinition.content.push({
           text: 'Divisão de áreas:',
           style: 'statusHeader'
         });
         
-        Object.entries(resultado.divisao).forEach(([area, pessoa]) => {
+        Object.entries(dadosDia.divisao).forEach(([area, pessoa]) => {
           if (pessoa) {
             docDefinition.content.push({
               text: `${area}: ${pessoa}`,
@@ -1205,26 +1347,26 @@ function gerarPDF() {
       }
       
       docDefinition.content.push({
-        text: `Trabalhando (${resultado.trabalhando.length}):`,
+        text: `Trabalhando (${dadosDia.trabalhando.length}):`,
         style: 'statusHeader',
         margin: [0, 10, 0, 4]
       });
       
-      resultado.trabalhando.forEach(nome => {
+      dadosDia.trabalhando.forEach(nome => {
         docDefinition.content.push({
           text: `✓ ${nome}`,
           style: 'statusText'
         });
       });
       
-      if (resultado.ausentes.length > 0) {
+      if (dadosDia.ausentes.length > 0) {
         docDefinition.content.push({
-          text: `Ausentes (${resultado.ausentes.length}):`,
+          text: `Ausentes (${dadosDia.ausentes.length}):`,
           style: 'statusHeader',
           margin: [0, 8, 0, 4]
         });
         
-        resultado.ausentes.forEach(({nome, motivo}) => {
+        dadosDia.ausentes.forEach(({nome, motivo}) => {
           docDefinition.content.push({
             text: `✗ ${nome} (${motivo})`,
             style: 'statusText'
@@ -1232,7 +1374,7 @@ function gerarPDF() {
         });
       }
       
-      if (index < resultadosGlobal.length - 1) {
+      if (index < diasOrdenados.length - 1) {
         docDefinition.content.push({
           text: '',
           margin: [0, 8, 0, 8]
