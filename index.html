@@ -1217,78 +1217,31 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Módulos separados para melhor organização e manutenção -->
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
 <script>
 // ============================================
-// CONFIGURAÇÕES DO SISTEMA
+// VARIÁVEIS GLOBAIS E ALIASES
 // ============================================
 
-// PIN de administrador
-const ADMIN_PIN = "home.2025";
+// Aliases para compatibilidade com código existente
+const ADMIN_PIN = CONFIG.ADMIN_PIN;
+const PRIORIDADES = CONFIG.PRIORIDADES;
+const DIAS_SEMANA = CONFIG.DIAS_SEMANA;
+const MESES = CONFIG.MESES;
 
-// ID fixo para o JSONBin - IMPORTANTE: Use este ID exato
-const JSONBIN_ESCALA_ID = "67acf6e1ad19ca34f89c1f2c";
-
-// Regras de prioridade
-const PRIORIDADES = {
-  3: {
-    'CO/NO/NE': ['CRISTIANE HERMOGENES DA SILVA', 'MARISTELLA MARCIA DOS SANTOS', 'RAISSA LIMA DE OLIVEIRA'],
-    'BA/MG/ES': ['LEONARDO FERREIRA LIMA DE ALMEIDA', 'RAISSA LIMA DE OLIVEIRA', 'MARISTELLA MARCIA DOS SANTOS'],
-    'RIO': ['THIAGO PEREIRA DA SILVA', 'ALAN MARINHO DIAS', 'MARISTELLA MARCIA DOS SANTOS', 'RAISSA LIMA DE OLIVEIRA']
-  },
-  4: {
-    'CO/NO': ['CRISTIANE HERMOGENES DA SILVA', 'MARISTELLA MARCIA DOS SANTOS', 'RAISSA LIMA DE OLIVEIRA', 'THIAGO PEREIRA DA SILVA', 'ALAN MARINHO DIAS', 'LEONARDO FERREIRA LIMA DE ALMEIDA'],
-    'NE/BA': ['RAISSA LIMA DE OLIVEIRA', 'MARISTELLA MARCIA DOS SANTOS', 'CRISTIANE HERMOGENES DA SILVA', 'THIAGO PEREIRA DA SILVA', 'LEONARDO FERREIRA LIMA DE ALMEIDA', 'ALAN MARINHO DIAS'],
-    'MG/ES': ['LEONARDO FERREIRA LIMA DE ALMEIDA', 'RAISSA LIMA DE OLIVEIRA', 'ALAN MARINHO DIAS', 'CRISTIANE HERMOGENES DA SILVA', 'MARISTELLA MARCIA DOS SANTOS', 'THIAGO PEREIRA DA SILVA'],
-    'RIO': ['ALAN MARINHO DIAS', 'THIAGO PEREIRA DA SILVA', 'MARISTELLA MARCIA DOS SANTOS', 'RAISSA LIMA DE OLIVEIRA', 'LEONARDO FERREIRA LIMA DE ALMEIDA', 'CRISTIANE HERMOGENES DA SILVA']
-  },
-  5: {
-    'CO/NO': ['CRISTIANE HERMOGENES DA SILVA', 'MARISTELLA MARCIA DOS SANTOS'],
-    'NE/BA': ['RAISSA LIMA DE OLIVEIRA', 'MARISTELLA MARCIA DOS SANTOS'],
-    'MG': ['LEONARDO FERREIRA LIMA DE ALMEIDA', 'RAISSA LIMA DE OLIVEIRA'],
-    'RIO A': ['ALAN MARINHO DIAS', 'MARISTELLA MARCIA DOS SANTOS'],
-    'RIO B': ['THIAGO PEREIRA DA SILVA', 'MARISTELLA MARCIA DOS SANTOS']
-  }
-};
-
-// ============================================
-// CONFIGURAÇÕES DE NUVEM
-// ============================================
-// IMPORTANTE: Este BIN_ID deve ser atualizado quando um novo bin for criado
-// Para criar um novo bin, acesse como admin e use o botão "Gerenciar Armazenamento"
-
+// Configuração JSONBin (retrocompatibilidade)
 const JSONBIN_CONFIG = {
-  // ⚠️ BIN_ID PRINCIPAL - Todos os usuários usam este ID
-  // Se precisar criar um novo, atualize este valor e faça commit
-  BIN_ID: null, // SERÁ CRIADO AUTOMATICAMENTE NO PRIMEIRO USO
-
-  // Credenciais de acesso
-  MASTER_KEY: '$2a$10$dQyAV006kSDh2CvPh8cBCu2yspqnkCb4Dpm.A7wby6q.tZAKQHNce',
-  ACCESS_KEY: '$2a$10$RB4c6LvHvrsrqm.UL24v4O32NX2kguwwrOx1VMKJC2y0/5ZZmX5TG',
-  API_URL: 'https://api.jsonbin.io/v3/b'
+  get BIN_ID() { return API.getBinId(); },
+  MASTER_KEY: CONFIG.JSONBIN.MASTER_KEY,
+  ACCESS_KEY: CONFIG.JSONBIN.ACCESS_KEY,
+  API_URL: CONFIG.JSONBIN.API_URL
 };
 
-// Função para obter o BIN_ID (prioriza código, depois localStorage)
-function obterBinId() {
-  // Prioridade 1: ID fixo no código (mais confiável)
-  if (JSONBIN_CONFIG.BIN_ID) {
-    return JSONBIN_CONFIG.BIN_ID;
-  }
-  // Prioridade 2: ID salvo localmente (fallback)
-  return localStorage.getItem('escala_bin_id');
-}
-
-// Função para salvar o BIN_ID
-function salvarBinId(novoId) {
-  localStorage.setItem('escala_bin_id', novoId);
-  console.log('📝 BIN_ID salvo localmente:', novoId);
-}
-
-// Mapeamento de dias da semana
-const DIAS_SEMANA = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'];
-const MESES = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-];
+// Funções de compatibilidade com código existente
+function obterBinId() { return API.getBinId(); }
+function salvarBinId(id) { return API.saveBinId(id); }
 
 // ============================================
 // VARIÁVEIS GLOBAIS
@@ -1338,43 +1291,18 @@ este ID manualmente poderão acessar os dados.
   console.log('📋 Instruções exibidas para atualizar BIN_ID:', novoBinId);
 }
 
-// Função para criar um novo bin no JSONBin.io
+// Função para criar um novo bin no JSONBin.io (usa módulo API)
 async function criarNovoBin(dadosIniciais) {
   console.log('🆕 CRIANDO NOVO BIN NO JSONBIN...');
 
   try {
-    const response = await fetch('https://api.jsonbin.io/v3/b', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
-        'X-Access-Key': JSONBIN_CONFIG.ACCESS_KEY,
-        'X-Bin-Name': `Escala Equipe Madrugada - ${new Date().toISOString()}`,
-        'X-Bin-Private': 'false'
-      },
-      body: JSON.stringify(dadosIniciais)
-    });
+    const resultado = await API.criarBin(dadosIniciais);
 
-    console.log('📡 Resposta da criação:', response.status);
-
-    if (response.ok) {
-      const result = await response.json();
-      const novoBinId = result.metadata.id;
-
-      console.log('✅ NOVO BIN CRIADO COM SUCESSO!');
-      console.log('📌 Novo BIN_ID:', novoBinId);
-
-      // Salvar o novo ID localmente
-      salvarBinId(novoBinId);
-
-      showToast(`✅ Novo armazenamento criado! ID: ${novoBinId}`, 'success');
-
-      return { success: true, binId: novoBinId, result: result };
-    } else {
-      const errorText = await response.text();
-      console.error('❌ Erro ao criar bin:', response.status, errorText);
-      throw new Error(`Erro ao criar bin: ${response.status} - ${errorText}`);
+    if (resultado.success) {
+      showToast(`✅ Novo armazenamento criado! ID: ${resultado.binId}`, 'success');
     }
+
+    return resultado;
   } catch (error) {
     console.error('💥 Falha ao criar novo bin:', error);
     throw error;
