@@ -148,6 +148,24 @@
     .refresh-btn.logout-viewer:hover {
       background: #117a8b;
     }
+
+    .refresh-btn.delete-admin {
+      background: #dc3545;
+      color: white;
+    }
+
+    .refresh-btn.delete-admin:hover {
+      background: #c82333;
+    }
+
+    .refresh-btn.test-connection {
+      background: #17a2b8;
+      color: white;
+    }
+
+    .refresh-btn.test-connection:hover {
+      background: #138496;
+    }
     
     /* Indicador de modo */
     .mode-indicator {
@@ -904,12 +922,22 @@
     <i class="bi bi-cloud-arrow-up"></i>
     <input type="file" id="fileInputAdmin" accept=".xlsx,.xls,.csv" style="display: none;">
   </button>
-  
+
+  <!-- Botão Excluir Planilha -->
+  <button class="refresh-btn delete-admin" onclick="excluirPlanilha()" title="Excluir planilha da nuvem">
+    <i class="bi bi-trash3"></i>
+  </button>
+
+  <!-- Botão Testar Conexão -->
+  <button class="refresh-btn test-connection" onclick="testarConexaoNuvem()" title="Testar conexão com a nuvem">
+    <i class="bi bi-cloud-check"></i>
+  </button>
+
   <!-- Botão Refresh -->
   <button class="refresh-btn" onclick="location.reload()" title="Recarregar página">
     <i class="bi bi-arrow-clockwise"></i>
   </button>
-  
+
   <!-- Botão Logout Admin -->
   <button class="refresh-btn logout-admin" onclick="logoutAdmin()" title="Sair do modo admin">
     <i class="bi bi-person-x"></i>
@@ -1395,13 +1423,19 @@ async function carregarDadosDaNuvem() {
       });
 
       if (dados && (dados.dadosOriginais || dados.dadosPlanilha)) {
+        console.log('✅ DADOS VÁLIDOS ENCONTRADOS NA NUVEM!');
         processarDadosCarregados(dados);
         hideLoading();
-        showToast('✅ Escala carregada da nuvem!', 'success');
+
+        const info = `Mês: ${dados.mes !== undefined ? MESES[dados.mes] : 'N/A'} ${dados.ano || ''} | Funcionários: ${dados.dadosPlanilha?.length || 0} | Dias: ${Object.keys(dados.dadosOriginais || {}).length}`;
+        console.log('📊 Info:', info);
+
+        showToast('✅ Escala carregada da nuvem! ' + info, 'success');
         return true;
       } else {
         console.warn('⚠️ Nuvem acessível mas sem dados válidos');
-        showToast('📭 Nenhuma escala encontrada na nuvem', 'info');
+        console.warn('Dados recebidos:', dados);
+        showToast('📭 Nenhuma escala encontrada na nuvem. Admin precisa fazer upload.', 'info');
       }
     } else {
       console.error('❌ Resposta não OK:', response.status, response.statusText);
@@ -1704,6 +1738,148 @@ function logoutViewer() {
 }
 
 // ============================================
+// FUNÇÕES DE GERENCIAMENTO DA NUVEM
+// ============================================
+
+async function testarConexaoNuvem() {
+  if (!isAdmin) {
+    showToast('❌ Apenas administradores podem testar conexão', 'danger');
+    return;
+  }
+
+  console.log('🔍 TESTANDO CONEXÃO COM A NUVEM...');
+  console.log('📌 BIN ID:', JSONBIN_CONFIG.BIN_ID);
+  console.log('🔑 Master Key:', JSONBIN_CONFIG.MASTER_KEY.substring(0, 20) + '...');
+  console.log('🔑 Access Key:', JSONBIN_CONFIG.ACCESS_KEY.substring(0, 20) + '...');
+
+  showLoading();
+
+  try {
+    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}/latest`, {
+      headers: {
+        'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
+        'X-Access-Key': JSONBIN_CONFIG.ACCESS_KEY
+      }
+    });
+
+    console.log('📡 Status da resposta:', response.status);
+    console.log('📡 Headers da resposta:', [...response.headers.entries()]);
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log('✅ BIN ACESSÍVEL! Dados encontrados:', result);
+
+      const dados = result.record;
+      if (dados && (dados.dadosOriginais || dados.dadosPlanilha)) {
+        const info = `
+📊 Planilha encontrada na nuvem!
+- Mês: ${dados.mes !== undefined ? MESES[dados.mes] : 'N/A'}
+- Ano: ${dados.ano || 'N/A'}
+- Funcionários: ${dados.dadosPlanilha?.length || 0}
+- Dias: ${Object.keys(dados.dadosOriginais || {}).length}
+- Trocas: ${dados.trocas?.length || 0}
+- Última atualização: ${dados.ultima_atualizacao || 'N/A'}
+        `.trim();
+
+        alert(info);
+        showToast('✅ Conexão OK! Planilha encontrada na nuvem', 'success');
+      } else {
+        console.warn('⚠️ BIN acessível mas SEM DADOS');
+        alert('⚠️ BIN acessível mas está VAZIO!\n\nFaça upload de uma planilha para preencher.');
+        showToast('⚠️ BIN vazio - faça upload de uma planilha', 'warning');
+      }
+    } else {
+      const errorText = await response.text();
+      console.error('❌ Erro ao acessar BIN:', response.status, errorText);
+
+      alert(`❌ Erro ao acessar a nuvem!\n\nStatus: ${response.status}\n\nDetalhes: ${errorText}\n\nVerifique as credenciais no console (F12).`);
+      showToast(`❌ Erro ${response.status}: Não foi possível acessar o BIN`, 'danger');
+    }
+  } catch (error) {
+    console.error('💥 ERRO na conexão:', error);
+    alert(`💥 Erro de conexão!\n\n${error.message}\n\nVerifique:\n- Conexão com internet\n- CORS (precisa estar em servidor HTTPS)\n- Console do navegador (F12)`);
+    showToast('💥 Erro de conexão com a nuvem', 'danger');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function excluirPlanilha() {
+  if (!isAdmin) {
+    showToast('❌ Apenas administradores podem excluir planilha', 'danger');
+    return;
+  }
+
+  const confirmar = confirm('⚠️ ATENÇÃO!\n\nDeseja EXCLUIR a planilha da nuvem?\n\nTodos os usuários perderão acesso aos dados!\n\nEsta ação NÃO pode ser desfeita.');
+
+  if (!confirmar) {
+    return;
+  }
+
+  console.log('🗑️ EXCLUINDO PLANILHA DA NUVEM...');
+  showLoading();
+
+  try {
+    // Criar um objeto vazio para limpar o BIN
+    const dadosVazios = {
+      escala_id: 'portal_escala_v2',
+      mes: null,
+      ano: null,
+      ultima_atualizacao: new Date().toISOString(),
+      dadosOriginais: {},
+      trocas: [],
+      dadosPlanilha: [],
+      metadata: {
+        deletado_em: new Date().toISOString(),
+        versao: '2.0'
+      }
+    };
+
+    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
+        'X-Bin-Name': 'Escala Vazia',
+        'X-Access-Key': JSONBIN_CONFIG.ACCESS_KEY
+      },
+      body: JSON.stringify(dadosVazios)
+    });
+
+    console.log('📡 Status da exclusão:', response.status);
+
+    if (response.ok) {
+      console.log('✅ Planilha excluída da nuvem');
+
+      // Limpar também o localStorage
+      localStorage.removeItem('escala_backup');
+      localStorage.removeItem('escala_ultimo_salvamento');
+
+      // Limpar variáveis globais
+      dadosPlanilha = [];
+      dadosOriginais = {};
+      dadosProcessados = {};
+      trocasRegistradas = [];
+
+      showToast('✅ Planilha excluída da nuvem com sucesso!', 'success');
+
+      setTimeout(() => {
+        location.reload();
+      }, 1500);
+    } else {
+      const errorText = await response.text();
+      console.error('❌ Erro ao excluir:', response.status, errorText);
+      showToast(`❌ Erro ao excluir: ${response.status}`, 'danger');
+    }
+  } catch (error) {
+    console.error('💥 Erro ao excluir planilha:', error);
+    showToast('💥 Erro ao excluir planilha: ' + error.message, 'danger');
+  } finally {
+    hideLoading();
+  }
+}
+
+// ============================================
 // SISTEMA DE UPLOAD E PROCESSAMENTO
 // ============================================
 
@@ -1773,19 +1949,40 @@ function processarArquivo(file) {
       }
       
       dadosPlanilha = dados;
-      
+
+      console.log('📊 Planilha carregada:', {
+        totalFuncionarios: dados.length,
+        primeiraLinha: dados[0],
+        colunas: Object.keys(dados[0])
+      });
+
       // Processar dados
       processarDadosPlanilha();
-      
-      // ⚠️ ALTERAÇÃO CRÍTICA: Usar NOVA função de salvamento
-      salvarDadosNaNuvem().then(() => {
+
+      console.log('📊 Dados processados:', {
+        totalDias: Object.keys(dadosOriginais).length,
+        primeirosDias: Object.keys(dadosOriginais).slice(0, 3)
+      });
+
+      // Salvar na nuvem
+      salvarDadosNaNuvem().then((resultado) => {
+        console.log('✅ Salvamento concluído:', resultado);
         atualizarCalendario();
         hideLoading();
-        showToast('✅ Planilha processada e salva!', 'success');
+
+        // Mostrar confirmação clara
+        setTimeout(() => {
+          alert(`✅ SUCESSO!\n\nPlanilha salva na nuvem!\n\n✔️ Todos os usuários já podem visualizar\n✔️ Total de funcionários: ${dados.length}\n✔️ Total de dias: ${Object.keys(dadosOriginais).length}\n\nClique em "Testar Conexão" para verificar.`);
+        }, 500);
+
+        showToast('✅ Planilha salva na nuvem! Todos podem visualizar.', 'success');
       }).catch((error) => {
-        console.error('Erro ao salvar:', error);
+        console.error('❌ ERRO ao salvar:', error);
+        atualizarCalendario();
         hideLoading();
-        showToast('⚠️ Processado, mas sem nuvem', 'warning');
+
+        alert(`⚠️ ATENÇÃO!\n\nPlanilha processada mas NÃO foi salva na nuvem!\n\nErro: ${error.message}\n\n❌ Outros usuários NÃO verão os dados\n\nVerifique o console (F12) para detalhes.`);
+        showToast('⚠️ Processado localmente - SEM NUVEM!', 'warning');
       });
       
     } catch (err) {
