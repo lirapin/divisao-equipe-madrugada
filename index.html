@@ -17,23 +17,15 @@
       --primary: #2e7d32;
       --primary-dark: #1b5e20;
       --primary-light: #4caf50;
-      --secondary: #a5d6a7;
       --accent: #81c784;
-      --light-bg: linear-gradient(135deg, #f8fdf8 0%, #f0f7ff 100%);
-      --card-bg: rgba(255, 255, 255, 0.95);
-      --card-bg-hover: rgba(255, 255, 255, 0.98);
+      --light-bg: #f8fdf8;
+      --card-bg: #ffffff;
       --text-dark: #1a1a1a;
-      --text-muted: #5a5a5a;
-      --border-color: rgba(0, 0, 0, 0.08);
+      --text-muted: #666666;
+      --border-color: #e0e0e0;
       --success: #4caf50;
-      --warning: #ff9800;
       --danger: #f44336;
       --info: #2196f3;
-      --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.06);
-      --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.12);
-      --shadow-lg: 0 16px 50px rgba(0, 0, 0, 0.15);
-      --glass: rgba(255, 255, 255, 0.25);
-      --glass-border: rgba(255, 255, 255, 0.18);
     }
     
     * {
@@ -44,387 +36,375 @@
       background: var(--light-bg);
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       color: var(--text-dark);
-      line-height: 1.6;
+      line-height: 1.5;
       min-height: 100vh;
-      overflow-x: hidden;
-      padding-bottom: 50px;
+      padding-bottom: 40px;
     }
     
     .app-header {
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       color: #fff;
-      box-shadow: var(--shadow-md);
-      position: relative;
-      overflow: hidden;
-      padding: 1rem 0;
-    }
-    
-    .app-header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
-      opacity: 0.1;
+      padding: 0.75rem 0;
+      margin-bottom: 1.5rem;
     }
     
     .brand-dot {
-      width: .75rem;
-      height: .75rem;
+      width: .6rem;
+      height: .6rem;
       border-radius: 50%;
       background: #fff;
       display: inline-block;
-      margin-right: .5rem;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      margin-right: .4rem;
+    }
+    
+    /* Container Principal Compacto */
+    .main-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    
+    /* Upload Area Compacta */
+    .upload-section {
+      background: white;
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border: 1px solid var(--border-color);
     }
     
     .upload-drop {
       border: 2px dashed var(--accent);
-      border-radius: 12px;
-      padding: 2.5rem;
+      border-radius: 8px;
+      padding: 1.5rem;
       text-align: center;
-      background: var(--glass);
-      backdrop-filter: blur(10px);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .upload-drop::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(33, 150, 243, 0.05) 100%);
-      opacity: 0;
-      transition: opacity 0.3s;
+      transition: all 0.2s;
+      background: #f8fff8;
     }
     
     .upload-drop:hover, .upload-drop.dragover {
-      background: var(--glass);
+      background: #f0f7f0;
       border-color: var(--primary);
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-lg);
     }
     
-    .upload-drop:hover::before, .upload-drop.dragover::before {
-      opacity: 1;
-    }
-    
-    .card-custom {
-      background: var(--card-bg);
-      border-radius: 12px;
-      box-shadow: var(--shadow-md);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(10px);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow: hidden;
-    }
-    
-    .section-title {
-      color: var(--primary);
-      font-weight: 700;
-      margin-bottom: 1.25rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 2px solid var(--border-color);
-      position: relative;
-      font-size: 1.15rem;
-    }
-    
-    .section-title::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 50px;
-      height: 2px;
-      background: linear-gradient(90deg, var(--primary), var(--info));
-      border-radius: 2px;
-    }
-    
-    /* Accordion Styles */
-    .accordion-item {
-      background: transparent;
-      border: 1px solid var(--border-color);
+    /* Configuração de Mês/Ano */
+    .config-section {
+      background: white;
       border-radius: 10px;
-      margin-bottom: 0.75rem;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border: 1px solid var(--border-color);
+    }
+    
+    .config-row {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+      margin-top: 1rem;
+    }
+    
+    .config-group {
+      flex: 1;
+    }
+    
+    .config-group label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 0.3rem;
+      color: var(--text-muted);
+      display: block;
+    }
+    
+    .config-group select {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      background: white;
+    }
+    
+    /* Accordion Compacto */
+    .accordion-item {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
       overflow: hidden;
-      transition: all 0.3s ease;
-    }
-    
-    .accordion-item:hover {
-      border-color: var(--accent);
-      box-shadow: var(--shadow-sm);
-    }
-    
-    .accordion-header {
-      padding: 0;
-      margin: 0;
     }
     
     .accordion-button {
-      background: rgba(255, 255, 255, 0.9);
-      padding: 0.85rem 1.25rem;
-      font-weight: 600;
-      color: var(--text-dark);
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      background: white;
       border: none;
-      border-radius: 10px 10px 0 0;
-      transition: all 0.3s ease;
+      font-weight: 500;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
     
     .accordion-button:not(.collapsed) {
-      background: rgba(255, 255, 255, 0.95);
+      background: #f8fff8;
       color: var(--primary);
-      box-shadow: none;
-    }
-    
-    .accordion-button:focus {
-      box-shadow: none;
-      border-color: var(--accent);
     }
     
     .accordion-button::after {
       content: '\F282';
       font-family: 'bootstrap-icons';
-      font-size: 0.875rem;
+      font-size: 0.8rem;
       background-image: none;
-      transform: rotate(0deg);
-      transition: transform 0.3s ease;
-    }
-    
-    .accordion-button:not(.collapsed)::after {
-      transform: rotate(180deg);
     }
     
     .accordion-body {
-      padding: 1.25rem;
-      background: rgba(255, 255, 255, 0.95);
+      padding: 1rem;
       border-top: 1px solid var(--border-color);
+      background: #fafafa;
     }
     
-    /* Day Header Styles */
+    /* Cabeçalho do Dia Compacto */
     .day-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      width: 100%;
-    }
-    
-    .day-info {
-      display: flex;
-      align-items: center;
       gap: 0.75rem;
+      flex-wrap: wrap;
     }
     
     .day-number {
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-size: 0.95rem;
+      font-weight: 600;
       color: var(--primary);
-      min-width: 2rem;
+      min-width: 1.8rem;
     }
     
     .day-week {
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       color: var(--text-muted);
-      font-weight: 500;
+      min-width: 3.5rem;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      font-weight: 500;
     }
     
     .day-stats {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      font-size: 0.85rem;
+      margin-left: auto;
     }
     
     .badge-count {
-      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+      background: var(--primary-light);
       color: white;
-      padding: 0.25rem 0.5rem;
+      padding: 0.2rem 0.6rem;
       border-radius: 10px;
       font-size: 0.75rem;
-      font-weight: 600;
-      min-width: 80px;
+      font-weight: 500;
+      min-width: 70px;
       text-align: center;
     }
     
-    /* Area Styles (More Discrete) */
+    .copy-btn {
+      background: var(--info);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.8rem;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .copy-btn:hover {
+      background: #1976d2;
+    }
+    
+    .copy-btn.copied {
+      background: var(--success);
+    }
+    
+    /* Layout Compacto do Conteúdo */
+    .day-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+      .day-content {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Áreas Compactas */
     .area-section {
-      margin-bottom: 1.25rem;
-      padding: 0.5rem;
+      background: white;
+      border-radius: 6px;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
     }
     
     .area-title {
       font-size: 0.85rem;
       font-weight: 600;
       color: var(--primary-dark);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
       padding-bottom: 0.25rem;
-      border-bottom: 1px dashed var(--border-color);
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
+      gap: 0.4rem;
+    }
+    
+    .area-grid {
+      display: grid;
       gap: 0.5rem;
     }
     
-    .area-badge {
-      background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
-      color: var(--text-dark);
-      padding: 0.35rem 0.75rem;
-      border-radius: 6px;
+    .area-item {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+    }
+    
+    .area-label {
       font-size: 0.8rem;
-      font-weight: 600;
-      border: 1px solid var(--border-color);
+      font-weight: 500;
+      color: var(--text-muted);
+      min-width: 80px;
+      flex-shrink: 0;
     }
     
-    .funcionario-item {
-      padding: 0.65rem 0.85rem;
-      margin: 0.25rem 0;
-      background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(33, 150, 243, 0.02) 100%);
-      border-radius: 6px;
+    .funcionario-name {
+      font-size: 0.85rem;
+      padding: 0.4rem 0.6rem;
+      background: #f8fff8;
+      border-radius: 4px;
       border-left: 3px solid var(--primary-light);
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
+      flex-grow: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 280px;
     }
     
-    .funcionario-item:hover {
-      transform: translateX(3px);
-      background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(33, 150, 243, 0.05) 100%);
-    }
-    
-    /* Status Styles */
+    /* Status Compacto - Sem Scroll */
     .status-section {
-      padding: 0.5rem;
+      background: white;
+      border-radius: 6px;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
     }
     
     .status-title {
       font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-muted);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
+    }
+    
+    .status-group {
+      margin-bottom: 0.75rem;
+    }
+    
+    .status-group:last-child {
+      margin-bottom: 0;
+    }
+    
+    .status-group-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      font-weight: 500;
     }
     
     .status-list {
-      max-height: 200px;
-      overflow-y: auto;
-      padding-right: 0.5rem;
-    }
-    
-    .status-list::-webkit-scrollbar {
-      width: 4px;
-    }
-    
-    .status-list::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 2px;
-    }
-    
-    .status-list::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
-      border-radius: 2px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
     }
     
     .status-item {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.4rem 0;
       font-size: 0.85rem;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    }
-    
-    .status-item:last-child {
-      border-bottom: none;
+      min-height: 28px;
     }
     
     .status-badge {
-      padding: 0.2rem 0.5rem;
+      padding: 0.15rem 0.5rem;
       border-radius: 10px;
       font-size: 0.7rem;
-      font-weight: 600;
-      min-width: 50px;
+      font-weight: 500;
+      min-width: 45px;
       text-align: center;
+      flex-shrink: 0;
     }
     
     .badge-presente {
-      background: linear-gradient(135deg, var(--success) 0%, #66bb6a 100%);
+      background: var(--success);
       color: white;
     }
     
     .badge-ausente {
-      background: linear-gradient(135deg, var(--danger) 0%, #ef5350 100%);
+      background: var(--danger);
       color: white;
     }
     
-    /* Copy Button */
-    .copy-btn {
-      background: linear-gradient(135deg, var(--info) 0%, #2196f3 100%);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 0.35rem 0.75rem;
-      font-size: 0.8rem;
-      font-weight: 500;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      cursor: pointer;
-    }
-    
-    .copy-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-sm);
-      background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
-    }
-    
-    .copy-btn:active {
-      transform: translateY(0);
-    }
-    
-    .copy-btn.copied {
-      background: linear-gradient(135deg, var(--success) 0%, #66bb6a 100%);
-    }
-    
-    /* Action Buttons */
+    /* Ações Compactas */
     .action-buttons {
       display: flex;
       gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .btn-compact {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      border: none;
+      font-weight: 500;
+      display: flex;
       align-items: center;
+      gap: 0.3rem;
     }
     
-    /* Assinatura */
+    .btn-primary-compact {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .btn-danger-compact {
+      background: #dc3545;
+      color: white;
+    }
+    
+    /* Assinatura Compacta */
     .assinatura {
-      position: fixed;
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(150, 150, 150, 0.1);
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 0.65rem;
-      color: #666;
-      backdrop-filter: blur(5px);
-      z-index: 1000;
-      animation: fadeIn 0.8s ease-out;
-      border: 1px solid rgba(0, 0, 0, 0.05);
       text-align: center;
+      font-size: 0.7rem;
+      color: #888;
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
     }
     
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    /* Toast Compacto */
+    .toast-container {
+      z-index: 99999;
     }
     
     .loading-overlay {
@@ -438,118 +418,117 @@
       align-items: center;
       justify-content: center;
       z-index: 9999;
-      backdrop-filter: blur(10px);
     }
     
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      border: none;
-      border-radius: 8px;
-      padding: 0.5rem 1rem;
-      font-weight: 500;
-      font-size: 0.875rem;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: var(--shadow-sm);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-    
-    /* Toast Custom */
-    .toast-container {
-      z-index: 99999;
-    }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
-      .upload-drop {
-        padding: 1.5rem;
-      }
-      
-      .accordion-button {
-        padding: 0.75rem 1rem;
-      }
-      
-      .day-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.25rem;
-      }
-      
-      .day-stats {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
-      
-      .action-buttons {
-        flex-wrap: wrap;
-      }
-      
-      .assinatura {
-        position: relative;
-        bottom: auto;
-        left: auto;
-        transform: none;
-        margin: 20px auto 10px;
-        width: 90%;
-      }
+    /* Mensagem quando não há dados */
+    .empty-message {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
-<header class="app-header py-3">
-  <div class="container-fluid d-flex justify-content-between align-items-center">
-    <h1 class="h5 m-0 fw-bold"><span class="brand-dot"></span>Portal de divisão de tarefas</h1>
+<header class="app-header">
+  <div class="main-container">
+    <h1 class="h6 m-0 fw-bold"><span class="brand-dot"></span>Portal de divisão de tarefas</h1>
   </div>
 </header>
 
-<div class="container-fluid py-4">
-  <div class="row justify-content-center">
-    <div class="col-12 col-lg-10">
-      
-      <!-- Upload Area -->
-      <div class="card-custom p-3 mb-4" id="uploadSection">
-        <h5 class="section-title">Upload da planilha de escalas</h5>
-        <div class="upload-drop" id="dropArea">
-          <i class="bi bi-cloud-arrow-up fs-1 text-primary mb-3"></i>
-          <p class="mb-1 fw-semibold">Arraste e solte sua planilha aqui</p>
-          <span class="small text-muted">Suporta XLSX, XLS e CSV</span>
-          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
-        </div>
-      </div>
-
-      <!-- Results Area -->
-      <div id="resultsSection" style="display: none;">
-        <div class="card-custom p-3 mb-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="section-title mb-0">Divisão de tarefas por dia</h5>
-            <div class="action-buttons">
-              <button class="btn btn-danger btn-sm" id="btnExportarPDF">
-                <i class="bi bi-filetype-pdf me-1"></i> PDF
-              </button>
-              <button class="btn btn-primary btn-sm" onclick="location.reload()">
-                <i class="bi bi-arrow-clockwise me-1"></i> Nova
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="accordion" id="daysAccordion">
-          <div id="resultContent"></div>
-        </div>
-      </div>
-
+<div class="main-container">
+  
+  <!-- Upload Area -->
+  <div class="upload-section" id="uploadSection">
+    <h5 class="mb-3" style="font-size: 0.95rem; color: var(--primary); font-weight: 600;">
+      <i class="bi bi-upload me-2"></i>Upload da planilha
+    </h5>
+    <div class="upload-drop" id="dropArea">
+      <i class="bi bi-cloud-arrow-up text-primary mb-2" style="font-size: 1.5rem;"></i>
+      <p class="mb-1" style="font-size: 0.9rem; font-weight: 500;">Arraste e solte sua planilha aqui</p>
+      <span class="small text-muted">Suporta XLSX, XLS e CSV</span>
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
     </div>
   </div>
+
+  <!-- Configuração de Mês/Ano -->
+  <div class="config-section" id="configSection" style="display: none;">
+    <h5 class="mb-3" style="font-size: 0.95rem; color: var(--primary); font-weight: 600;">
+      <i class="bi bi-calendar me-2"></i>Configurar mês de referência
+    </h5>
+    <p class="mb-2 text-muted" style="font-size: 0.85rem;">
+      Selecione o mês e ano correspondente à planilha para garantir o alinhamento correto dos dias da semana.
+    </p>
+    <div class="config-row">
+      <div class="config-group">
+        <label for="mesSelect">Mês</label>
+        <select id="mesSelect" class="form-select form-select-sm">
+          <option value="0">Janeiro</option>
+          <option value="1">Fevereiro</option>
+          <option value="2">Março</option>
+          <option value="3">Abril</option>
+          <option value="4">Maio</option>
+          <option value="5">Junho</option>
+          <option value="6">Julho</option>
+          <option value="7">Agosto</option>
+          <option value="8">Setembro</option>
+          <option value="9">Outubro</option>
+          <option value="10">Novembro</option>
+          <option value="11">Dezembro</option>
+        </select>
+      </div>
+      <div class="config-group">
+        <label for="anoSelect">Ano</label>
+        <select id="anoSelect" class="form-select form-select-sm">
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="aplicarConfiguracao()" style="padding: 0.4rem 1rem;">
+        Aplicar
+      </button>
+    </div>
+  </div>
+
+  <!-- Results Area -->
+  <div id="resultsSection" style="display: none;">
+    
+    <!-- Cabeçalho com ações -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="m-0" style="font-size: 0.95rem; color: var(--primary); font-weight: 600;">
+        <i class="bi bi-calendar-week me-2"></i>Divisão de tarefas
+      </h5>
+      <div class="action-buttons" style="margin-top: 0;">
+        <button class="btn-compact btn-danger-compact" id="btnExportarPDF">
+          <i class="bi bi-filetype-pdf"></i> PDF
+        </button>
+        <button class="btn-compact btn-primary-compact" onclick="location.reload()">
+          <i class="bi bi-arrow-clockwise"></i> Nova
+        </button>
+      </div>
+    </div>
+
+    <!-- Lista de dias -->
+    <div class="accordion" id="daysAccordion">
+      <div id="resultContent"></div>
+    </div>
+
+    <!-- Mensagem quando não há resultados -->
+    <div id="emptyMessage" class="empty-message" style="display: none;">
+      <i class="bi bi-calendar-x" style="font-size: 2rem; color: #ccc; margin-bottom: 1rem;"></i>
+      <p>Nenhum dia com pessoas trabalhando encontrado.</p>
+    </div>
+    
+  </div>
+
 </div>
 
 <!-- Assinatura -->
-<div class="assinatura">
-  <strong>Desenvolvido por:</strong> N6105010 e N5923221
+<div class="main-container">
+  <div class="assinatura">
+    <strong>Desenvolvido por:</strong> N6105010 e N5923221
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -576,11 +555,14 @@ const PRIORIDADES = {
   }
 };
 
-// Mapeamento de dias da semana
-const DIAS_SEMANA = ['DOMINGO', 'SEGUNDA', 'TERÇA', 'QUARTA', 'QUINTA', 'SEXTA', 'SÁBADO'];
+// Mapeamento de dias da semana abreviados
+const DIAS_SEMANA = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'];
 
+// Variáveis globais
 let dadosPlanilha = [];
 let resultadosGlobal = [];
+let mesSelecionado = new Date().getMonth();
+let anoSelecionado = new Date().getFullYear();
 
 // Upload handlers
 const dropArea = document.getElementById('dropArea');
@@ -607,13 +589,34 @@ fileInput.addEventListener('change', e => {
   if (f) processarArquivo(f);
 });
 
-// Adicionar listener para o botão de PDF
+// Configurar ano atual como padrão
 document.addEventListener('DOMContentLoaded', function() {
+  const anoSelect = document.getElementById('anoSelect');
+  const mesSelect = document.getElementById('mesSelect');
+  
+  // Definir mês e ano atuais como padrão
+  const hoje = new Date();
+  mesSelect.value = hoje.getMonth();
+  anoSelect.value = hoje.getFullYear();
+  
+  // Adicionar listener para o botão de PDF
   const btnPDF = document.getElementById('btnExportarPDF');
   if (btnPDF) {
     btnPDF.addEventListener('click', gerarPDF);
   }
 });
+
+function aplicarConfiguracao() {
+  mesSelecionado = parseInt(document.getElementById('mesSelect').value);
+  anoSelecionado = parseInt(document.getElementById('anoSelect').value);
+  
+  if (dadosPlanilha.length > 0) {
+    showToast('✅ Configuração aplicada! Recalculando...', 'success');
+    setTimeout(() => calcularDivisao(), 300);
+  } else {
+    showToast('✅ Configuração salva', 'success');
+  }
+}
 
 function processarArquivo(file) {
   showLoading();
@@ -625,7 +628,7 @@ function processarArquivo(file) {
       const wb = XLSX.read(data, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
       
-      // Ler como array de arrays primeiro (mais confiável)
+      // Ler como array de arrays
       const rawData = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
       
       if (!rawData || rawData.length === 0) {
@@ -652,7 +655,7 @@ function processarArquivo(file) {
       
       const headers = rawData[headerRowIndex];
       
-      // Converter para objetos a partir da linha após o cabeçalho
+      // Converter para objetos
       const dados = [];
       for (let i = headerRowIndex + 1; i < rawData.length; i++) {
         const row = rawData[i];
@@ -671,12 +674,15 @@ function processarArquivo(file) {
       }
       
       if (dados.length === 0) {
-        showToast('❌ Nenhum dado válido encontrado na planilha', 'danger');
+        showToast('❌ Nenhum dado válido encontrado', 'danger');
         hideLoading();
         return;
       }
       
       dadosPlanilha = dados;
+      
+      // Mostrar seção de configuração
+      document.getElementById('configSection').style.display = 'block';
       
       setTimeout(() => {
         calcularDivisao();
@@ -788,9 +794,18 @@ function calcularDivisao() {
     
     const resultados = [];
     
+    // Calcular dia da semana para o primeiro dia do mês
+    const primeiroDiaMes = new Date(anoSelecionado, mesSelecionado, 1);
+    const diaSemanaPrimeiro = primeiroDiaMes.getDay(); // 0=Domingo, 1=Segunda, etc.
+    
     for (let diaInfo of colunaDias) {
       const colunaDia = diaInfo.coluna;
       const diaNumero = diaInfo.dia;
+      
+      // Calcular dia da semana correto considerando o mês/ano
+      const dataDia = new Date(anoSelecionado, mesSelecionado, diaNumero);
+      const diaSemanaNumero = dataDia.getDay();
+      const diaSemanaNome = DIAS_SEMANA[diaSemanaNumero];
       
       const trabalhandoHoje = [];
       const ausentesHoje = [];
@@ -836,6 +851,7 @@ function calcularDivisao() {
         
         resultados.push({
           dia: diaNumero,
+          diaSemana: diaSemanaNome,
           numPessoas: trabalhandoHoje.length,
           trabalhando: [...trabalhandoHoje],
           ausentes: [...ausentesHoje],
@@ -845,8 +861,10 @@ function calcularDivisao() {
     }
     
     if (resultados.length === 0) {
-      showToast('⚠️ Nenhum dia com pessoas trabalhando foi encontrado', 'warning');
-      return;
+      document.getElementById('emptyMessage').style.display = 'block';
+      showToast('⚠️ Nenhum dia com pessoas trabalhando encontrado', 'warning');
+    } else {
+      document.getElementById('emptyMessage').style.display = 'none';
     }
     
     resultadosGlobal = resultados;
@@ -858,170 +876,153 @@ function calcularDivisao() {
   }
 }
 
-function gerarPDF() {
-  if (!resultadosGlobal || resultadosGlobal.length === 0) {
-    showToast('❌ Nenhum resultado para exportar', 'danger');
+function exibirResultados(resultados) {
+  document.getElementById('uploadSection').style.display = 'none';
+  document.getElementById('resultsSection').style.display = 'block';
+  
+  const content = document.getElementById('resultContent');
+  content.innerHTML = '';
+  
+  if (resultados.length === 0) {
+    document.getElementById('emptyMessage').style.display = 'block';
     return;
   }
   
-  showLoading();
+  // Ordenar resultados por dia
+  resultados.sort((a, b) => a.dia - b.dia);
   
-  try {
-    const docDefinition = {
-      pageSize: 'A4',
-      pageOrientation: 'portrait',
-      pageMargins: [40, 60, 40, 60],
-      content: [
-        {
-          text: 'Portal de divisão de tarefas',
-          style: 'header',
-          alignment: 'center',
-          margin: [0, 0, 0, 20]
-        },
-        {
-          text: `Relatório gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
-          style: 'subheader',
-          alignment: 'center',
-          margin: [0, 0, 0, 30]
-        }
-      ],
-      styles: {
-        header: {
-          fontSize: 22,
-          bold: true,
-          color: '#2e7d32'
-        },
-        subheader: {
-          fontSize: 10,
-          color: '#666666',
-          italics: true
-        },
-        diaHeader: {
-          fontSize: 14,
-          bold: true,
-          color: '#2e7d32',
-          margin: [0, 15, 0, 10]
-        },
-        areaTitle: {
-          fontSize: 11,
-          bold: true,
-          color: '#1a1a1a',
-          margin: [0, 5, 0, 3]
-        },
-        funcionarioText: {
-          fontSize: 10,
-          color: '#333333',
-          margin: [15, 2, 0, 2]
-        },
-        statusHeader: {
-          fontSize: 11,
-          bold: true,
-          color: '#666666',
-          margin: [0, 10, 0, 5]
-        },
-        statusText: {
-          fontSize: 9,
-          color: '#555555',
-          margin: [10, 1, 0, 1]
-        },
-        divider: {
-          margin: [0, 10, 0, 10]
-        }
-      }
-    };
+  resultados.forEach((resultado, index) => {
+    const accordionItem = document.createElement('div');
+    accordionItem.className = 'accordion-item';
     
-    resultadosGlobal.forEach((resultado, index) => {
-      docDefinition.content.push({
-        text: `Dia ${resultado.dia} - ${resultado.numPessoas} pessoa(s) trabalhando`,
-        style: 'diaHeader'
+    const accordionHeader = document.createElement('h2');
+    accordionHeader.className = 'accordion-header';
+    
+    const accordionButton = document.createElement('button');
+    accordionButton.className = 'accordion-button collapsed';
+    accordionButton.type = 'button';
+    accordionButton.setAttribute('data-bs-toggle', 'collapse');
+    accordionButton.setAttribute('data-bs-target', `#collapse-${resultado.dia}`);
+    accordionButton.setAttribute('aria-expanded', 'false');
+    
+    // Cabeçalho compacto
+    accordionButton.innerHTML = `
+      <div class="day-header">
+        <span class="day-number">${resultado.dia}</span>
+        <span class="day-week">${resultado.diaSemana}</span>
+        <span class="badge-count">${resultado.numPessoas} trabalhando</span>
+        <div class="day-stats">
+          <button class="copy-btn" onclick="event.stopPropagation(); copiarDia(${index})">
+            <i class="bi bi-copy"></i> Copiar
+          </button>
+        </div>
+      </div>
+    `;
+    
+    const collapseDiv = document.createElement('div');
+    collapseDiv.id = `collapse-${resultado.dia}`;
+    collapseDiv.className = 'accordion-collapse collapse';
+    collapseDiv.setAttribute('data-bs-parent', '#daysAccordion');
+    
+    const accordionBody = document.createElement('div');
+    accordionBody.className = 'accordion-body';
+    
+    // Conteúdo compacto
+    let html = `
+      <div class="day-content">
+        <div class="area-section">
+          <div class="area-title">
+            <i class="bi bi-diagram-3"></i>
+            <span>Áreas</span>
+          </div>
+          <div class="area-grid">
+    `;
+    
+    if (Object.keys(resultado.divisao).length > 0) {
+      Object.entries(resultado.divisao).forEach(([area, pessoa]) => {
+        if (pessoa) {
+          html += `
+            <div class="area-item">
+              <span class="area-label">${area}</span>
+              <div class="funcionario-name" title="${pessoa}">${pessoa}</div>
+            </div>
+          `;
+        }
       });
-      
-      if (Object.keys(resultado.divisao).length > 0) {
-        docDefinition.content.push({
-          text: 'Divisão de áreas:',
-          style: 'statusHeader'
-        });
+    } else {
+      html += `<div class="text-muted small">Não foi possível fazer a divisão.</div>`;
+    }
+    
+    html += `
+          </div>
+        </div>
         
-        Object.entries(resultado.divisao).forEach(([area, pessoa]) => {
-          if (pessoa) {
-            docDefinition.content.push({
-              text: area,
-              style: 'areaTitle'
-            });
-            docDefinition.content.push({
-              text: `• ${pessoa}`,
-              style: 'funcionarioText'
-            });
-          }
-        });
-      }
-      
-      docDefinition.content.push({
-        text: 'Status da equipe:',
-        style: 'statusHeader',
-        margin: [0, 15, 0, 5]
-      });
-      
-      docDefinition.content.push({
-        text: `Trabalhando (${resultado.trabalhando.length}):`,
-        style: 'areaTitle'
-      });
-      
-      resultado.trabalhando.forEach(nome => {
-        docDefinition.content.push({
-          text: `✓ ${nome}`,
-          style: 'statusText',
-          color: '#4caf50'
-        });
-      });
-      
-      if (resultado.ausentes.length > 0) {
-        docDefinition.content.push({
-          text: `Ausentes (${resultado.ausentes.length}):`,
-          style: 'areaTitle',
-          margin: [0, 8, 0, 3]
-        });
-        
-        resultado.ausentes.forEach(({nome, motivo}) => {
-          docDefinition.content.push({
-            text: `✗ ${nome} (${motivo})`,
-            style: 'statusText',
-            color: '#f44336'
-          });
-        });
-      }
-      
-      if (index < resultadosGlobal.length - 1) {
-        docDefinition.content.push({
-          canvas: [
-            {
-              type: 'line',
-              x1: 0, y1: 0,
-              x2: 515, y2: 0,
-              lineWidth: 1,
-              lineColor: '#e0e0e0'
-            }
-          ],
-          style: 'divider'
-        });
-      }
+        <div class="status-section">
+          <div class="status-title">
+            <i class="bi bi-people"></i>
+            <span>Equipe</span>
+          </div>
+          
+          <div class="status-group">
+            <div class="status-group-title">Trabalhando (${resultado.trabalhando.length})</div>
+            <div class="status-list">
+    `;
+    
+    resultado.trabalhando.forEach(nome => {
+      html += `
+        <div class="status-item">
+          <span class="status-badge badge-presente">✓</span>
+          <span>${nome}</span>
+        </div>
+      `;
     });
     
-    docDefinition.content.push({
-      text: '\n\nDesenvolvido por: N6105010 e N5923221',
-      style: 'subheader',
-      alignment: 'center',
-      margin: [0, 30, 0, 0]
-    });
+    html += `
+            </div>
+          </div>
+    `;
     
-    pdfMake.createPdf(docDefinition).download(`divisao-tarefas-${new Date().toISOString().split('T')[0]}.pdf`);
-    showToast('✅ PDF exportado com sucesso!', 'success');
-  } catch (error) {
-    console.error('Erro ao gerar PDF:', error);
-    showToast('❌ Erro ao exportar PDF', 'danger');
-  } finally {
-    hideLoading();
-  }
+    if (resultado.ausentes.length > 0) {
+      html += `
+          <div class="status-group">
+            <div class="status-group-title">Ausentes (${resultado.ausentes.length})</div>
+            <div class="status-list">
+      `;
+      
+      resultado.ausentes.forEach(({nome, motivo}) => {
+        html += `
+          <div class="status-item">
+            <span class="status-badge badge-ausente">${motivo}</span>
+            <span>${nome}</span>
+          </div>
+        `;
+      });
+      
+      html += `</div></div>`;
+    }
+    
+    html += `
+        </div>
+      </div>
+    `;
+    
+    accordionBody.innerHTML = html;
+    collapseDiv.appendChild(accordionBody);
+    accordionHeader.appendChild(accordionButton);
+    accordionItem.appendChild(accordionHeader);
+    accordionItem.appendChild(collapseDiv);
+    content.appendChild(accordionItem);
+    
+    // Expandir primeiro item
+    if (index === 0) {
+      setTimeout(() => {
+        accordionButton.classList.remove('collapsed');
+        collapseDiv.classList.add('show');
+      }, 100);
+    }
+  });
+  
+  showToast('✅ Divisão calculada!', 'success');
 }
 
 function calcularDivisaoPorNumero(num, trabalhandoHoje) {
@@ -1063,144 +1064,6 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
   return divisao;
 }
 
-function exibirResultados(resultados) {
-  document.getElementById('uploadSection').style.display = 'none';
-  document.getElementById('resultsSection').style.display = 'block';
-  
-  const content = document.getElementById('resultContent');
-  content.innerHTML = '';
-  
-  resultados.forEach((resultado, index) => {
-    const diaSemana = DIAS_SEMANA[(resultado.dia + 6) % 7]; // Ajuste para começar na segunda
-    
-    const accordionItem = document.createElement('div');
-    accordionItem.className = 'accordion-item';
-    accordionItem.id = `day-${resultado.dia}`;
-    
-    const accordionHeader = document.createElement('h2');
-    accordionHeader.className = 'accordion-header';
-    
-    const accordionButton = document.createElement('button');
-    accordionButton.className = 'accordion-button collapsed';
-    accordionButton.type = 'button';
-    accordionButton.setAttribute('data-bs-toggle', 'collapse');
-    accordionButton.setAttribute('data-bs-target', `#collapse-${resultado.dia}`);
-    accordionButton.setAttribute('aria-expanded', 'false');
-    accordionButton.setAttribute('aria-controls', `collapse-${resultado.dia}`);
-    
-    // Cabeçalho do acordeão
-    accordionButton.innerHTML = `
-      <div class="day-header">
-        <div class="day-info">
-          <span class="day-number">${resultado.dia}</span>
-          <span class="day-week">${diaSemana}</span>
-          <span class="badge-count">${resultado.numPessoas} trabalhando</span>
-        </div>
-        <div class="action-buttons">
-          <button class="copy-btn" onclick="copiarDia(${index})" title="Copiar dados do dia">
-            <i class="bi bi-copy"></i> Copiar
-          </button>
-        </div>
-      </div>
-    `;
-    
-    const collapseDiv = document.createElement('div');
-    collapseDiv.id = `collapse-${resultado.dia}`;
-    collapseDiv.className = 'accordion-collapse collapse';
-    collapseDiv.setAttribute('data-bs-parent', '#daysAccordion');
-    
-    const accordionBody = document.createElement('div');
-    accordionBody.className = 'accordion-body';
-    
-    // Conteúdo do acordeão
-    let html = `
-      <div class="row">
-        <div class="col-md-8">
-          <div class="area-section">
-            <div class="area-title">
-              <i class="bi bi-diagram-3"></i>
-              <span>Divisão de Áreas</span>
-            </div>
-    `;
-    
-    if (Object.keys(resultado.divisao).length > 0) {
-      Object.entries(resultado.divisao).forEach(([area, pessoa]) => {
-        if (pessoa) {
-          html += `
-            <div class="mb-3">
-              <div class="area-badge mb-1">${area}</div>
-              <div class="funcionario-item">
-                <i class="bi bi-person-check me-2"></i>${pessoa}
-              </div>
-            </div>
-          `;
-        }
-      });
-    } else {
-      html += `<p class="text-muted small">Não foi possível fazer a divisão para este número de pessoas.</p>`;
-    }
-    
-    html += `
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="status-section">
-            <div class="status-title">
-              <i class="bi bi-people"></i>
-              <span>Status da Equipe</span>
-            </div>
-            <div class="status-list">
-              <div class="mb-2">
-                <small class="text-muted">Trabalhando (${resultado.trabalhando.length}):</small>
-                ${resultado.trabalhando.map(nome => `
-                  <div class="status-item">
-                    <span class="status-badge badge-presente">✓</span>
-                    <span>${nome}</span>
-                  </div>
-                `).join('')}
-              </div>
-    `;
-    
-    if (resultado.ausentes.length > 0) {
-      html += `
-              <div class="mt-3">
-                <small class="text-muted">Ausentes (${resultado.ausentes.length}):</small>
-                ${resultado.ausentes.map(({nome, motivo}) => `
-                  <div class="status-item">
-                    <span class="status-badge badge-ausente">${motivo}</span>
-                    <span>${nome}</span>
-                  </div>
-                `).join('')}
-              </div>
-      `;
-    }
-    
-    html += `
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    accordionBody.innerHTML = html;
-    collapseDiv.appendChild(accordionBody);
-    accordionHeader.appendChild(accordionButton);
-    accordionItem.appendChild(accordionHeader);
-    accordionItem.appendChild(collapseDiv);
-    content.appendChild(accordionItem);
-    
-    // Expandir automaticamente o primeiro item
-    if (index === 0) {
-      setTimeout(() => {
-        accordionButton.classList.remove('collapsed');
-        collapseDiv.classList.add('show');
-      }, 100);
-    }
-  });
-  
-  showToast('✅ Divisão calculada! Clique em cada dia para expandir.', 'success');
-}
-
 function copiarDia(index) {
   const resultado = resultadosGlobal[index];
   if (!resultado) return;
@@ -1208,30 +1071,28 @@ function copiarDia(index) {
   const texto = formatarParaCopiar(resultado);
   
   navigator.clipboard.writeText(texto).then(() => {
-    showToast('✅ Dados do dia copiados para a área de transferência!', 'success');
+    showToast('✅ Dados copiados!', 'success');
     
-    // Feedback visual no botão
     const btn = event.target.closest('.copy-btn');
     if (btn) {
       const originalHTML = btn.innerHTML;
       btn.classList.add('copied');
-      btn.innerHTML = '<i class="bi bi-check"></i> Copiado!';
+      btn.innerHTML = '<i class="bi bi-check"></i> OK';
       
       setTimeout(() => {
         btn.classList.remove('copied');
         btn.innerHTML = originalHTML;
-      }, 2000);
+      }, 1500);
     }
   }).catch(err => {
     console.error('Erro ao copiar:', err);
-    showToast('❌ Erro ao copiar dados', 'danger');
+    showToast('❌ Erro ao copiar', 'danger');
   });
 }
 
 function formatarParaCopiar(resultado) {
-  const diaSemana = DIAS_SEMANA[(resultado.dia + 6) % 7];
-  let texto = `DIA ${resultado.dia} (${diaSemana})\n`;
-  texto += `====================\n\n`;
+  let texto = `DIA ${resultado.dia} (${resultado.diaSemana})\n`;
+  texto += `================================\n\n`;
   
   texto += `TRABALHANDO (${resultado.numPessoas}):\n`;
   resultado.trabalhando.forEach((nome, i) => {
@@ -1244,14 +1105,156 @@ function formatarParaCopiar(resultado) {
   });
   
   if (resultado.ausentes.length > 0) {
-    texto += `\nAUSENTES (${resultado.ausentes.length}):\n`;
+    texto += `\nAUSENTES:\n`;
     resultado.ausentes.forEach(({nome, motivo}) => {
       texto += `${nome} (${motivo})\n`;
     });
   }
   
-  texto += `\n---\n`;
   return texto;
+}
+
+function gerarPDF() {
+  if (!resultadosGlobal || resultadosGlobal.length === 0) {
+    showToast('❌ Nenhum resultado para exportar', 'danger');
+    return;
+  }
+  
+  showLoading();
+  
+  try {
+    const docDefinition = {
+      pageSize: 'A4',
+      pageOrientation: 'portrait',
+      pageMargins: [30, 50, 30, 50],
+      content: [
+        {
+          text: 'Portal de divisão de tarefas',
+          style: 'header',
+          alignment: 'center',
+          margin: [0, 0, 0, 15]
+        },
+        {
+          text: `Mês: ${document.getElementById('mesSelect').options[mesSelecionado].text}/${anoSelecionado}`,
+          style: 'subheader',
+          alignment: 'center',
+          margin: [0, 0, 0, 25]
+        }
+      ],
+      styles: {
+        header: {
+          fontSize: 18,
+          bold: true,
+          color: '#2e7d32'
+        },
+        subheader: {
+          fontSize: 10,
+          color: '#666666'
+        },
+        diaHeader: {
+          fontSize: 12,
+          bold: true,
+          color: '#2e7d32',
+          margin: [0, 10, 0, 8]
+        },
+        areaTitle: {
+          fontSize: 9,
+          bold: true,
+          color: '#1a1a1a',
+          margin: [0, 5, 0, 3]
+        },
+        funcionarioText: {
+          fontSize: 9,
+          color: '#333333',
+          margin: [10, 1, 0, 1]
+        },
+        statusHeader: {
+          fontSize: 9,
+          bold: true,
+          color: '#666666',
+          margin: [0, 8, 0, 4]
+        },
+        statusText: {
+          fontSize: 8,
+          color: '#555555',
+          margin: [8, 0, 0, 0]
+        }
+      }
+    };
+    
+    resultadosGlobal.forEach((resultado, index) => {
+      docDefinition.content.push({
+        text: `Dia ${resultado.dia} (${resultado.diaSemana}) - ${resultado.numPessoas} pessoas`,
+        style: 'diaHeader'
+      });
+      
+      if (Object.keys(resultado.divisao).length > 0) {
+        docDefinition.content.push({
+          text: 'Divisão de áreas:',
+          style: 'statusHeader'
+        });
+        
+        Object.entries(resultado.divisao).forEach(([area, pessoa]) => {
+          if (pessoa) {
+            docDefinition.content.push({
+              text: `${area}: ${pessoa}`,
+              style: 'funcionarioText'
+            });
+          }
+        });
+      }
+      
+      docDefinition.content.push({
+        text: `Trabalhando (${resultado.trabalhando.length}):`,
+        style: 'statusHeader',
+        margin: [0, 10, 0, 4]
+      });
+      
+      resultado.trabalhando.forEach(nome => {
+        docDefinition.content.push({
+          text: `✓ ${nome}`,
+          style: 'statusText'
+        });
+      });
+      
+      if (resultado.ausentes.length > 0) {
+        docDefinition.content.push({
+          text: `Ausentes (${resultado.ausentes.length}):`,
+          style: 'statusHeader',
+          margin: [0, 8, 0, 4]
+        });
+        
+        resultado.ausentes.forEach(({nome, motivo}) => {
+          docDefinition.content.push({
+            text: `✗ ${nome} (${motivo})`,
+            style: 'statusText'
+          });
+        });
+      }
+      
+      if (index < resultadosGlobal.length - 1) {
+        docDefinition.content.push({
+          text: '',
+          margin: [0, 8, 0, 8]
+        });
+      }
+    });
+    
+    docDefinition.content.push({
+      text: '\n\nDesenvolvido por: N6105010 e N5923221',
+      style: 'subheader',
+      alignment: 'center',
+      margin: [0, 20, 0, 0]
+    });
+    
+    pdfMake.createPdf(docDefinition).download(`divisao-${mesSelecionado+1}-${anoSelecionado}.pdf`);
+    showToast('✅ PDF exportado!', 'success');
+  } catch (error) {
+    console.error('Erro ao gerar PDF:', error);
+    showToast('❌ Erro ao exportar PDF', 'danger');
+  } finally {
+    hideLoading();
+  }
 }
 
 function showLoading() {
@@ -1260,10 +1263,10 @@ function showLoading() {
   overlay.id = 'loadingOverlay';
   overlay.innerHTML = `
     <div class="text-center">
-      <div class="spinner-border text-primary" style="width: 2.5rem; height: 2.5rem;" role="status">
+      <div class="spinner-border text-primary" style="width: 2rem; height: 2rem;" role="status">
         <span class="visually-hidden">Carregando...</span>
       </div>
-      <p class="mt-3 text-muted fw-semibold">Processando planilha...</p>
+      <p class="mt-2 text-muted" style="font-size: 0.9rem;">Processando...</p>
     </div>
   `;
   document.body.appendChild(overlay);
@@ -1287,7 +1290,7 @@ function showToast(message, type = 'info') {
   
   toast.innerHTML = `
     <div class="d-flex">
-      <div class="toast-body">${message}</div>
+      <div class="toast-body" style="font-size: 0.9rem;">${message}</div>
       <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
     </div>
   `;
@@ -1295,7 +1298,7 @@ function showToast(message, type = 'info') {
   toastContainer.appendChild(toast);
   document.body.appendChild(toastContainer);
   
-  const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+  const bsToast = new bootstrap.Toast(toast, { delay: 2000 });
   bsToast.show();
 }
 </script>
