@@ -413,35 +413,69 @@ function processarArquivo(file) {
   showLoading();
   const reader = new FileReader();
   
-  reader.onload = e => {
+  reader.onload = function(e) {
     try {
       const data = new Uint8Array(e.target.result);
       const wb = XLSX.read(data, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
       
-      // Converter para JSON mantendo cabeçalhos originais
-      const jsonData = XLSX.utils.sheet_to_json(ws, { raw: false, defval: '' });
+      // Ler como array de arrays primeiro
+      const rawData = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
       
-      if (!jsonData || jsonData.length === 0) {
-        showToast('❌ Planilha vazia ou sem dados', 'danger');
+      console.log('Raw Data:', rawData);
+      
+      if (!rawData || rawData.length === 0) {
+        showToast('❌ Planilha vazia', 'danger');
         hideLoading();
         return;
       }
       
-      dadosPlanilha = jsonData;
+      // Primeira linha é o cabeçalho
+      const headers = rawData[0];
+      console.log('Headers:', headers);
       
-      console.log('Dados carregados:', dadosPlanilha);
-      console.log('Primeira linha:', dadosPlanilha[0]);
-      console.log('Colunas encontradas:', Object.keys(dadosPlanilha[0]));
+      // Converter para objetos
+      const dados = [];
+      for (let i = 1; i < rawData.length; i++) {
+        const row = rawData[i];
+        if (!row || row.length === 0) continue;
+        
+        const obj = {};
+        for (let j = 0; j < headers.length; j++) {
+          obj[headers[j]] = row[j] || '';
+        }
+        
+        // Só adicionar se tiver nome
+        if (obj[headers[0]] && String(obj[headers[0]]).trim() !== '') {
+          dados.push(obj);
+        }
+      }
       
-      calcularDivisao();
-      hideLoading();
+      console.log('Dados processados:', dados);
+      
+      if (dados.length === 0) {
+        showToast('❌ Nenhum dado válido encontrado', 'danger');
+        hideLoading();
+        return;
+      }
+      
+      dadosPlanilha = dados;
+      
+      setTimeout(() => {
+        calcularDivisao();
+        hideLoading();
+      }, 100);
       
     } catch (err) {
       console.error('Erro ao processar:', err);
-      showToast('❌ Erro ao processar planilha: ' + err.message, 'danger');
+      showToast('❌ Erro: ' + err.message, 'danger');
       hideLoading();
     }
+  };
+  
+  reader.onerror = function() {
+    showToast('❌ Erro ao ler arquivo', 'danger');
+    hideLoading();
   };
   
   reader.readAsArrayBuffer(file);
