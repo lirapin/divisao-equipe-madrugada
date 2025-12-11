@@ -1250,23 +1250,38 @@ const PRIORIDADES = {
   }
 };
 
-// CONFIGURAÇÕES DE NUVEM - BIN COMPARTILHADO ENTRE TODOS OS USUÁRIOS
+// ============================================
+// CONFIGURAÇÕES DE NUVEM
+// ============================================
+// IMPORTANTE: Este BIN_ID deve ser atualizado quando um novo bin for criado
+// Para criar um novo bin, acesse como admin e use o botão "Gerenciar Armazenamento"
+
 const JSONBIN_CONFIG = {
-  // BIN ÚNICO COMPARTILHADO - TODOS OS USUÁRIOS USAM ESTE ID
-  // Se o bin não existir, será criado automaticamente
-  BIN_ID_PADRAO: "67acf6e1ad19ca34f89c1f2c",
+  // ⚠️ BIN_ID PRINCIPAL - Todos os usuários usam este ID
+  // Se precisar criar um novo, atualize este valor e faça commit
+  BIN_ID: null, // SERÁ CRIADO AUTOMATICAMENTE NO PRIMEIRO USO
+
+  // Credenciais de acesso
   MASTER_KEY: '$2a$10$dQyAV006kSDh2CvPh8cBCu2yspqnkCb4Dpm.A7wby6q.tZAKQHNce',
   ACCESS_KEY: '$2a$10$RB4c6LvHvrsrqm.UL24v4O32NX2kguwwrOx1VMKJC2y0/5ZZmX5TG',
-  API_URL: 'https://api.jsonbin.io/v3/b',
-  // Função para obter o BIN_ID atual (prioriza localStorage para sincronizar entre usuários)
-  get BIN_ID() {
-    return localStorage.getItem('jsonbin_id_atual') || this.BIN_ID_PADRAO;
-  },
-  set BIN_ID(novoId) {
-    localStorage.setItem('jsonbin_id_atual', novoId);
-    console.log('📝 Novo BIN_ID salvo:', novoId);
-  }
+  API_URL: 'https://api.jsonbin.io/v3/b'
 };
+
+// Função para obter o BIN_ID (prioriza código, depois localStorage)
+function obterBinId() {
+  // Prioridade 1: ID fixo no código (mais confiável)
+  if (JSONBIN_CONFIG.BIN_ID) {
+    return JSONBIN_CONFIG.BIN_ID;
+  }
+  // Prioridade 2: ID salvo localmente (fallback)
+  return localStorage.getItem('escala_bin_id');
+}
+
+// Função para salvar o BIN_ID
+function salvarBinId(novoId) {
+  localStorage.setItem('escala_bin_id', novoId);
+  console.log('📝 BIN_ID salvo localmente:', novoId);
+}
 
 // Mapeamento de dias da semana
 const DIAS_SEMANA = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'];
@@ -1296,6 +1311,33 @@ let trocasRegistradas = [];
 // SISTEMA DE SALVAMENTO NA NUVEM - REESCRITO
 // ============================================
 
+// Função para exibir instruções quando um novo BIN_ID é criado
+function exibirInstrucoesBinId(novoBinId) {
+  // Copiar para área de transferência
+  navigator.clipboard.writeText(novoBinId).catch(() => {});
+
+  const mensagem = `
+✅ NOVO ARMAZENAMENTO CRIADO!
+
+📌 BIN_ID: ${novoBinId}
+
+⚠️ IMPORTANTE - Para que TODOS os usuários acessem os dados:
+
+1. O ID foi copiado para sua área de transferência
+2. Acesse o repositório GitHub do projeto
+3. Edite o arquivo index.html
+4. Encontre a linha: BIN_ID: null
+5. Altere para: BIN_ID: "${novoBinId}"
+6. Faça commit e aguarde o deploy
+
+Enquanto isso, apenas você e usuários que inserirem
+este ID manualmente poderão acessar os dados.
+  `.trim();
+
+  alert(mensagem);
+  console.log('📋 Instruções exibidas para atualizar BIN_ID:', novoBinId);
+}
+
 // Função para criar um novo bin no JSONBin.io
 async function criarNovoBin(dadosIniciais) {
   console.log('🆕 CRIANDO NOVO BIN NO JSONBIN...');
@@ -1322,12 +1364,8 @@ async function criarNovoBin(dadosIniciais) {
       console.log('✅ NOVO BIN CRIADO COM SUCESSO!');
       console.log('📌 Novo BIN_ID:', novoBinId);
 
-      // Salvar o novo ID para uso futuro
-      JSONBIN_CONFIG.BIN_ID = novoBinId;
-
-      // Também salvar em localStorage com chave específica para sincronização
-      localStorage.setItem('jsonbin_id_atual', novoBinId);
-      localStorage.setItem('jsonbin_criado_em', new Date().toISOString());
+      // Salvar o novo ID localmente
+      salvarBinId(novoBinId);
 
       showToast(`✅ Novo armazenamento criado! ID: ${novoBinId}`, 'success');
 
@@ -1361,7 +1399,10 @@ async function verificarBinExiste(binId) {
 
 async function salvarDadosNaNuvem() {
   console.log('🔵 INICIANDO SALVAMENTO NA NUVEM...');
-  console.log('📌 Usando BIN compartilhado:', JSONBIN_CONFIG.BIN_ID);
+
+  let binId = obterBinId();
+  console.log('📌 BIN_ID atual:', binId || 'Nenhum (será criado)');
+
   showLoading();
 
   try {
@@ -1389,11 +1430,33 @@ async function salvarDadosNaNuvem() {
       totalTrocas: trocasRegistradas.length
     });
 
-    // 2. Salvar no BIN compartilhado
-    const resultado = await tentarSalvarNoBin(JSONBIN_CONFIG.BIN_ID, dadosParaSalvar);
+    // 2. Se não houver BIN_ID, criar um novo (apenas admin)
+    if (!binId) {
+      if (!isAdmin) {
+        throw new Error('Nenhum armazenamento configurado. Aguarde o admin fazer o primeiro upload.');
+      }
+      console.log('🆕 Nenhum BIN_ID encontrado. Criando novo...');
+      const novoBin = await criarNovoBin(dadosParaSalvar);
+      if (novoBin.success) {
+        salvarBinId(novoBin.binId);
+        exibirInstrucoesBinId(novoBin.binId);
+        hideLoading();
+        return novoBin.result;
+      }
+      throw new Error('Falha ao criar novo armazenamento');
+    }
+
+    // 3. Salvar no BIN existente
+    const resultado = await tentarSalvarNoBin(binId, dadosParaSalvar);
 
     if (resultado && resultado.metadata) {
-      console.log('✅ SALVO COM SUCESSO na nuvem! Bin:', JSONBIN_CONFIG.BIN_ID);
+      // Verificar se o ID mudou (novo bin criado)
+      const novoId = resultado.metadata.id;
+      if (novoId && novoId !== binId) {
+        salvarBinId(novoId);
+        exibirInstrucoesBinId(novoId);
+      }
+      console.log('✅ SALVO COM SUCESSO na nuvem! Bin:', novoId || binId);
 
       // Salvar backup local também (para fallback)
       localStorage.setItem('escala_backup', JSON.stringify(dadosParaSalvar));
@@ -1492,17 +1555,32 @@ async function tentarSalvarNoBin(binId, dados, tentarCriarNovo = true) {
 
 async function carregarDadosDaNuvem() {
   console.log('🔵 INICIANDO CARREGAMENTO DA NUVEM...');
-  console.log('📌 Usando BIN compartilhado:', JSONBIN_CONFIG.BIN_ID);
+
+  const binId = obterBinId();
+  console.log('📌 BIN_ID para carregar:', binId || 'Nenhum configurado');
+
+  // Se não houver BIN_ID, mostrar mensagem apropriada
+  if (!binId) {
+    console.warn('⚠️ Nenhum BIN_ID configurado');
+    if (isAdmin) {
+      showToast('📭 Nenhum armazenamento configurado. Faça upload de uma planilha para criar.', 'warning');
+    } else {
+      showToast('📭 Sistema não configurado. Aguarde o admin fazer o primeiro upload.', 'info');
+    }
+    hideLoading();
+    return false;
+  }
+
   showLoading();
 
   try {
-    // Fazer requisição com timeout para o BIN compartilhado
+    // Fazer requisição com timeout para o BIN
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
 
-    console.log('🔄 Carregando do Bin compartilhado:', JSONBIN_CONFIG.BIN_ID);
+    console.log('🔄 Carregando do Bin:', binId);
 
-    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}/latest`, {
+    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${binId}/latest`, {
       headers: {
         'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
         'X-Access-Key': JSONBIN_CONFIG.ACCESS_KEY
@@ -1868,15 +1946,22 @@ async function testarConexaoNuvem() {
     return;
   }
 
+  const binId = obterBinId();
+
   console.log('🔍 TESTANDO CONEXÃO COM A NUVEM...');
-  console.log('📌 BIN ID:', JSONBIN_CONFIG.BIN_ID);
+  console.log('📌 BIN ID:', binId || 'Nenhum configurado');
   console.log('🔑 Master Key:', JSONBIN_CONFIG.MASTER_KEY.substring(0, 20) + '...');
   console.log('🔑 Access Key:', JSONBIN_CONFIG.ACCESS_KEY.substring(0, 20) + '...');
+
+  if (!binId) {
+    alert('⚠️ Nenhum armazenamento configurado!\n\nFaça upload de uma planilha para criar o armazenamento automaticamente.');
+    return;
+  }
 
   showLoading();
 
   try {
-    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}/latest`, {
+    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${binId}/latest`, {
       headers: {
         'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
         'X-Access-Key': JSONBIN_CONFIG.ACCESS_KEY
@@ -1937,7 +2022,32 @@ async function excluirPlanilha() {
     return;
   }
 
+  const binId = obterBinId();
   console.log('🗑️ EXCLUINDO PLANILHA DA NUVEM...');
+  console.log('📌 BIN_ID:', binId || 'Nenhum');
+
+  // Função auxiliar para limpar dados locais
+  const limparDadosLocais = () => {
+    // Limpar localStorage
+    localStorage.removeItem('escala_backup');
+    localStorage.removeItem('escala_ultimo_salvamento');
+    localStorage.removeItem('escala_bin_id');
+
+    // Limpar variáveis globais
+    dadosPlanilha = [];
+    dadosOriginais = {};
+    dadosProcessados = {};
+    trocasRegistradas = [];
+  };
+
+  // Se não há BIN_ID, apenas limpar dados locais
+  if (!binId) {
+    limparDadosLocais();
+    showToast('✅ Dados locais limpos!', 'success');
+    setTimeout(() => location.reload(), 1500);
+    return;
+  }
+
   showLoading();
 
   try {
@@ -1956,7 +2066,7 @@ async function excluirPlanilha() {
       }
     };
 
-    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}`, {
+    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${binId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -1968,20 +2078,6 @@ async function excluirPlanilha() {
     });
 
     console.log('📡 Status da exclusão:', response.status);
-
-    // Função auxiliar para limpar dados locais
-    const limparDadosLocais = () => {
-      // Limpar localStorage
-      localStorage.removeItem('escala_backup');
-      localStorage.removeItem('escala_ultimo_salvamento');
-      localStorage.removeItem('jsonbin_id_atual');
-
-      // Limpar variáveis globais
-      dadosPlanilha = [];
-      dadosOriginais = {};
-      dadosProcessados = {};
-      trocasRegistradas = [];
-    };
 
     if (response.ok) {
       console.log('✅ Planilha excluída da nuvem');
@@ -2022,13 +2118,15 @@ function gerenciarArmazenamento() {
     return;
   }
 
-  const binIdAtual = JSONBIN_CONFIG.BIN_ID || 'Nenhum configurado';
-  const binIdLocal = localStorage.getItem('jsonbin_id_atual') || 'Não definido localmente';
+  const binIdAtual = obterBinId() || 'Nenhum configurado';
+  const binIdCodigo = JSONBIN_CONFIG.BIN_ID ? 'Configurado no código' : 'Não definido no código';
+  const binIdLocal = localStorage.getItem('escala_bin_id') || 'Não salvo localmente';
 
   const opcao = prompt(
     `🗄️ GERENCIAMENTO DE ARMAZENAMENTO NA NUVEM\n\n` +
-    `📌 BIN_ID Atual: ${binIdAtual}\n` +
-    `💾 BIN_ID Local: ${binIdLocal}\n\n` +
+    `📌 BIN_ID em uso: ${binIdAtual}\n` +
+    `📝 No código: ${binIdCodigo}\n` +
+    `💾 Local: ${binIdLocal}\n\n` +
     `Opções:\n` +
     `1 - Criar novo armazenamento (novo bin)\n` +
     `2 - Usar BIN_ID específico\n` +
@@ -2046,14 +2144,14 @@ function gerenciarArmazenamento() {
     case '2':
       const novoBinId = prompt('Digite o BIN_ID para usar:');
       if (novoBinId && novoBinId.trim()) {
-        JSONBIN_CONFIG.BIN_ID = novoBinId.trim();
+        salvarBinId(novoBinId.trim());
         showToast(`✅ BIN_ID alterado para: ${novoBinId.trim()}`, 'success');
         setTimeout(() => location.reload(), 1500);
       }
       break;
     case '3':
-      localStorage.removeItem('jsonbin_id_atual');
-      localStorage.removeItem('jsonbin_criado_em');
+      localStorage.removeItem('escala_bin_id');
+      localStorage.removeItem('escala_backup');
       showToast('✅ Configuração local limpa!', 'success');
       setTimeout(() => location.reload(), 1500);
       break;
@@ -2061,9 +2159,9 @@ function gerenciarArmazenamento() {
       if (binIdAtual && binIdAtual !== 'Nenhum configurado') {
         navigator.clipboard.writeText(binIdAtual).then(() => {
           showToast(`✅ BIN_ID copiado: ${binIdAtual}`, 'success');
-          alert(`BIN_ID copiado para a área de transferência:\n\n${binIdAtual}\n\nCompartilhe este ID com outros usuários ou atualize o código-fonte.`);
+          alert(`BIN_ID copiado para a área de transferência:\n\n${binIdAtual}\n\n⚠️ IMPORTANTE: Para que TODOS os usuários acessem os dados:\n1. Edite index.html no GitHub\n2. Altere a linha: BIN_ID: null\n3. Para: BIN_ID: "${binIdAtual}"\n4. Faça commit e aguarde deploy`);
         }).catch(() => {
-          alert(`BIN_ID atual:\n\n${binIdAtual}\n\nCopie manualmente e compartilhe com outros usuários.`);
+          alert(`BIN_ID atual:\n\n${binIdAtual}\n\nCopie manualmente e atualize o código-fonte.`);
         });
       } else {
         showToast('❌ Nenhum BIN_ID configurado', 'warning');
@@ -2133,7 +2231,7 @@ async function criarNovoArmazenamento() {
 
 // Função para usuários configurarem o BIN_ID (quando receberem do admin)
 function configurarBinIdUsuario() {
-  const binIdAtual = JSONBIN_CONFIG.BIN_ID || 'Nenhum configurado';
+  const binIdAtual = obterBinId() || 'Nenhum configurado';
 
   const novoBinId = prompt(
     `☁️ CONFIGURAR ARMAZENAMENTO\n\n` +
@@ -2148,7 +2246,7 @@ function configurarBinIdUsuario() {
 
     // Validar formato básico (24 caracteres hexadecimais)
     if (idLimpo.length >= 20 && /^[a-f0-9]+$/i.test(idLimpo)) {
-      JSONBIN_CONFIG.BIN_ID = idLimpo;
+      salvarBinId(idLimpo);
       showToast(`✅ BIN_ID configurado! Recarregando...`, 'success');
       setTimeout(() => location.reload(), 1500);
     } else {
