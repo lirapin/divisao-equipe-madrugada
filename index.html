@@ -1134,21 +1134,14 @@
           <h6 class="text-center mb-3">
             <i class="bi bi-shield-lock me-2"></i>Acesso Administrativo
           </h6>
-          <p class="small text-muted text-center mb-3">
-            Digite o PIN para modificar a escala
-          </p>
           
           <div class="mb-3">
-            <label class="pin-label">PIN de administrador:</label>
+            <label class="pin-label">PIN:</label>
             <input type="password" 
                    class="form-control form-control-lg text-center" 
                    id="pinInput" 
-                   placeholder="Digite o PIN"
+                   placeholder=""
                    autocomplete="off">
-            <div class="form-text text-center mt-1">
-              <i class="bi bi-info-circle me-1"></i>
-              Use o PIN para fazer upload e alterações
-            </div>
           </div>
           
           <div id="pinError" class="alert alert-danger py-2 small" style="display: none;">
@@ -1205,12 +1198,22 @@ const PRIORIDADES = {
   }
 };
 
-// Configuração do JSONBin.io - COM ID REAL
+// NOVAS CONFIGURAÇÕES - SISTEMA ROBUSTO DE SALVAMENTO
 const JSONBIN_CONFIG = {
-  BIN_ID: JSONBIN_ESCALA_ID,
+  // TENTAMOS PRIMEIRO COM O BIN ORIGINAL
+  BIN_ID_ORIGINAL: "67acf6e1ad19ca34f89c1f2c",
+  // SE FALHAR, CRIAMOS UM NOVO
+  BIN_ID_NOVO: null,
   MASTER_KEY: '$2a$10$dQyAV006kSDh2CvPh8cBCu2yspqnkCb4Dpm.A7wby6q.tZAKQHNce',
+  ACCESS_KEY: '$2a$10$RB4c6LvHvrsrqm.UL24v4O32NX2kguwwrOx1VMKJC2y0/5ZZmX5TG',
   API_URL: 'https://api.jsonbin.io/v3/b'
 };
+
+// Verificar se já temos um ID de bin salvo
+const binIdSalvo = localStorage.getItem('escala_bin_id');
+if (binIdSalvo) {
+  JSONBIN_CONFIG.BIN_ID_NOVO = binIdSalvo;
+}
 
 // Mapeamento de dias da semana
 const DIAS_SEMANA = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'];
@@ -1235,6 +1238,274 @@ let selecaoTroca = {
   segundo: { dia: null, pessoa: null }
 };
 let trocasRegistradas = [];
+
+// ============================================
+// SISTEMA DE SALVAMENTO NA NUVEM - REESCRITO
+// ============================================
+
+async function salvarDadosNaNuvem() {
+  console.log('🔵 INICIANDO SALVAMENTO NA NUVEM...');
+  showLoading();
+  
+  try {
+    // 1. Preparar dados
+    const dadosParaSalvar = {
+      escala_id: 'portal_escala_v2',
+      mes: mesSelecionado,
+      ano: anoSelecionado,
+      ultima_atualizacao: new Date().toISOString(),
+      dadosOriginais: dadosOriginais || {},
+      trocas: trocasRegistradas || [],
+      dadosPlanilha: dadosPlanilha || [],
+      metadata: {
+        criado_em: new Date().toISOString(),
+        versao: '2.0',
+        total_dias: Object.keys(dadosOriginais).length
+      }
+    };
+    
+    console.log('📦 Dados preparados:', dadosParaSalvar);
+    
+    // 2. TENTATIVA 1: Usar bin existente
+    let resultado = null;
+    
+    // Primeiro, tentamos com o BIN ID que está funcionando
+    const binIdAtual = JSONBIN_CONFIG.BIN_ID_NOVO || JSONBIN_CONFIG.BIN_ID_ORIGINAL;
+    console.log('🔄 Tentando salvar no Bin ID:', binIdAtual);
+    
+    resultado = await tentarSalvarNoBin(binIdAtual, dadosParaSalvar);
+    
+    if (resultado && resultado.metadata && resultado.metadata.id) {
+      console.log('✅ SALVO COM SUCESSO no Bin:', resultado.metadata.id);
+      
+      // Salvar este ID para uso futuro
+      if (resultado.metadata.id !== binIdAtual) {
+        JSONBIN_CONFIG.BIN_ID_NOVO = resultado.metadata.id;
+        localStorage.setItem('escala_bin_id', resultado.metadata.id);
+        console.log('💾 Novo Bin ID salvo no localStorage:', resultado.metadata.id);
+      }
+      
+      // Salvar backup local também
+      localStorage.setItem('escala_backup', JSON.stringify(dadosParaSalvar));
+      localStorage.setItem('escala_ultimo_salvamento', new Date().toISOString());
+      
+      hideLoading();
+      showToast('✅ Escala salva na nuvem com sucesso!', 'success');
+      return resultado;
+    }
+    
+    // 3. TENTATIVA 2: Criar novo bin
+    console.log('🆕 Tentando criar novo Bin...');
+    const novoBinId = await criarNovoBin(dadosParaSalvar);
+    
+    if (novoBinId) {
+      // Salvar novo ID
+      JSONBIN_CONFIG.BIN_ID_NOVO = novoBinId;
+      localStorage.setItem('escala_bin_id', novoBinId);
+      
+      // Salvar backup local
+      localStorage.setItem('escala_backup', JSON.stringify(dadosParaSalvar));
+      localStorage.setItem('escala_ultimo_salvamento', new Date().toISOString());
+      
+      hideLoading();
+      showToast('✅ Nova escala criada e salva na nuvem!', 'success');
+      return { metadata: { id: novoBinId } };
+    }
+    
+    // 4. SE TUDO FALHAR: Salvar apenas localmente
+    throw new Error('Todas as tentativas de nuvem falharam');
+    
+  } catch (error) {
+    console.error('❌ ERRO CRÍTICO no salvamento:', error);
+    
+    // SALVAMENTO LOCAL DE EMERGÊNCIA
+    try {
+      const dadosParaSalvar = {
+        escala_id: 'local_emergency',
+        mes: mesSelecionado,
+        ano: anoSelecionado,
+        ultima_atualizacao: new Date().toISOString(),
+        dadosOriginais: dadosOriginais || {},
+        trocas: trocasRegistradas || [],
+        dadosPlanilha: dadosPlanilha || []
+      };
+      
+      localStorage.setItem('escala_backup', JSON.stringify(dadosParaSalvar));
+      localStorage.setItem('escala_ultimo_salvamento', new Date().toISOString());
+      
+      showToast('⚠️ Salvo localmente (nuvem indisponível)', 'warning');
+    } catch (fallbackError) {
+      console.error('❌ FALHA TOTAL no salvamento:', fallbackError);
+      showToast('💥 ERRO: Não foi possível salvar os dados!', 'danger');
+    }
+  } finally {
+    hideLoading();
+  }
+}
+
+async function tentarSalvarNoBin(binId, dados) {
+  try {
+    console.log(`🔄 Tentando PUT no Bin ${binId}...`);
+    
+    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${binId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
+        'X-Bin-Name': `Escala ${MESES[mesSelecionado]} ${anoSelecionado}`,
+        'X-Access-Key': JSONBIN_CONFIG.ACCESS_KEY
+      },
+      body: JSON.stringify(dados)
+    });
+    
+    console.log('📡 Resposta da API:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Erro ${response.status}:`, errorText);
+      
+      // Se for 404 (não encontrado) ou 403 (proibido), retornamos null para tentar criar novo
+      if (response.status === 404 || response.status === 403) {
+        console.log(`⚠️ Bin ${binId} não encontrado ou sem acesso`);
+        return null;
+      }
+      
+      throw new Error(`JSONBin Error ${response.status}: ${errorText}`);
+    }
+    
+    const result = await response.json();
+    console.log('✅ Salvamento bem-sucedido:', result.metadata);
+    return result;
+    
+  } catch (error) {
+    console.error(`❌ Falha no salvamento do Bin ${binId}:`, error);
+    return null;
+  }
+}
+
+async function criarNovoBin(dados) {
+  try {
+    console.log('🚀 Criando NOVO Bin...');
+    
+    const response = await fetch(JSONBIN_CONFIG.API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
+        'X-Bin-Name': `Escala ${MESES[mesSelecionado]} ${anoSelecionado}`,
+        'X-Access-Key': JSONBIN_CONFIG.ACCESS_KEY
+      },
+      body: JSON.stringify(dados)
+    });
+    
+    console.log('📡 Resposta da criação:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Falha ao criar bin: ${response.status} - ${errorText}`);
+    }
+    
+    const result = await response.json();
+    const novoBinId = result.metadata.id;
+    
+    console.log('🎉 NOVO BIN CRIADO COM SUCESSO! ID:', novoBinId);
+    return novoBinId;
+    
+  } catch (error) {
+    console.error('❌ Falha ao criar novo bin:', error);
+    return null;
+  }
+}
+
+async function carregarDadosDaNuvem() {
+  console.log('🔵 INICIANDO CARREGAMENTO DA NUVEM...');
+  showLoading();
+  
+  try {
+    // 1. Tentar carregar do ID salvo
+    const binIdAtual = JSONBIN_CONFIG.BIN_ID_NOVO || JSONBIN_CONFIG.BIN_ID_ORIGINAL;
+    console.log('🔄 Tentando carregar do Bin:', binIdAtual);
+    
+    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${binIdAtual}/latest`, {
+      headers: {
+        'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
+        'X-Access-Key': JSONBIN_CONFIG.ACCESS_KEY
+      }
+    });
+    
+    console.log('📡 Status da resposta:', response.status);
+    
+    if (response.ok) {
+      const result = await response.json();
+      const dados = result.record;
+      
+      console.log('📦 Dados carregados:', dados);
+      
+      if (dados && dados.dadosOriginais) {
+        processarDadosCarregados(dados);
+        hideLoading();
+        showToast('✅ Escala carregada da nuvem!', 'success');
+        return;
+      }
+    }
+    
+    // 2. Se falhar, tentar do backup local
+    console.log('🔄 Tentando carregar do backup local...');
+    carregarDoBackupLocal();
+    
+  } catch (error) {
+    console.error('❌ Erro ao carregar da nuvem:', error);
+    carregarDoBackupLocal();
+  }
+}
+
+function carregarDoBackupLocal() {
+  try {
+    const dadosSalvos = localStorage.getItem('escala_backup');
+    if (dadosSalvos) {
+      const dados = JSON.parse(dadosSalvos);
+      processarDadosCarregados(dados);
+      showToast('📁 Escala carregada do backup local', 'info');
+    } else {
+      showToast('📭 Nenhuma escala encontrada', 'warning');
+    }
+  } catch (error) {
+    console.error('❌ Erro no backup local:', error);
+    showToast('💥 Erro ao carregar dados', 'danger');
+  } finally {
+    hideLoading();
+  }
+}
+
+function processarDadosCarregados(dados) {
+  dadosPlanilha = dados.dadosPlanilha || [];
+  mesSelecionado = dados.mes !== undefined ? dados.mes : new Date().getMonth();
+  anoSelecionado = dados.ano || new Date().getFullYear();
+  dadosOriginais = dados.dadosOriginais || {};
+  trocasRegistradas = dados.trocas || [];
+  
+  // Atualizar selects
+  const mesSelect = document.getElementById('mesSelect');
+  const anoSelect = document.getElementById('anoSelect');
+  
+  if (mesSelect) mesSelect.value = mesSelecionado;
+  if (anoSelect) anoSelect.value = anoSelecionado;
+  
+  dadosProcessados = JSON.parse(JSON.stringify(dadosOriginais));
+  aplicarTrocasAosDados();
+  
+  // Mostrar calendário
+  const calendarSection = document.getElementById('calendarSection');
+  const configAccordion = document.getElementById('configAccordion');
+  const emptyMessage = document.getElementById('emptyMessage');
+  
+  if (calendarSection) calendarSection.style.display = 'block';
+  if (configAccordion) configAccordion.style.display = 'block';
+  if (emptyMessage) emptyMessage.style.display = 'none';
+  
+  atualizarCalendario();
+  atualizarPainelTrocas();
+}
 
 // ============================================
 // SISTEMA DE AUTENTICAÇÃO
@@ -1312,10 +1583,10 @@ function verificarAutenticacao() {
     mostrarModalLogin();
   } else if (auth === 'admin') {
     iniciarComoAdmin();
-    carregarDadosDoJSONBin();
+    carregarDadosDaNuvem();
   } else if (auth === 'viewer') {
     iniciarComoVisualizador();
-    carregarDadosDoJSONBin();
+    carregarDadosDaNuvem();
   } else {
     setTimeout(() => {
       mostrarModalLogin();
@@ -1359,7 +1630,7 @@ function verificarPin() {
     
     // Iniciar como admin
     iniciarComoAdmin();
-    carregarDadosDoJSONBin();
+    carregarDadosDaNuvem();
     
     showToast('✅ Acesso administrativo concedido!', 'success');
   } else {
@@ -1387,7 +1658,7 @@ function entrarComoVisualizador() {
   
   // Iniciar como visualizador
   iniciarComoVisualizador();
-  carregarDadosDoJSONBin();
+  carregarDadosDaNuvem();
   
   showToast('🔍 Modo de visualização ativado', 'info');
 }
@@ -1432,193 +1703,6 @@ function logoutAdmin() {
     localStorage.removeItem('escala_auth');
     localStorage.removeItem('escala_auth_expiry');
     location.reload();
-  }
-}
-
-// ============================================
-// SISTEMA DE ARMAZENAMENTO CENTRALIZADO - CORRIGIDO
-// ============================================
-
-async function salvarNoJSONBin() {
-  showLoading();
-  
-  try {
-    // Preparar dados para salvar (estrutura simplificada)
-    const dadosParaSalvar = {
-      escala_id: JSONBIN_ESCALA_ID,
-      mes: mesSelecionado,
-      ano: anoSelecionado,
-      ultima_atualizacao: new Date().toISOString(),
-      dadosOriginais: dadosOriginais || {},
-      trocas: trocasRegistradas || [],
-      dadosPlanilha: dadosPlanilha || []
-    };
-    
-    console.log('Salvando no JSONBin:', dadosParaSalvar);
-    
-    // Usar PUT para atualizar (não POST)
-    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
-        'X-Bin-Name': `Escala ${MESES[mesSelecionado]} ${anoSelecionado}`
-      },
-      body: JSON.stringify(dadosParaSalvar)
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`JSONBin Error ${response.status}: ${errorText}`);
-    }
-    
-    const result = await response.json();
-    console.log('Salvo com sucesso:', result);
-    
-    // Também salvar localmente para referência
-    localStorage.setItem('escala_backup', JSON.stringify(dadosParaSalvar));
-    
-    showToast('✅ Dados salvos na nuvem com sucesso!', 'success');
-    return result;
-    
-  } catch (error) {
-    console.error('Erro ao salvar no JSONBin:', error);
-    
-    // Tentar salvar localmente como backup
-    try {
-      const dadosParaSalvar = {
-        escala_id: JSONBIN_ESCALA_ID,
-        mes: mesSelecionado,
-        ano: anoSelecionado,
-        ultima_atualizacao: new Date().toISOString(),
-        dadosOriginais: dadosOriginais || {},
-        trocas: trocasRegistradas || [],
-        dadosPlanilha: dadosPlanilha || []
-      };
-      
-      localStorage.setItem('escala_backup', JSON.stringify(dadosParaSalvar));
-      showToast('⚠️ Salvo localmente (problema com nuvem)', 'warning');
-    } catch (fallbackError) {
-      console.error('Erro no fallback:', fallbackError);
-      showToast('❌ Erro ao salvar dados', 'danger');
-    }
-    
-    throw error;
-  } finally {
-    hideLoading();
-  }
-}
-
-async function carregarDadosDoJSONBin() {
-  showLoading();
-  
-  try {
-    console.log('Carregando do JSONBin...');
-    
-    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}/latest`, {
-      headers: {
-        'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY
-      }
-    });
-    
-    if (response.status === 404) {
-      console.log('Nenhuma escala encontrada na nuvem');
-      hideLoading();
-      showToast('📁 Nenhuma escala encontrada na nuvem', 'info');
-      return;
-    }
-    
-    if (!response.ok) {
-      throw new Error(`HTTP Error ${response.status}`);
-    }
-    
-    const result = await response.json();
-    const dados = result.record;
-    
-    console.log('Dados carregados:', dados);
-    
-    if (dados && dados.dadosOriginais) {
-      // Carregar dados da nuvem
-      dadosPlanilha = dados.dadosPlanilha || [];
-      mesSelecionado = dados.mes !== undefined ? dados.mes : new Date().getMonth();
-      anoSelecionado = dados.ano || new Date().getFullYear();
-      dadosOriginais = dados.dadosOriginais || {};
-      trocasRegistradas = dados.trocas || [];
-      
-      // Atualizar selects
-      const mesSelect = document.getElementById('mesSelect');
-      const anoSelect = document.getElementById('anoSelect');
-      
-      if (mesSelect) mesSelect.value = mesSelecionado;
-      if (anoSelect) anoSelect.value = anoSelecionado;
-      
-      // Processar e mostrar dados
-      dadosProcessados = JSON.parse(JSON.stringify(dadosOriginais));
-      aplicarTrocasAosDados();
-      
-      // Mostrar calendário
-      const calendarSection = document.getElementById('calendarSection');
-      const configAccordion = document.getElementById('configAccordion');
-      const emptyMessage = document.getElementById('emptyMessage');
-      
-      if (calendarSection) calendarSection.style.display = 'block';
-      if (configAccordion) configAccordion.style.display = 'block';
-      if (emptyMessage) emptyMessage.style.display = 'none';
-      
-      atualizarCalendario();
-      atualizarPainelTrocas();
-      
-      showToast('✅ Escala carregada da nuvem!', 'success');
-    } else {
-      console.log('Dados inválidos ou vazios');
-      showToast('⚠️ Dados inválidos na nuvem', 'warning');
-    }
-  } catch (error) {
-    console.error('Erro ao carregar do JSONBin:', error);
-    
-    // Tentar carregar do backup local
-    try {
-      const dadosSalvos = localStorage.getItem('escala_backup');
-      if (dadosSalvos) {
-        const dados = JSON.parse(dadosSalvos);
-        
-        dadosPlanilha = dados.dadosPlanilha || [];
-        mesSelecionado = dados.mes !== undefined ? dados.mes : new Date().getMonth();
-        anoSelecionado = dados.ano || new Date().getFullYear();
-        dadosOriginais = dados.dadosOriginais || {};
-        trocasRegistradas = dados.trocas || [];
-        
-        // Atualizar selects
-        const mesSelect = document.getElementById('mesSelect');
-        const anoSelect = document.getElementById('anoSelect');
-        
-        if (mesSelect) mesSelect.value = mesSelecionado;
-        if (anoSelect) anoSelect.value = anoSelecionado;
-        
-        dadosProcessados = JSON.parse(JSON.stringify(dadosOriginais));
-        aplicarTrocasAosDados();
-        
-        const calendarSection = document.getElementById('calendarSection');
-        const configAccordion = document.getElementById('configAccordion');
-        const emptyMessage = document.getElementById('emptyMessage');
-        
-        if (calendarSection) calendarSection.style.display = 'block';
-        if (configAccordion) configAccordion.style.display = 'block';
-        if (emptyMessage) emptyMessage.style.display = 'none';
-        
-        atualizarCalendario();
-        atualizarPainelTrocas();
-        
-        showToast('⚠️ Carregado do backup local', 'warning');
-      } else {
-        showToast('📁 Nenhuma escala encontrada', 'info');
-      }
-    } catch (fallbackError) {
-      console.error('Erro no fallback:', fallbackError);
-      showToast('❌ Erro ao carregar dados', 'danger');
-    }
-  } finally {
-    hideLoading();
   }
 }
 
@@ -1696,15 +1780,15 @@ function processarArquivo(file) {
       // Processar dados
       processarDadosPlanilha();
       
-      // Salvar no JSONBin (PONTO PRINCIPAL)
-      salvarNoJSONBin().then(() => {
+      // ⚠️ ALTERAÇÃO CRÍTICA: Usar NOVA função de salvamento
+      salvarDadosNaNuvem().then(() => {
         atualizarCalendario();
         hideLoading();
-        showToast('✅ Planilha processada e salva na nuvem!', 'success');
+        showToast('✅ Planilha processada e salva!', 'success');
       }).catch((error) => {
         console.error('Erro ao salvar:', error);
         hideLoading();
-        showToast('❌ Processado mas erro ao salvar na nuvem', 'danger');
+        showToast('⚠️ Processado, mas sem nuvem', 'warning');
       });
       
     } catch (err) {
@@ -2141,8 +2225,8 @@ function confirmarTroca() {
     swapStatus.classList.remove('active');
   }
   
-  // Salvar no JSONBin (PONTO PRINCIPAL)
-  salvarNoJSONBin().then(() => {
+  // Salvar no JSONBin
+  salvarDadosNaNuvem().then(() => {
     // Atualizar visualização
     aplicarTrocasAosDados();
     atualizarCalendario();
@@ -2247,7 +2331,7 @@ function aplicarConfiguracao() {
     
     // Salvar alteração no JSONBin (se for admin)
     if (isAdmin) {
-      salvarNoJSONBin();
+      salvarDadosNaNuvem();
     }
   }
 }
@@ -2582,8 +2666,8 @@ function cancelarTroca(trocaId) {
   if (troca) {
     troca.status = 'cancelada';
     
-    // Salvar no JSONBin (PONTO PRINCIPAL)
-    salvarNoJSONBin().then(() => {
+    // Salvar no JSONBin
+    salvarDadosNaNuvem().then(() => {
       aplicarTrocasAosDados();
       atualizarCalendario();
       atualizarPainelTrocas();
@@ -2603,8 +2687,8 @@ function limparTodasTrocas() {
       troca.status = 'cancelada';
     });
     
-    // Salvar no JSONBin (PONTO PRINCIPAL)
-    salvarNoJSONBin().then(() => {
+    // Salvar no JSONBin
+    salvarDadosNaNuvem().then(() => {
       aplicarTrocasAosDados();
       atualizarCalendario();
       atualizarPainelTrocas();
