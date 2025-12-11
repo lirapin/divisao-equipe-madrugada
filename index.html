@@ -1212,22 +1212,14 @@ const PRIORIDADES = {
   }
 };
 
-// NOVAS CONFIGURAÇÕES - SISTEMA ROBUSTO DE SALVAMENTO
+// CONFIGURAÇÕES DE NUVEM - BIN COMPARTILHADO ENTRE TODOS OS USUÁRIOS
 const JSONBIN_CONFIG = {
-  // TENTAMOS PRIMEIRO COM O BIN ORIGINAL
-  BIN_ID_ORIGINAL: "67acf6e1ad19ca34f89c1f2c",
-  // SE FALHAR, CRIAMOS UM NOVO
-  BIN_ID_NOVO: null,
+  // BIN ÚNICO COMPARTILHADO - TODOS OS USUÁRIOS USAM ESTE ID
+  BIN_ID: "67acf6e1ad19ca34f89c1f2c",
   MASTER_KEY: '$2a$10$dQyAV006kSDh2CvPh8cBCu2yspqnkCb4Dpm.A7wby6q.tZAKQHNce',
   ACCESS_KEY: '$2a$10$RB4c6LvHvrsrqm.UL24v4O32NX2kguwwrOx1VMKJC2y0/5ZZmX5TG',
   API_URL: 'https://api.jsonbin.io/v3/b'
 };
-
-// Verificar se já temos um ID de bin salvo
-const binIdSalvo = localStorage.getItem('escala_bin_id');
-if (binIdSalvo) {
-  JSONBIN_CONFIG.BIN_ID_NOVO = binIdSalvo;
-}
 
 // Mapeamento de dias da semana
 const DIAS_SEMANA = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'];
@@ -1259,8 +1251,9 @@ let trocasRegistradas = [];
 
 async function salvarDadosNaNuvem() {
   console.log('🔵 INICIANDO SALVAMENTO NA NUVEM...');
+  console.log('📌 Usando BIN compartilhado:', JSONBIN_CONFIG.BIN_ID);
   showLoading();
-  
+
   try {
     // 1. Preparar dados
     const dadosParaSalvar = {
@@ -1277,61 +1270,36 @@ async function salvarDadosNaNuvem() {
         total_dias: Object.keys(dadosOriginais).length
       }
     };
-    
-    console.log('📦 Dados preparados:', dadosParaSalvar);
-    
-    // 2. TENTATIVA 1: Usar bin existente
-    let resultado = null;
-    
-    // Primeiro, tentamos com o BIN ID que está funcionando
-    const binIdAtual = JSONBIN_CONFIG.BIN_ID_NOVO || JSONBIN_CONFIG.BIN_ID_ORIGINAL;
-    console.log('🔄 Tentando salvar no Bin ID:', binIdAtual);
-    
-    resultado = await tentarSalvarNoBin(binIdAtual, dadosParaSalvar);
-    
-    if (resultado && resultado.metadata && resultado.metadata.id) {
-      console.log('✅ SALVO COM SUCESSO no Bin:', resultado.metadata.id);
-      
-      // Salvar este ID para uso futuro
-      if (resultado.metadata.id !== binIdAtual) {
-        JSONBIN_CONFIG.BIN_ID_NOVO = resultado.metadata.id;
-        localStorage.setItem('escala_bin_id', resultado.metadata.id);
-        console.log('💾 Novo Bin ID salvo no localStorage:', resultado.metadata.id);
-      }
-      
-      // Salvar backup local também
+
+    console.log('📦 Dados preparados para salvar:', {
+      mes: MESES[mesSelecionado],
+      ano: anoSelecionado,
+      totalDias: Object.keys(dadosOriginais).length,
+      totalFuncionarios: dadosPlanilha.length,
+      totalTrocas: trocasRegistradas.length
+    });
+
+    // 2. Salvar no BIN compartilhado
+    const resultado = await tentarSalvarNoBin(JSONBIN_CONFIG.BIN_ID, dadosParaSalvar);
+
+    if (resultado && resultado.metadata) {
+      console.log('✅ SALVO COM SUCESSO na nuvem! Bin:', JSONBIN_CONFIG.BIN_ID);
+
+      // Salvar backup local também (para fallback)
       localStorage.setItem('escala_backup', JSON.stringify(dadosParaSalvar));
       localStorage.setItem('escala_ultimo_salvamento', new Date().toISOString());
-      
+
       hideLoading();
-      showToast('✅ Escala salva na nuvem com sucesso!', 'success');
+      showToast('✅ Escala salva na nuvem! Todos os usuários podem visualizar.', 'success');
       return resultado;
     }
-    
-    // 3. TENTATIVA 2: Criar novo bin
-    console.log('🆕 Tentando criar novo Bin...');
-    const novoBinId = await criarNovoBin(dadosParaSalvar);
-    
-    if (novoBinId) {
-      // Salvar novo ID
-      JSONBIN_CONFIG.BIN_ID_NOVO = novoBinId;
-      localStorage.setItem('escala_bin_id', novoBinId);
-      
-      // Salvar backup local
-      localStorage.setItem('escala_backup', JSON.stringify(dadosParaSalvar));
-      localStorage.setItem('escala_ultimo_salvamento', new Date().toISOString());
-      
-      hideLoading();
-      showToast('✅ Nova escala criada e salva na nuvem!', 'success');
-      return { metadata: { id: novoBinId } };
-    }
-    
-    // 4. SE TUDO FALHAR: Salvar apenas localmente
-    throw new Error('Todas as tentativas de nuvem falharam');
-    
+
+    // 3. Se falhar, tentar backup local
+    throw new Error('Falha ao salvar na nuvem');
+
   } catch (error) {
-    console.error('❌ ERRO CRÍTICO no salvamento:', error);
-    
+    console.error('❌ ERRO ao salvar na nuvem:', error);
+
     // SALVAMENTO LOCAL DE EMERGÊNCIA
     try {
       const dadosParaSalvar = {
@@ -1343,11 +1311,11 @@ async function salvarDadosNaNuvem() {
         trocas: trocasRegistradas || [],
         dadosPlanilha: dadosPlanilha || []
       };
-      
+
       localStorage.setItem('escala_backup', JSON.stringify(dadosParaSalvar));
       localStorage.setItem('escala_ultimo_salvamento', new Date().toISOString());
-      
-      showToast('⚠️ Salvo localmente (nuvem indisponível)', 'warning');
+
+      showToast('⚠️ ATENÇÃO: Salvo apenas localmente! Outros usuários não verão os dados.', 'warning');
     } catch (fallbackError) {
       console.error('❌ FALHA TOTAL no salvamento:', fallbackError);
       showToast('💥 ERRO: Não foi possível salvar os dados!', 'danger');
@@ -1359,8 +1327,8 @@ async function salvarDadosNaNuvem() {
 
 async function tentarSalvarNoBin(binId, dados) {
   try {
-    console.log(`🔄 Tentando PUT no Bin ${binId}...`);
-    
+    console.log(`🔄 Enviando PUT para Bin ${binId}...`);
+
     const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${binId}`, {
       method: 'PUT',
       headers: {
@@ -1371,87 +1339,38 @@ async function tentarSalvarNoBin(binId, dados) {
       },
       body: JSON.stringify(dados)
     });
-    
-    console.log('📡 Resposta da API:', response.status);
-    
+
+    console.log('📡 Resposta da API JSONBin:', response.status, response.statusText);
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`❌ Erro ${response.status}:`, errorText);
-      
-      // Se for 404 (não encontrado) ou 403 (proibido), retornamos null para tentar criar novo
-      if (response.status === 404 || response.status === 403) {
-        console.log(`⚠️ Bin ${binId} não encontrado ou sem acesso`);
-        return null;
-      }
-      
       throw new Error(`JSONBin Error ${response.status}: ${errorText}`);
     }
-    
-    const result = await response.json();
-    console.log('✅ Salvamento bem-sucedido:', result.metadata);
-    return result;
-    
-  } catch (error) {
-    console.error(`❌ Falha no salvamento do Bin ${binId}:`, error);
-    return null;
-  }
-}
 
-async function criarNovoBin(dados) {
-  try {
-    console.log('🚀 Criando NOVO Bin...');
-    
-    const response = await fetch(JSONBIN_CONFIG.API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
-        'X-Bin-Name': `Escala ${MESES[mesSelecionado]} ${anoSelecionado}`,
-        'X-Access-Key': JSONBIN_CONFIG.ACCESS_KEY
-      },
-      body: JSON.stringify(dados)
-    });
-    
-    console.log('📡 Resposta da criação:', response.status);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Falha ao criar bin: ${response.status} - ${errorText}`);
-    }
-    
     const result = await response.json();
-    const novoBinId = result.metadata.id;
-    
-    console.log('🎉 NOVO BIN CRIADO COM SUCESSO! ID:', novoBinId);
-    return novoBinId;
-    
+    console.log('✅ Salvamento bem-sucedido no Bin:', result.metadata);
+    return result;
+
   } catch (error) {
-    console.error('❌ Falha ao criar novo bin:', error);
-    return null;
+    console.error(`❌ Falha ao salvar no Bin ${binId}:`, error);
+    throw error; // Re-throw para ser tratado pela função chamadora
   }
 }
 
 async function carregarDadosDaNuvem() {
   console.log('🔵 INICIANDO CARREGAMENTO DA NUVEM...');
+  console.log('📌 Usando BIN compartilhado:', JSONBIN_CONFIG.BIN_ID);
   showLoading();
 
   try {
-    // 1. Verificar localStorage para BIN_ID salvo
-    const binIdSalvo = localStorage.getItem('escala_bin_id');
-    if (binIdSalvo) {
-      JSONBIN_CONFIG.BIN_ID_NOVO = binIdSalvo;
-      console.log('💾 Bin ID recuperado do localStorage:', binIdSalvo);
-    }
-
-    // 2. Tentar carregar do ID salvo ou original
-    const binIdAtual = JSONBIN_CONFIG.BIN_ID_NOVO || JSONBIN_CONFIG.BIN_ID_ORIGINAL;
-    console.log('🔄 Tentando carregar do Bin:', binIdAtual);
-
-    // 3. Fazer requisição com timeout
+    // Fazer requisição com timeout para o BIN compartilhado
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
 
-    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${binIdAtual}/latest`, {
+    console.log('🔄 Carregando do Bin compartilhado:', JSONBIN_CONFIG.BIN_ID);
+
+    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}/latest`, {
       headers: {
         'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
         'X-Access-Key': JSONBIN_CONFIG.ACCESS_KEY
@@ -1466,7 +1385,14 @@ async function carregarDadosDaNuvem() {
       const result = await response.json();
       const dados = result.record;
 
-      console.log('📦 Dados carregados da nuvem:', dados);
+      console.log('📦 Dados carregados da nuvem:', {
+        temDados: !!dados,
+        temOriginais: !!(dados && dados.dadosOriginais),
+        temPlanilha: !!(dados && dados.dadosPlanilha),
+        mes: dados?.mes,
+        ano: dados?.ano,
+        ultimaAtualizacao: dados?.ultima_atualizacao
+      });
 
       if (dados && (dados.dadosOriginais || dados.dadosPlanilha)) {
         processarDadosCarregados(dados);
@@ -1474,23 +1400,27 @@ async function carregarDadosDaNuvem() {
         showToast('✅ Escala carregada da nuvem!', 'success');
         return true;
       } else {
-        console.warn('⚠️ Dados vazios retornados da nuvem');
+        console.warn('⚠️ Nuvem acessível mas sem dados válidos');
+        showToast('📭 Nenhuma escala encontrada na nuvem', 'info');
       }
     } else {
       console.error('❌ Resposta não OK:', response.status, response.statusText);
+      const errorText = await response.text();
+      console.error('❌ Detalhes do erro:', errorText);
     }
 
-    // 4. Se falhar, tentar do backup local
+    // Se falhar, tentar do backup local
     console.log('🔄 Tentando carregar do backup local...');
     carregarDoBackupLocal();
     return false;
 
   } catch (error) {
     if (error.name === 'AbortError') {
-      console.error('❌ Timeout ao carregar da nuvem');
+      console.error('❌ Timeout ao carregar da nuvem (10s)');
       showToast('⚠️ Timeout ao conectar com a nuvem', 'warning');
     } else {
       console.error('❌ Erro ao carregar da nuvem:', error);
+      showToast('⚠️ Erro ao acessar nuvem: ' + error.message, 'warning');
     }
     carregarDoBackupLocal();
     return false;
