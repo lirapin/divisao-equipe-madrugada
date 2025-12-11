@@ -291,6 +291,21 @@
       box-shadow: var(--shadow-md);
     }
     
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger) 0%, #ef5350 100%);
+      border: none;
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
     @media (max-width: 768px) {
       .upload-drop {
         padding: 2rem;
@@ -381,8 +396,7 @@ const PRIORIDADES = {
   }
 };
 
-let dadosPlanilha = [];
-let resultadosGlobal = [];
+let dadosGlobais = null;
 
 // Upload handlers
 const dropArea = document.getElementById('dropArea');
@@ -411,64 +425,20 @@ fileInput.addEventListener('change', e => {
 
 function processarArquivo(file) {
   showLoading();
-  const reader = new FileReader();
   
-  reader.onload = function(e) {
+  const reader = new FileReader();
+  reader.onload = function(evento) {
     try {
-      const data = new Uint8Array(e.target.result);
-      const wb = XLSX.read(data, { type: 'array' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
+      const arrayBuffer = evento.target.result;
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const primeiraAba = workbook.Sheets[workbook.SheetNames[0]];
+      const dados = XLSX.utils.sheet_to_json(primeiraAba, { header: 1 });
       
-      // Ler como array de arrays primeiro
-      const rawData = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
+      processarDados(dados);
       
-      console.log('Raw Data:', rawData);
-      
-      if (!rawData || rawData.length === 0) {
-        showToast('❌ Planilha vazia', 'danger');
-        hideLoading();
-        return;
-      }
-      
-      // Primeira linha é o cabeçalho
-      const headers = rawData[0];
-      console.log('Headers:', headers);
-      
-      // Converter para objetos
-      const dados = [];
-      for (let i = 1; i < rawData.length; i++) {
-        const row = rawData[i];
-        if (!row || row.length === 0) continue;
-        
-        const obj = {};
-        for (let j = 0; j < headers.length; j++) {
-          obj[headers[j]] = row[j] || '';
-        }
-        
-        // Só adicionar se tiver nome
-        if (obj[headers[0]] && String(obj[headers[0]]).trim() !== '') {
-          dados.push(obj);
-        }
-      }
-      
-      console.log('Dados processados:', dados);
-      
-      if (dados.length === 0) {
-        showToast('❌ Nenhum dado válido encontrado', 'danger');
-        hideLoading();
-        return;
-      }
-      
-      dadosPlanilha = dados;
-      
-      setTimeout(() => {
-        calcularDivisao();
-        hideLoading();
-      }, 100);
-      
-    } catch (err) {
-      console.error('Erro ao processar:', err);
-      showToast('❌ Erro: ' + err.message, 'danger');
+    } catch (erro) {
+      console.error('Erro:', erro);
+      showToast('❌ Erro ao processar arquivo: ' + erro.message, 'danger');
       hideLoading();
     }
   };
@@ -481,123 +451,197 @@ function processarArquivo(file) {
   reader.readAsArrayBuffer(file);
 }
 
-function calcularDivisao() {
-  try {
-    if (!dadosPlanilha || dadosPlanilha.length === 0) {
-      showToast('❌ Nenhum dado encontrado', 'danger');
-      return;
+function processarDados(dados) {
+  if (!dados || dados.length < 2) {
+    showToast('❌ Planilha vazia ou inválida', 'danger');
+    hideLoading();
+    return;
+  }
+  
+  const cabecalho = dados[0];
+  const linhasDados = dados.slice(1);
+  
+  // Encontrar índice da coluna NOME
+  let indiceName = -1;
+  for (let i = 0; i < cabecalho.length; i++) {
+    const col = String(cabecalho[i] || '').toUpperCase().trim();
+    if (col === 'NOME' || col.includes('NOME')) {
+      indiceName = i;
+      break;
+    }
+  }
+  
+  if (indiceName === -1) {
+    showToast('❌ Coluna NOME não encontrada', 'danger');
+    hideLoading();
+    return;
+  }
+  
+  // Encontrar colunas de dias (1 a 31)
+  const colunasDias = [];
+  for (let i = 0; i < cabecalho.length; i++) {
+    const col = String(cabecalho[i] || '');
+    const match = col.match(/^(\d+)/);
+    if (match) {
+      const dia = parseInt(match[1]);
+      if (dia >= 1 && dia <= 31) {
+        colunasDias.push({ indice: i, dia: dia });
+      }
+    }
+  }
+  
+  if (colunasDias.length === 0) {
+    showToast('❌ Nenhuma coluna de dia encontrada', 'danger');
+    hideLoading();
+    return;
+  }
+  
+  // Ordenar colunas por dia
+  colunasDias.sort((a, b) => a.dia - b.dia);
+  
+  // Processar cada dia
+  const resultados = [];
+  
+  for (const colDia of colunasDias) {
+    const trabalhandoHoje = [];
+    const ausentesHoje = [];
+    
+    for (const linha of linhasDados) {
+      const nome = String(linha[indiceName] || '').trim().toUpperCase();
+      if (!nome) continue;
+      
+      const status = String(linha[colDia.indice] || '').trim().toUpperCase();
+      
+      // Ausências: DSR, COM, FF, FS
+      if (['DSR', 'COM', 'FF', 'FS'].includes(status)) {
+        ausentesHoje.push({ nome: nome, motivo: status });
+      }
+      // Trabalhando: 22 ou vazio
+      else if (status === '22' || status === '') {
+        trabalhandoHoje.push(nome);
+      }
     }
     
-    const primeiraLinha = dadosPlanilha[0];
-    const todasColunas = Object.keys(primeiraLinha);
+    if (trabalhandoHoje.length > 0) {
+      const divisao = calcularDivisao(trabalhandoHoje);
+      
+      resultados.push({
+        dia: colDia.dia,
+        numPessoas: trabalhandoHoje.length,
+        trabalhando: trabalhandoHoje,
+        ausentes: ausentesHoje,
+        divisao: divisao
+      });
+    }
+  }
+  
+  if (resultados.length === 0) {
+    showToast('⚠️ Nenhum dia com pessoas trabalhando', 'warning');
+    hideLoading();
+    return;
+  }
+  
+  dadosGlobais = resultados;
+  exibirResultados(resultados);
+  hideLoading();
+}
+
+function calcularDivisao(trabalhandoHoje) {
+  const num = trabalhandoHoje.length;
+  const regras = PRIORIDADES[num] || PRIORIDADES[4];
+  const divisao = {};
+  
+  for (const area in regras) {
+    const prioridade = regras[area];
+    let atribuido = false;
     
-    console.log('Todas as colunas:', todasColunas);
-    
-    // Encontrar coluna do NOME - buscar por "NOME" exato ou que contenha
-    let colunaNome = null;
-    for (let col of todasColunas) {
-      if (col.toUpperCase().trim() === 'NOME' || col.toUpperCase().includes('NOME')) {
-        colunaNome = col;
+    for (const pessoa of prioridade) {
+      if (trabalhandoHoje.includes(pessoa)) {
+        divisao[area] = pessoa;
+        atribuido = true;
         break;
       }
     }
     
-    if (!colunaNome) {
-      showToast('❌ Coluna NOME não encontrada. Colunas: ' + todasColunas.join(', '), 'danger');
-      return;
+    if (!atribuido && trabalhandoHoje.length > 0) {
+      divisao[area] = trabalhandoHoje[0];
     }
-    
-    console.log('Coluna NOME encontrada:', colunaNome);
-    
-    // Encontrar colunas de dias - formato "1 (SEG)", "2 (TER)", etc ou apenas números
-    const colunaDias = [];
-    for (let col of todasColunas) {
-      // Pegar apenas números no início da string
-      const match = col.match(/^(\d+)/);
-      if (match) {
-        const num = parseInt(match[1]);
-        if (num >= 1 && num <= 31) {
-          colunaDias.push({ coluna: col, dia: num });
-        }
-      }
-    }
-    
-    // Ordenar por dia
-    colunaDias.sort((a, b) => a.dia - b.dia);
-    
-    console.log('Colunas de dias encontradas:', colunaDias);
-    
-    if (colunaDias.length === 0) {
-      showToast('❌ Nenhuma coluna de dia encontrada (formato esperado: "1 (SEG)", "2 (TER)", etc)', 'danger');
-      return;
-    }
-    
-    const resultados = [];
-    
-    // Processar cada dia
-    for (let diaInfo of colunaDias) {
-      const colunaDia = diaInfo.coluna;
-      const diaNumero = diaInfo.dia;
-      
-      const trabalhandoHoje = [];
-      const ausentesHoje = [];
-      
-      // Verificar cada funcionário
-      for (let funcionario of dadosPlanilha) {
-        let nome = String(funcionario[colunaNome] || '').trim().toUpperCase();
-        
-        // Pular linhas vazias
-        if (!nome || nome === '') continue;
-        
-        // Pegar valor da célula do dia
-        let valorCelula = funcionario[colunaDia];
-        let status = String(valorCelula || '').trim().toUpperCase();
-        
-        console.log(`Dia ${diaNumero} - ${nome}: "${status}"`);
-        
-        // Siglas de ausência
-        const ausente = ['DSR', 'COM', 'FF', 'FS'].includes(status);
-        const trabalhando = status === '22' || status === '';
-        
-        if (trabalhando) {
-          trabalhandoHoje.push(nome);
-        } else if (ausente) {
-          ausentesHoje.push({ nome, motivo: status });
-        }
-      }
-      
-      console.log(`Dia ${diaNumero} - Trabalhando:`, trabalhandoHoje);
-      
-      // Só adicionar se houver alguém trabalhando
-      if (trabalhandoHoje.length > 0) {
-        const divisao = calcularDivisaoPorNumero(trabalhandoHoje.length, trabalhandoHoje);
-        
-        resultados.push({
-          dia: diaNumero,
-          numPessoas: trabalhandoHoje.length,
-          trabalhando: trabalhandoHoje,
-          ausentes: ausentesHoje,
-          divisao
-        });
-      }
-    }
-    
-    console.log('Resultados finais:', resultados);
-    
-    if (resultados.length === 0) {
-      showToast('⚠️ Nenhum dia com pessoas trabalhando foi encontrado', 'warning');
-      return;
-    }
-    
-    exibirResultados(resultados);
-  } catch (error) {
-    console.error('Erro em calcularDivisao:', error);
-    showToast('❌ Erro ao calcular divisão: ' + error.message, 'danger');
   }
+  
+  return divisao;
+}
+
+function exibirResultados(resultados) {
+  document.getElementById('uploadSection').style.display = 'none';
+  document.getElementById('resultsSection').style.display = 'block';
+  
+  const content = document.getElementById('resultContent');
+  content.innerHTML = '';
+  
+  for (let i = 0; i < resultados.length; i++) {
+    const resultado = resultados[i];
+    const diaCard = document.createElement('div');
+    diaCard.className = 'dia-card';
+    diaCard.style.animationDelay = (i * 0.1) + 's';
+    
+    let html = `
+      <div class="dia-header">
+        Dia ${resultado.dia} - ${resultado.numPessoas} pessoa(s) trabalhando
+      </div>
+      
+      <div class="row">
+        <div class="col-md-8">
+          <h6 class="text-primary mb-3">Divisão de áreas:</h6>
+    `;
+    
+    for (const area in resultado.divisao) {
+      const pessoa = resultado.divisao[area];
+      html += `
+        <div class="mb-3">
+          <span class="area-badge">${area}</span>
+          <div class="funcionario-item">
+            <i class="bi bi-person-check me-2"></i>${pessoa}
+          </div>
+        </div>
+      `;
+    }
+    
+    html += `
+        </div>
+        <div class="col-md-4">
+          <h6 class="text-muted mb-3">Status da equipe:</h6>
+          <div class="mb-3">
+            <strong>Trabalhando (${resultado.trabalhando.length}):</strong>
+    `;
+    
+    for (const nome of resultado.trabalhando) {
+      html += `<div class="small mt-1"><span class="presente-badge">✓</span> ${nome}</div>`;
+    }
+    
+    if (resultado.ausentes.length > 0) {
+      html += `</div><div class="mb-3 mt-3"><strong>Ausentes (${resultado.ausentes.length}):</strong>`;
+      for (const ausente of resultado.ausentes) {
+        html += `<div class="small mt-1"><span class="ausente-badge">${ausente.motivo}</span> ${ausente.nome}</div>`;
+      }
+    }
+    
+    html += `
+          </div>
+        </div>
+      </div>
+    `;
+    
+    diaCard.innerHTML = html;
+    content.appendChild(diaCard);
+  }
+  
+  document.getElementById('btnExportarPDF').onclick = gerarPDF;
+  
+  showToast('✅ Divisão de tarefas calculada com sucesso!', 'success');
 }
 
 function gerarPDF() {
-  if (resultadosGlobal.length === 0) {
+  if (!dadosGlobais || dadosGlobais.length === 0) {
     showToast('❌ Nenhum resultado para exportar', 'danger');
     return;
   }
@@ -627,268 +671,4 @@ function gerarPDF() {
         color: '#2e7d32'
       },
       subheader: {
-        fontSize: 10,
-        color: '#666666',
-        italics: true
-      },
-      diaHeader: {
-        fontSize: 14,
-        bold: true,
-        color: '#2e7d32',
-        margin: [0, 15, 0, 10]
-      },
-      areaTitle: {
-        fontSize: 11,
-        bold: true,
-        color: '#1a1a1a',
-        margin: [0, 5, 0, 3]
-      },
-      funcionarioText: {
-        fontSize: 10,
-        color: '#333333',
-        margin: [15, 2, 0, 2]
-      },
-      statusHeader: {
-        fontSize: 11,
-        bold: true,
-        color: '#666666',
-        margin: [0, 10, 0, 5]
-      },
-      statusText: {
-        fontSize: 9,
-        color: '#555555',
-        margin: [10, 1, 0, 1]
-      },
-      divider: {
-        margin: [0, 10, 0, 10]
-      }
-    }
-  };
-  
-  resultadosGlobal.forEach((resultado, index) => {
-    // Cabeçalho do dia
-    docDefinition.content.push({
-      text: `Dia ${resultado.dia} - ${resultado.numPessoas} pessoa(s) trabalhando`,
-      style: 'diaHeader'
-    });
-    
-    // Divisão de áreas
-    docDefinition.content.push({
-      text: 'Divisão de áreas:',
-      style: 'statusHeader'
-    });
-    
-    Object.entries(resultado.divisao).forEach(([area, pessoa]) => {
-      docDefinition.content.push({
-        text: area,
-        style: 'areaTitle'
-      });
-      docDefinition.content.push({
-        text: `• ${pessoa}`,
-        style: 'funcionarioText'
-      });
-    });
-    
-    // Status da equipe
-    docDefinition.content.push({
-      text: 'Status da equipe:',
-      style: 'statusHeader',
-      margin: [0, 15, 0, 5]
-    });
-    
-    // Trabalhando
-    docDefinition.content.push({
-      text: `Trabalhando (${resultado.trabalhando.length}):`,
-      style: 'areaTitle'
-    });
-    
-    resultado.trabalhando.forEach(nome => {
-      docDefinition.content.push({
-        text: `✓ ${nome}`,
-        style: 'statusText',
-        color: '#4caf50'
-      });
-    });
-    
-    // Ausentes
-    if (resultado.ausentes.length > 0) {
-      docDefinition.content.push({
-        text: `Ausentes (${resultado.ausentes.length}):`,
-        style: 'areaTitle',
-        margin: [0, 8, 0, 3]
-      });
-      
-      resultado.ausentes.forEach(({nome, motivo}) => {
-        docDefinition.content.push({
-          text: `✗ ${nome} (${motivo})`,
-          style: 'statusText',
-          color: '#f44336'
-        });
-      });
-    }
-    
-    // Divisória entre dias (exceto no último)
-    if (index < resultadosGlobal.length - 1) {
-      docDefinition.content.push({
-        canvas: [
-          {
-            type: 'line',
-            x1: 0, y1: 0,
-            x2: 515, y2: 0,
-            lineWidth: 1,
-            lineColor: '#e0e0e0'
-          }
-        ],
-        style: 'divider'
-      });
-    }
-  });
-  
-  // Rodapé
-  docDefinition.content.push({
-    text: '\n\nDesenvolvido por: N6105010 e N5923221',
-    style: 'subheader',
-    alignment: 'center',
-    margin: [0, 30, 0, 0]
-  });
-  
-  pdfMake.createPdf(docDefinition).download(`divisao-tarefas-${new Date().toISOString().split('T')[0]}.pdf`);
-  showToast('✅ PDF exportado com sucesso!', 'success');
-}
-
-function calcularDivisaoPorNumero(num, trabalhandoHoje) {
-  const regras = PRIORIDADES[num] || PRIORIDADES[4]; // Default para 4 se não houver regra
-  const divisao = {};
-  
-  Object.keys(regras).forEach(area => {
-    const prioridade = regras[area];
-    
-    // Encontrar primeiro disponível na lista de prioridade
-    for (let pessoa of prioridade) {
-      if (trabalhandoHoje.includes(pessoa)) {
-        divisao[area] = pessoa;
-        break;
-      }
-    }
-    
-    // Se ninguém da prioridade está disponível, pegar qualquer um
-    if (!divisao[area] && trabalhandoHoje.length > 0) {
-      divisao[area] = trabalhandoHoje[0];
-    }
-  });
-  
-  return divisao;
-}
-
-function exibirResultados(resultados) {
-  document.getElementById('uploadSection').style.display = 'none';
-  document.getElementById('resultsSection').style.display = 'block';
-  
-  const content = document.getElementById('resultContent');
-  content.innerHTML = '';
-  
-  resultados.forEach((resultado, index) => {
-    const diaCard = document.createElement('div');
-    diaCard.className = 'dia-card';
-    diaCard.style.animationDelay = `${index * 0.1}s`;
-    
-    let html = `
-      <div class="dia-header">
-        Dia ${resultado.dia} - ${resultado.numPessoas} pessoa(s) trabalhando
-      </div>
-      
-      <div class="row">
-        <div class="col-md-8">
-          <h6 class="text-primary mb-3">Divisão de Áreas:</h6>
-    `;
-    
-    Object.entries(resultado.divisao).forEach(([area, pessoa]) => {
-      html += `
-        <div class="mb-3">
-          <span class="area-badge">${area}</span>
-          <div class="funcionario-item">
-            <i class="bi bi-person-check me-2"></i>${pessoa}
-          </div>
-        </div>
-      `;
-    });
-    
-    html += `
-        </div>
-        <div class="col-md-4">
-          <h6 class="text-muted mb-3">Status da Equipe:</h6>
-          <div class="mb-3">
-            <strong>Trabalhando (${resultado.trabalhandoHoje.length}):</strong>
-    `;
-    
-    resultado.trabalhando.forEach(nome => {
-      html += `<div class="small mt-1"><span class="presente-badge">✓</span> ${nome}</div>`;
-    });
-    
-    if (resultado.ausentes.length > 0) {
-      html += `</div><div class="mb-3 mt-3"><strong>Ausentes (${resultado.ausentes.length}):</strong>`;
-      resultado.ausentes.forEach(({nome, motivo}) => {
-        html += `<div class="small mt-1"><span class="ausente-badge">${motivo}</span> ${nome}</div>`;
-      });
-    }
-    
-    html += `
-          </div>
-        </div>
-      </div>
-    `;
-    
-    diaCard.innerHTML = html;
-    content.appendChild(diaCard);
-  });
-  
-  showToast('✅ Divisão de tarefas calculada com sucesso!', 'success');
-}
-
-function showLoading() {
-  const overlay = document.createElement('div');
-  overlay.className = 'loading-overlay';
-  overlay.id = 'loadingOverlay';
-  overlay.innerHTML = `
-    <div class="text-center">
-      <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-        <span class="visually-hidden">Carregando...</span>
-      </div>
-      <p class="mt-3 text-muted fw-semibold">Processando planilha...</p>
-    </div>
-  `;
-  document.body.appendChild(overlay);
-}
-
-function hideLoading() {
-  const overlay = document.getElementById('loadingOverlay');
-  if (overlay) overlay.remove();
-}
-
-function showToast(message, type = 'info') {
-  const existingToasts = document.querySelectorAll('.toast-container');
-  existingToasts.forEach(toast => toast.remove());
-  
-  const toastContainer = document.createElement('div');
-  toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-  
-  const toast = document.createElement('div');
-  toast.className = `toast align-items-center text-white bg-${type} border-0`;
-  toast.setAttribute('role', 'alert');
-  
-  toast.innerHTML = `
-    <div class="d-flex">
-      <div class="toast-body">${message}</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-    </div>
-  `;
-  
-  toastContainer.appendChild(toast);
-  document.body.appendChild(toastContainer);
-  
-  const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
-  bsToast.show();
-}
-</script>
-</body>
-</html>
+        fontSize: 10
