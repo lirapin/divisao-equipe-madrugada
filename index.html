@@ -800,7 +800,7 @@
       background: #f8d7da;
     }
     
-    /* Modal de Login - NOVO DESIGN */
+    /* Modal de Login - SEGURO */
     #loginModal .modal-content {
       border-radius: 12px;
       border: none;
@@ -1107,7 +1107,7 @@
   </div>
 </div>
 
-<!-- Modal para Login PIN - NOVO DESIGN -->
+<!-- Modal para Login PIN - SEGURO -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-md">
     <div class="modal-content">
@@ -1143,7 +1143,7 @@
             <input type="password" 
                    class="form-control form-control-lg text-center" 
                    id="pinInput" 
-                   placeholder="home.2025"
+                   placeholder="Digite o PIN"
                    autocomplete="off">
             <div class="form-text text-center mt-1">
               <i class="bi bi-info-circle me-1"></i>
@@ -1180,8 +1180,8 @@
 // PIN de administrador
 const ADMIN_PIN = "home.2025";
 
-// ID fixo para o JSONBin
-const JSONBIN_ESCALA_ID = "escala-centralizada-v2";
+// ID fixo para o JSONBin - IMPORTANTE: Use este ID exato
+const JSONBIN_ESCALA_ID = "67acf6e1ad19ca34f89c1f2c";
 
 // Regras de prioridade
 const PRIORIDADES = {
@@ -1205,7 +1205,7 @@ const PRIORIDADES = {
   }
 };
 
-// Configuração do JSONBin.io
+// Configuração do JSONBin.io - COM ID REAL
 const JSONBIN_CONFIG = {
   BIN_ID: JSONBIN_ESCALA_ID,
   MASTER_KEY: '$2a$10$dQyAV006kSDh2CvPh8cBCu2yspqnkCb4Dpm.A7wby6q.tZAKQHNce',
@@ -1330,10 +1330,13 @@ function mostrarModalLogin() {
   });
   loginModal.show();
   
-  // Focar no input do PIN
+  // Limpar campo PIN e focar
   setTimeout(() => {
     const pinInput = document.getElementById('pinInput');
-    if (pinInput) pinInput.focus();
+    if (pinInput) {
+      pinInput.value = '';
+      pinInput.focus();
+    }
   }, 500);
 }
 
@@ -1433,84 +1436,68 @@ function logoutAdmin() {
 }
 
 // ============================================
-// SISTEMA DE ARMAZENAMENTO CENTRALIZADO
+// SISTEMA DE ARMAZENAMENTO CENTRALIZADO - CORRIGIDO
 // ============================================
 
 async function salvarNoJSONBin() {
   showLoading();
   
   try {
+    // Preparar dados para salvar (estrutura simplificada)
     const dadosParaSalvar = {
       escala_id: JSONBIN_ESCALA_ID,
       mes: mesSelecionado,
       ano: anoSelecionado,
       ultima_atualizacao: new Date().toISOString(),
-      dadosProcessados: dadosOriginais || {},
+      dadosOriginais: dadosOriginais || {},
       trocas: trocasRegistradas || [],
       dadosPlanilha: dadosPlanilha || []
     };
     
-    console.log('Tentando salvar no JSONBin:', dadosParaSalvar);
+    console.log('Salvando no JSONBin:', dadosParaSalvar);
     
-    // Tentar atualizar primeiro
-    let response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}`, {
+    // Usar PUT para atualizar (não POST)
+    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
-        'X-Bin-Name': `Escala Centralizada - ${MESES[mesSelecionado]} ${anoSelecionado}`
+        'X-Bin-Name': `Escala ${MESES[mesSelecionado]} ${anoSelecionado}`
       },
       body: JSON.stringify(dadosParaSalvar)
     });
     
-    // Se falhar, tentar criar
     if (!response.ok) {
-      console.log('PUT falhou, tentando POST...');
-      response = await fetch(JSONBIN_CONFIG.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
-          'X-Bin-Name': `Escala Centralizada - ${MESES[mesSelecionado]} ${anoSelecionado}`
-        },
-        body: JSON.stringify(dadosParaSalvar)
-      });
-    }
-    
-    if (!response.ok) {
-      throw new Error(`Falha HTTP: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`JSONBin Error ${response.status}: ${errorText}`);
     }
     
     const result = await response.json();
     console.log('Salvo com sucesso:', result);
     
-    // Também salvar localmente como backup
-    try {
-      localStorage.setItem(JSONBIN_ESCALA_ID, JSON.stringify(dadosParaSalvar));
-    } catch (e) {
-      console.warn('Não foi possível salvar localmente:', e);
-    }
+    // Também salvar localmente para referência
+    localStorage.setItem('escala_backup', JSON.stringify(dadosParaSalvar));
     
-    showToast('✅ Dados salvos na nuvem!', 'success');
+    showToast('✅ Dados salvos na nuvem com sucesso!', 'success');
     return result;
     
   } catch (error) {
     console.error('Erro ao salvar no JSONBin:', error);
     
-    // Fallback para localStorage
+    // Tentar salvar localmente como backup
     try {
       const dadosParaSalvar = {
         escala_id: JSONBIN_ESCALA_ID,
         mes: mesSelecionado,
         ano: anoSelecionado,
         ultima_atualizacao: new Date().toISOString(),
-        dadosProcessados: dadosOriginais || {},
+        dadosOriginais: dadosOriginais || {},
         trocas: trocasRegistradas || [],
         dadosPlanilha: dadosPlanilha || []
       };
       
-      localStorage.setItem(JSONBIN_ESCALA_ID, JSON.stringify(dadosParaSalvar));
-      showToast('⚠️ Salvo localmente (nuvem indisponível)', 'warning');
+      localStorage.setItem('escala_backup', JSON.stringify(dadosParaSalvar));
+      showToast('⚠️ Salvo localmente (problema com nuvem)', 'warning');
     } catch (fallbackError) {
       console.error('Erro no fallback:', fallbackError);
       showToast('❌ Erro ao salvar dados', 'danger');
@@ -1526,7 +1513,7 @@ async function carregarDadosDoJSONBin() {
   showLoading();
   
   try {
-    console.log('Carregando dados do JSONBin...');
+    console.log('Carregando do JSONBin...');
     
     const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}/latest`, {
       headers: {
@@ -1535,26 +1522,27 @@ async function carregarDadosDoJSONBin() {
     });
     
     if (response.status === 404) {
-      console.log('Bin não existe ainda');
+      console.log('Nenhuma escala encontrada na nuvem');
       hideLoading();
+      showToast('📁 Nenhuma escala encontrada na nuvem', 'info');
       return;
     }
     
     if (!response.ok) {
-      throw new Error(`Falha HTTP: ${response.status}`);
+      throw new Error(`HTTP Error ${response.status}`);
     }
     
     const result = await response.json();
     const dados = result.record;
     
-    console.log('Dados recebidos:', dados);
+    console.log('Dados carregados:', dados);
     
-    if (dados && dados.dadosProcessados) {
-      // Carregar dados
+    if (dados && dados.dadosOriginais) {
+      // Carregar dados da nuvem
       dadosPlanilha = dados.dadosPlanilha || [];
       mesSelecionado = dados.mes !== undefined ? dados.mes : new Date().getMonth();
       anoSelecionado = dados.ano || new Date().getFullYear();
-      dadosOriginais = dados.dadosProcessados || {};
+      dadosOriginais = dados.dadosOriginais || {};
       trocasRegistradas = dados.trocas || [];
       
       // Atualizar selects
@@ -1582,21 +1570,22 @@ async function carregarDadosDoJSONBin() {
       
       showToast('✅ Escala carregada da nuvem!', 'success');
     } else {
-      console.log('Dados vazios ou inválidos');
+      console.log('Dados inválidos ou vazios');
+      showToast('⚠️ Dados inválidos na nuvem', 'warning');
     }
   } catch (error) {
     console.error('Erro ao carregar do JSONBin:', error);
     
-    // Tentar carregar do localStorage como fallback
+    // Tentar carregar do backup local
     try {
-      const dadosSalvos = localStorage.getItem(JSONBIN_ESCALA_ID);
+      const dadosSalvos = localStorage.getItem('escala_backup');
       if (dadosSalvos) {
         const dados = JSON.parse(dadosSalvos);
         
         dadosPlanilha = dados.dadosPlanilha || [];
         mesSelecionado = dados.mes !== undefined ? dados.mes : new Date().getMonth();
         anoSelecionado = dados.ano || new Date().getFullYear();
-        dadosOriginais = dados.dadosProcessados || {};
+        dadosOriginais = dados.dadosOriginais || {};
         trocasRegistradas = dados.trocas || [];
         
         // Atualizar selects
@@ -1620,7 +1609,7 @@ async function carregarDadosDoJSONBin() {
         atualizarCalendario();
         atualizarPainelTrocas();
         
-        showToast('⚠️ Carregado localmente (nuvem indisponível)', 'warning');
+        showToast('⚠️ Carregado do backup local', 'warning');
       } else {
         showToast('📁 Nenhuma escala encontrada', 'info');
       }
@@ -1707,13 +1696,15 @@ function processarArquivo(file) {
       // Processar dados
       processarDadosPlanilha();
       
-      // Salvar no JSONBin
+      // Salvar no JSONBin (PONTO PRINCIPAL)
       salvarNoJSONBin().then(() => {
         atualizarCalendario();
         hideLoading();
         showToast('✅ Planilha processada e salva na nuvem!', 'success');
-      }).catch(() => {
+      }).catch((error) => {
+        console.error('Erro ao salvar:', error);
         hideLoading();
+        showToast('❌ Processado mas erro ao salvar na nuvem', 'danger');
       });
       
     } catch (err) {
@@ -1937,7 +1928,7 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
 }
 
 // ============================================
-// SISTEMA DE TROCAS
+// SISTEMA DE TROCAS - COM MULTIPLAS TROCAS
 // ============================================
 
 function handleDiaClick(dia) {
@@ -1952,20 +1943,24 @@ function handleDiaClick(dia) {
     return;
   }
   
-  // Verificar se o dia já está em uma troca ativa
-  const trocaAtiva = trocasRegistradas.find(t => 
-    (t.dia_a === dia || t.dia_b === dia) && t.status === 'ativa'
-  );
+  // Verificar se a pessoa já está em alguma troca ativa neste dia
+  if (selecaoTroca.primeiro.dia && selecaoTroca.primeiro.dia === dia) {
+    // Já selecionou este dia como primeiro, vamos para o segundo
+    if (!selecaoTroca.segundo.dia) {
+      mostrarModalSelecaoPessoa(dia, 'segundo');
+    }
+    return;
+  }
   
-  if (trocaAtiva) {
-    showToast('❌ Este dia já está em uma troca ativa', 'warning');
+  if (selecaoTroca.segundo.dia && selecaoTroca.segundo.dia === dia) {
+    // Já selecionou este dia como segundo
     return;
   }
   
   if (!selecaoTroca.primeiro.dia) {
     selecaoTroca.primeiro.dia = dia;
     mostrarModalSelecaoPessoa(dia, 'primeiro');
-  } else if (!selecaoTroca.segundo.dia && selecaoTroca.primeiro.dia !== dia) {
+  } else if (!selecaoTroca.segundo.dia) {
     selecaoTroca.segundo.dia = dia;
     mostrarModalSelecaoPessoa(dia, 'segundo');
   }
@@ -1990,16 +1985,36 @@ function mostrarModalSelecaoPessoa(dia, etapa) {
     modalTitle.innerHTML = `<i class="bi bi-person-plus me-2"></i>${titulo}`;
   }
   
-  // Criar lista de pessoas
+  // Filtrar pessoas que já estão em trocas ativas neste dia
+  const pessoasEmTrocas = new Set();
+  trocasRegistradas
+    .filter(t => t.status === 'ativa' && (t.dia_a === dia || t.dia_b === dia))
+    .forEach(t => {
+      if (t.dia_a === dia) pessoasEmTrocas.add(t.pessoa_a);
+      if (t.dia_b === dia) pessoasEmTrocas.add(t.pessoa_b);
+    });
+  
+  // Criar lista de pessoas disponíveis
   if (personList) {
-    personList.innerHTML = dadosDia.trabalhando.map(pessoa => `
-      <button type="button" 
-              class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-              onclick="selecionarPessoa('${pessoa.replace(/'/g, "\\'")}', ${dia}, '${etapa}')">
-        <span>${pessoa}</span>
-        <i class="bi bi-check-circle text-primary"></i>
-      </button>
-    `).join('');
+    const pessoasDisponiveis = dadosDia.trabalhando.filter(p => !pessoasEmTrocas.has(p));
+    
+    if (pessoasDisponiveis.length === 0) {
+      personList.innerHTML = `
+        <div class="alert alert-warning text-center">
+          <i class="bi bi-exclamation-triangle"></i>
+          <p class="mb-0 mt-2">Todas as pessoas já estão em trocas neste dia</p>
+        </div>
+      `;
+    } else {
+      personList.innerHTML = pessoasDisponiveis.map(pessoa => `
+        <button type="button" 
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                onclick="selecionarPessoa('${pessoa.replace(/'/g, "\\'")}', ${dia}, '${etapa}')">
+          <span>${pessoa}</span>
+          <i class="bi bi-check-circle text-primary"></i>
+        </button>
+      `).join('');
+    }
   }
   
   modal.show();
@@ -2116,7 +2131,17 @@ function confirmarTroca() {
   // Resetar seleção
   resetarSelecaoTroca();
   
-  // Salvar no JSONBin
+  // DESATIVAR MODO TROCA AUTOMATICAMENTE
+  modoTroca = false;
+  const swapModeToggle = document.getElementById('swapModeToggle');
+  if (swapModeToggle) swapModeToggle.checked = false;
+  
+  const swapStatus = document.getElementById('swapStatus');
+  if (swapStatus) {
+    swapStatus.classList.remove('active');
+  }
+  
+  // Salvar no JSONBin (PONTO PRINCIPAL)
   salvarNoJSONBin().then(() => {
     // Atualizar visualização
     aplicarTrocasAosDados();
@@ -2135,7 +2160,7 @@ function aplicarTrocasAosDados() {
   // Restaurar dados originais
   dadosProcessados = JSON.parse(JSON.stringify(dadosOriginais));
   
-  // Aplicar cada troca ativa
+  // Aplicar cada troca ativa (agora podem ser múltiplas por dia)
   trocasRegistradas
     .filter(troca => troca.status === 'ativa')
     .forEach(troca => {
@@ -2306,12 +2331,12 @@ function atualizarCalendario() {
     if (dadosDia) {
       dayDiv.classList.add('has-data');
       
-      // Verificar se este dia está em uma troca ativa
-      const temTroca = trocasRegistradas.some(troca => 
+      // Verificar se este dia tem trocas ativas
+      const temTrocas = trocasRegistradas.some(troca => 
         (troca.dia_a === dia || troca.dia_b === dia) && troca.status === 'ativa'
       );
       
-      if (temTroca) {
+      if (temTrocas) {
         dayDiv.classList.add('swapped');
       }
       
@@ -2331,11 +2356,11 @@ function atualizarCalendario() {
       }
       
       // Adicionar ícone de troca se houver
-      const temTroca = trocasRegistradas.some(troca => 
+      const temTrocas = trocasRegistradas.some(troca => 
         (troca.dia_a === dia || troca.dia_b === dia) && troca.status === 'ativa'
       );
       
-      if (temTroca) {
+      if (temTrocas) {
         content += `<div class="swap-icon"><i class="bi bi-arrow-left-right"></i></div>`;
       }
     }
@@ -2359,7 +2384,7 @@ function mostrarDetalhesDia(dia) {
   const dadosDia = getDadosDiaComTrocas(dia);
   if (!dadosDia) return;
   
-  const trocaDia = trocasRegistradas.find(t => 
+  const trocasDia = trocasRegistradas.filter(t => 
     (t.dia_a === dia || t.dia_b === dia) && t.status === 'ativa'
   );
   
@@ -2370,10 +2395,9 @@ function mostrarDetalhesDia(dia) {
   if (!modalTitle || !modalContent) return;
   
   let tituloExtra = '';
-  if (trocaDia) {
-    const outroDia = trocaDia.dia_a === dia ? trocaDia.dia_b : trocaDia.dia_a;
-    const outraPessoa = trocaDia.dia_a === dia ? trocaDia.pessoa_b : trocaDia.pessoa_a;
-    tituloExtra = ` <span class="badge bg-purple">Trocado com ${outraPessoa} (dia ${outroDia})</span>`;
+  if (trocasDia.length > 0) {
+    const numTrocas = trocasDia.length;
+    tituloExtra = ` <span class="badge bg-purple">${numTrocas} troca(s)</span>`;
   }
   
   modalTitle.innerHTML = `Dia ${dia} (${dadosDia.diaSemana}) - ${dadosDia.numPessoas} pessoa(s) trabalhando${tituloExtra}`;
@@ -2384,7 +2408,7 @@ function mostrarDetalhesDia(dia) {
         <div class="area-title">
           <i class="bi bi-diagram-3"></i>
           <span>Divisão de Áreas</span>
-          ${trocaDia ? '<span class="badge bg-info ms-2">COM TROCA</span>' : ''}
+          ${trocasDia.length > 0 ? '<span class="badge bg-info ms-2">COM TROCAS</span>' : ''}
         </div>
         <div class="area-grid">
   `;
@@ -2392,12 +2416,15 @@ function mostrarDetalhesDia(dia) {
   if (Object.keys(dadosDia.divisao).length > 0) {
     Object.entries(dadosDia.divisao).forEach(([area, pessoa]) => {
       if (pessoa) {
+        // Verificar se esta pessoa está em alguma troca
+        const pessoaEmTroca = trocasDia.some(t => t.pessoa_a === pessoa || t.pessoa_b === pessoa);
+        
         html += `
           <div class="area-item">
             <span class="area-label">${area}</span>
             <div class="funcionario-name" title="${pessoa}">
               ${pessoa}
-              ${trocaDia ? ' <i class="bi bi-arrow-left-right text-purple"></i>' : ''}
+              ${pessoaEmTroca ? ' <i class="bi bi-arrow-left-right text-purple"></i>' : ''}
             </div>
           </div>
         `;
@@ -2423,10 +2450,12 @@ function mostrarDetalhesDia(dia) {
   `;
   
   dadosDia.trabalhando.forEach(nome => {
+    const pessoaEmTroca = trocasDia.some(t => t.pessoa_a === nome || t.pessoa_b === nome);
+    
     html += `
       <div class="status-item">
         <span class="status-badge badge-presente">✓</span>
-        <span>${nome}</span>
+        <span>${nome} ${pessoaEmTroca ? '<i class="bi bi-arrow-left-right text-purple ms-1"></i>' : ''}</span>
       </div>
     `;
   });
@@ -2455,24 +2484,32 @@ function mostrarDetalhesDia(dia) {
     html += `</div></div>`;
   }
   
-  // Adicionar informações da troca se houver
-  if (trocaDia) {
-    const outroDia = trocaDia.dia_a === dia ? trocaDia.dia_b : trocaDia.dia_a;
-    const outraPessoa = trocaDia.dia_a === dia ? trocaDia.pessoa_b : trocaDia.pessoa_a;
-    const outroDiaDados = getDadosDiaComTrocas(outroDia);
-    const outraArea = outroDiaDados ? Object.entries(outroDiaDados.divisao).find(([area, pessoa]) => pessoa === outraPessoa)?.[0] || 'Área' : 'Área';
-    
+  // Adicionar informações das trocas se houver
+  if (trocasDia.length > 0) {
     html += `
         <div class="status-group mt-3">
-          <div class="status-group-title">Informações da Troca</div>
-          <div class="alert alert-info p-2 small">
-            <i class="bi bi-info-circle me-2"></i>
-            <strong>Trocado com:</strong> ${outraPessoa} (Dia ${outroDia} - ${outraArea})<br>
-            ${trocaDia.observacao ? `<strong>Motivo:</strong> ${trocaDia.observacao}<br>` : ''}
-            <strong>Registrado em:</strong> ${trocaDia.data_registro}
-          </div>
-        </div>
+          <div class="status-group-title">Trocas Registradas (${trocasDia.length})</div>
     `;
+    
+    trocasDia.forEach((troca, index) => {
+      const outroDia = troca.dia_a === dia ? troca.dia_b : troca.dia_a;
+      const outraPessoa = troca.dia_a === dia ? troca.pessoa_b : troca.pessoa_a;
+      const outroDiaDados = getDadosDiaComTrocas(outroDia);
+      const outraArea = outroDiaDados ? Object.entries(outroDiaDados.divisao).find(([area, pessoa]) => pessoa === outraPessoa)?.[0] || 'Área' : 'Área';
+      
+      html += `
+          <div class="alert alert-info p-2 small mt-2">
+            <strong>Troca ${index + 1}:</strong> ${troca.pessoa_a === outraPessoa ? outraPessoa : troca.pessoa_a} ↔ ${troca.pessoa_b}<br>
+            <small>
+              <strong>Com:</strong> ${outraPessoa} (Dia ${outroDia} - ${outraArea})<br>
+              ${troca.observacao ? `<strong>Motivo:</strong> ${troca.observacao}<br>` : ''}
+              <strong>Registrado em:</strong> ${troca.data_registro}
+            </small>
+          </div>
+      `;
+    });
+    
+    html += `</div>`;
   }
   
   html += `
@@ -2545,7 +2582,7 @@ function cancelarTroca(trocaId) {
   if (troca) {
     troca.status = 'cancelada';
     
-    // Salvar no JSONBin
+    // Salvar no JSONBin (PONTO PRINCIPAL)
     salvarNoJSONBin().then(() => {
       aplicarTrocasAosDados();
       atualizarCalendario();
@@ -2566,7 +2603,7 @@ function limparTodasTrocas() {
       troca.status = 'cancelada';
     });
     
-    // Salvar no JSONBin
+    // Salvar no JSONBin (PONTO PRINCIPAL)
     salvarNoJSONBin().then(() => {
       aplicarTrocasAosDados();
       atualizarCalendario();
