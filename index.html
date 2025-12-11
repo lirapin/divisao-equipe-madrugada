@@ -28,7 +28,6 @@
       --info: #2196f3;
       --calendar-bg: #ffffff;
       --calendar-header: #f5f5f5;
-      --calendar-weekend: #f9f9f9;
       --calendar-today: #e8f5e9;
     }
     
@@ -181,7 +180,7 @@
       background: white;
     }
     
-    /* Calendário Tradicional - CORRIGIDO */
+    /* Calendário Tradicional */
     .calendar-container {
       background: white;
       border-radius: 10px;
@@ -230,7 +229,7 @@
       background: #e8e8e8;
     }
     
-    /* Grid do Calendário - CORRIGIDO */
+    /* Grid do Calendário - AGORA COMEÇA NA SEGUNDA */
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -241,7 +240,7 @@
       overflow: hidden;
     }
     
-    /* Cabeçalho dos dias da semana */
+    /* Cabeçalho dos dias da semana - SEGUNDA É O PRIMEIRO */
     .calendar-weekday {
       background: var(--calendar-header);
       padding: 0.75rem 0.5rem;
@@ -252,10 +251,7 @@
       text-transform: uppercase;
     }
     
-    .calendar-weekday.weekend {
-      background: #f0f0f0;
-      color: var(--danger);
-    }
+    /* REMOVIDO: .calendar-weekday.weekend - Sábado agora é normal */
     
     /* Células dos dias */
     .calendar-day {
@@ -669,19 +665,18 @@
         </div>
       </div>
 
-      <!-- Grid do Calendário - CORRIGIDO: Sem container intermediário -->
+      <!-- Grid do Calendário - AGORA COMEÇA NA SEGUNDA -->
       <div class="calendar-grid" id="calendarGrid">
-        <!-- Cabeçalhos dos dias da semana -->
-        <div class="calendar-weekday">DOM</div>
+        <!-- Cabeçalhos dos dias da semana - SEGUNDA É O PRIMEIRO -->
         <div class="calendar-weekday">SEG</div>
         <div class="calendar-weekday">TER</div>
         <div class="calendar-weekday">QUA</div>
         <div class="calendar-weekday">QUI</div>
         <div class="calendar-weekday">SEX</div>
-        <div class="calendar-weekday weekend">SÁB</div>
+        <div class="calendar-weekday">SÁB</div>
+        <div class="calendar-weekday">DOM</div>
         
         <!-- Dias serão inseridos DIRETAMENTE aqui -->
-        <!-- JavaScript vai inserir .calendar-day diretamente nesta grid -->
       </div>
     </div>
 
@@ -745,14 +740,14 @@ const PRIORIDADES = {
   5: {
     'CO/NO': ['CRISTIANE HERMOGENES DA SILVA', 'MARISTELLA MARCIA DOS SANTOS'],
     'NE/BA': ['RAISSA LIMA DE OLIVEIRA', 'MARISTELLA MARCIA DOS SANTOS'],
-    'MG': ['LEONARDO FERREIRA LIMA DE ALMEIDA', 'RAISSA LIMA DE OLIVEIRA'],
+    'MG': ['LEONARDO FERREIRA LIMA DE ALMEIDA', 'RAISSA LIMA DE OLiveIRA'],
     'RIO A': ['ALAN MARINHO DIAS', 'MARISTELLA MARCIA DOS SANTOS'],
     'RIO B': ['THIAGO PEREIRA DA SILVA', 'MARISTELLA MARCIA DOS SANTOS']
   }
 };
 
-// Mapeamento de dias da semana
-const DIAS_SEMANA = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+// Mapeamento de dias da semana - AGORA COMEÇA NA SEGUNDA
+const DIAS_SEMANA = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'];
 const MESES = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
@@ -1025,7 +1020,12 @@ function processarDadosPlanilha() {
       // Verificar se o dia pertence ao mês selecionado
       if (dataDia.getMonth() !== mesSelecionado) continue;
       
-      const diaSemanaNumero = dataDia.getDay();
+      // Calcular índice do dia da semana (0=Segunda, 6=Domingo)
+      let diaSemanaNumero = dataDia.getDay(); // 0=Domingo, 1=Segunda, etc.
+      
+      // Converter para nosso formato (0=Segunda, 6=Domingo)
+      diaSemanaNumero = diaSemanaNumero === 0 ? 6 : diaSemanaNumero - 1;
+      
       const diaSemanaNome = DIAS_SEMANA[diaSemanaNumero];
       
       const trabalhandoHoje = [];
@@ -1039,31 +1039,14 @@ function processarDadosPlanilha() {
         let valorCelula = funcionario[colunaDia];
         let status = String(valorCelula || '').trim().toUpperCase();
         
-        const ausente = ['DSR', 'COM', 'FF', 'FS', 'FERIADO', 'FOLGA', 'AFASTADO', 'AUSENTE', 'FALT', 'LICEN'].some(
-          cod => status.includes(cod)
-        );
-        
-        const trabalhando = status === '' || 
-                           status === 'X' || 
-                           status === '22' || 
-                           status === 'P' || 
-                           status === 'PRESENTE' || 
-                           status === 'TRABALHANDO' ||
-                           /^\d+$/.test(status);
+        // REGRA SIMPLIFICADA: vazio ou "22" = presente, qualquer outra coisa = ausente
+        const trabalhando = status === '' || status === '22';
+        const ausente = !trabalhando && status !== '';
         
         if (trabalhando) {
           trabalhandoHoje.push(nome);
         } else if (ausente) {
           ausentesHoje.push({ nome, motivo: status || 'AUSENTE' });
-        } else {
-          const horarioMatch = status.match(/\d{1,2}[:\.]\d{2}/);
-          if (horarioMatch) {
-            trabalhandoHoje.push(nome);
-          } else if (status && status !== '') {
-            ausentesHoje.push({ nome, motivo: status });
-          } else {
-            trabalhandoHoje.push(nome);
-          }
         }
       }
       
@@ -1143,13 +1126,16 @@ function atualizarCalendario() {
   const primeiroDiaMes = new Date(anoSelecionado, mesSelecionado, 1);
   const ultimoDiaMes = new Date(anoSelecionado, mesSelecionado + 1, 0);
   const diasNoMes = ultimoDiaMes.getDate();
-  const primeiroDiaSemana = primeiroDiaMes.getDay(); // 0 = Domingo, 1 = Segunda, etc.
+  
+  // Calcular primeiro dia da semana (0=Segunda, 6=Domingo)
+  let primeiroDiaSemana = primeiroDiaMes.getDay(); // 0=Domingo, 1=Segunda, etc.
+  primeiroDiaSemana = primeiroDiaSemana === 0 ? 6 : primeiroDiaSemana - 1; // Converter para 0=Segunda
   
   // Atualizar título do calendário
   document.getElementById('calendarTitle').textContent = 
     `${MESES[mesSelecionado]} de ${anoSelecionado}`;
   
-  // Gerar grid do calendário - CORRETO: dias inseridos diretamente na grid
+  // Gerar grid do calendário
   const calendarGrid = document.getElementById('calendarGrid');
   
   // Manter os cabeçalhos (primeiros 7 elementos)
@@ -1164,13 +1150,17 @@ function atualizarCalendario() {
     calendarGrid.appendChild(emptyDay);
   }
   
-  // Dias do mês - AGORA EM GRADE 7x[5-6]
+  // Dias do mês
   for (let dia = 1; dia <= diasNoMes; dia++) {
     const dayDiv = document.createElement('div');
     dayDiv.className = 'calendar-day';
     
     const dataDia = new Date(anoSelecionado, mesSelecionado, dia);
-    const diaSemanaNumero = dataDia.getDay();
+    
+    // Calcular dia da semana (0=Segunda, 6=Domingo)
+    let diaSemanaNumero = dataDia.getDay();
+    diaSemanaNumero = diaSemanaNumero === 0 ? 6 : diaSemanaNumero - 1;
+    
     const diaSemanaNome = DIAS_SEMANA[diaSemanaNumero];
     
     // Verificar se é hoje
