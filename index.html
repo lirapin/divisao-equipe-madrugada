@@ -26,6 +26,7 @@
       --success: #4caf50;
       --danger: #f44336;
       --info: #2196f3;
+      --warning: #ff9800;
       --calendar-bg: #ffffff;
       --calendar-header: #f5f5f5;
       --calendar-today: #e8f5e9;
@@ -180,6 +181,63 @@
       background: white;
     }
     
+    /* Controles de Armazenamento */
+    .storage-controls {
+      background: white;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border: 1px solid var(--border-color);
+      display: none;
+    }
+    
+    .storage-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .storage-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin: 0;
+    }
+    
+    .storage-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .storage-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: white;
+      color: var(--text-dark);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    
+    .storage-btn:hover {
+      background: #f5f5f5;
+    }
+    
+    .storage-btn.save {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    
+    .storage-btn.save:hover {
+      background: var(--primary-dark);
+    }
+    
     /* Calendário Tradicional */
     .calendar-container {
       background: white;
@@ -229,6 +287,51 @@
       background: #e8e8e8;
     }
     
+    /* Controles de Troca */
+    .swap-controls {
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      background: #f8fff8;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .swap-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+    
+    .swap-toggle input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .swap-toggle label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--primary);
+      cursor: pointer;
+      margin: 0;
+    }
+    
+    .swap-status {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: none;
+    }
+    
+    .swap-status.active {
+      display: block;
+      color: var(--info);
+      font-weight: 500;
+    }
+    
     /* Grid do Calendário - AGORA COMEÇA NA SEGUNDA */
     .calendar-grid {
       display: grid;
@@ -250,8 +353,6 @@
       color: var(--text-dark);
       text-transform: uppercase;
     }
-    
-    /* REMOVIDO: .calendar-weekday.weekend - Sábado agora é normal */
     
     /* Células dos dias */
     .calendar-day {
@@ -284,6 +385,25 @@
     
     .calendar-day.has-data {
       border-left: 3px solid var(--primary-light);
+    }
+    
+    /* Estilo para dias selecionados para troca */
+    .calendar-day.selected-for-swap {
+      background: #e3f2fd;
+      border-left: 3px solid var(--info);
+    }
+    
+    .calendar-day.swapped {
+      background: #f3e5f5;
+      border-left: 3px solid #9c27b0;
+    }
+    
+    .swap-icon {
+      position: absolute;
+      top: 0.3rem;
+      right: 0.3rem;
+      color: #9c27b0;
+      font-size: 0.8rem;
     }
     
     .calendar-day-number {
@@ -530,12 +650,21 @@
       color: white;
     }
     
+    .btn-warning-compact {
+      background: var(--warning);
+      color: white;
+    }
+    
     .btn-primary-compact:hover {
       background: var(--primary-dark);
     }
     
     .btn-danger-compact:hover {
       background: #c82333;
+    }
+    
+    .btn-warning-compact:hover {
+      background: #e68900;
     }
     
     /* Assinatura */
@@ -574,6 +703,95 @@
       color: #ddd;
       margin-bottom: 1rem;
     }
+    
+    /* Trocas Panel */
+    .trocas-panel {
+      background: white;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border: 1px solid var(--border-color);
+      display: none;
+    }
+    
+    .trocas-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .trocas-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin: 0;
+    }
+    
+    .trocas-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .troca-item {
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border-left: 4px solid #9c27b0;
+    }
+    
+    .troca-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .troca-info {
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .troca-pessoas {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    
+    .troca-obs {
+      font-size: 0.8rem;
+      color: #666;
+      font-style: italic;
+      padding-top: 0.5rem;
+      border-top: 1px dashed #ddd;
+    }
+    
+    .troca-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    
+    .troca-btn {
+      padding: 0.2rem 0.5rem;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      background: white;
+      cursor: pointer;
+    }
+    
+    .troca-btn.cancel {
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+    
+    .troca-btn.cancel:hover {
+      background: #f8d7da;
+    }
   </style>
 </head>
 <body>
@@ -600,6 +818,27 @@
       <p class="mb-1" style="font-size: 0.9rem; font-weight: 500;">Arraste e solte sua planilha aqui</p>
       <span class="small text-muted">Suporta XLSX, XLS e CSV</span>
       <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+    </div>
+  </div>
+
+  <!-- Controles de Armazenamento -->
+  <div class="storage-controls" id="storageControls">
+    <div class="storage-header">
+      <h5 class="storage-title">
+        <i class="bi bi-cloud me-2"></i>Armazenamento na Nuvem
+      </h5>
+      <div class="storage-buttons">
+        <button class="storage-btn save" onclick="salvarEscala()">
+          <i class="bi bi-cloud-upload"></i> Salvar Escala
+        </button>
+        <button class="storage-btn" onclick="carregarEscalaSalva()">
+          <i class="bi bi-cloud-download"></i> Carregar
+        </button>
+      </div>
+    </div>
+    <div class="small text-muted">
+      <i class="bi bi-info-circle me-1"></i>
+      A escala atual será salva com as trocas aplicadas. Use "Carregar" para recuperar a última versão salva.
     </div>
   </div>
 
@@ -651,6 +890,17 @@
   <!-- Calendário -->
   <div id="calendarSection" style="display: none;">
     
+    <!-- Controles de Troca -->
+    <div class="swap-controls">
+      <div class="swap-toggle">
+        <input type="checkbox" id="swapModeToggle">
+        <label for="swapModeToggle">Modo de Troca de Dias</label>
+      </div>
+      <div class="swap-status" id="swapStatus">
+        Selecione o primeiro dia para troca...
+      </div>
+    </div>
+
     <!-- Cabeçalho do Calendário com Navegação -->
     <div class="calendar-container">
       <div class="calendar-header">
@@ -680,8 +930,26 @@
       </div>
     </div>
 
+    <!-- Painel de Trocas -->
+    <div class="trocas-panel" id="trocasPanel">
+      <div class="trocas-header">
+        <h5 class="trocas-title">
+          <i class="bi bi-arrow-left-right me-2"></i>Trocas Registradas
+        </h5>
+        <button class="btn btn-sm btn-outline-secondary" onclick="limparTodasTrocas()">
+          <i class="bi bi-trash"></i> Limpar Todas
+        </button>
+      </div>
+      <div class="trocas-list" id="trocasList">
+        <!-- Lista de trocas será inserida aqui -->
+      </div>
+    </div>
+
     <!-- Ações -->
     <div class="action-buttons">
+      <button class="btn-compact btn-warning-compact" onclick="mostrarPainelTrocas()">
+        <i class="bi bi-arrow-left-right"></i> Ver Trocas
+      </button>
       <button class="btn-compact btn-danger-compact" id="btnExportarPDF">
         <i class="bi bi-filetype-pdf"></i> Exportar PDF
       </button>
@@ -715,6 +983,31 @@
   </div>
 </div>
 
+<!-- Modal para Confirmar Troca -->
+<div class="modal fade" id="swapModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-arrow-left-right me-2"></i>Confirmar Troca de Dias
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="swapDetails"></div>
+        <div class="mt-3">
+          <label for="swapObservation" class="form-label small">Observação (opcional):</label>
+          <textarea class="form-control form-control-sm" id="swapObservation" rows="2" placeholder="Motivo da troca..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-info btn-sm" onclick="confirmarTroca()">Confirmar Troca</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Assinatura -->
 <div class="main-container">
   <div class="assinatura">
@@ -740,7 +1033,7 @@ const PRIORIDADES = {
   5: {
     'CO/NO': ['CRISTIANE HERMOGENES DA SILVA', 'MARISTELLA MARCIA DOS SANTOS'],
     'NE/BA': ['RAISSA LIMA DE OLIVEIRA', 'MARISTELLA MARCIA DOS SANTOS'],
-    'MG': ['LEONARDO FERREIRA LIMA DE ALMEIDA', 'RAISSA LIMA DE OLiveIRA'],
+    'MG': ['LEONARDO FERREIRA LIMA DE ALMEIDA', 'RAISSA LIMA DE OLIVEIRA'],
     'RIO A': ['ALAN MARINHO DIAS', 'MARISTELLA MARCIA DOS SANTOS'],
     'RIO B': ['THIAGO PEREIRA DA SILVA', 'MARISTELLA MARCIA DOS SANTOS']
   }
@@ -753,15 +1046,33 @@ const MESES = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
+// Configuração do JSONBin.io
+const JSONBIN_CONFIG = {
+  BIN_ID: null, // Será gerado automaticamente
+  MASTER_KEY: '$2a$10$vL9U2J9yGkG5p5q5q5q5q5q5q5q5q5q5q5q5q5q5q5q5q5q5q5q5q', // Substitua pela sua chave
+  API_URL: 'https://api.jsonbin.io/v3/b'
+};
+
 // Variáveis globais
 let dadosPlanilha = [];
 let mesSelecionado = new Date().getMonth();
 let anoSelecionado = new Date().getFullYear();
 let dadosProcessados = {};
+let dadosOriginais = {}; // Para manter os dados originais da planilha
+
+// Sistema de trocas
+let modoTroca = false;
+let selecaoTroca = {
+  primeiro: null,
+  segundo: null
+};
+let trocasRegistradas = [];
 
 // Upload handlers
 const dropArea = document.getElementById('dropArea');
 const fileInput = document.getElementById('fileInput');
+const swapModeToggle = document.getElementById('swapModeToggle');
+const swapStatus = document.getElementById('swapStatus');
 
 ['dragenter', 'dragover'].forEach(evt => dropArea.addEventListener(evt, e => {
   e.preventDefault();
@@ -801,7 +1112,62 @@ document.addEventListener('DOMContentLoaded', function() {
   if (btnPDF) {
     btnPDF.addEventListener('click', gerarPDF);
   }
+  
+  // Listener para modo de troca
+  if (swapModeToggle) {
+    swapModeToggle.addEventListener('change', function() {
+      modoTroca = this.checked;
+      if (modoTroca) {
+        swapStatus.classList.add('active');
+        swapStatus.textContent = 'Selecione o primeiro dia para troca...';
+        resetarSelecaoTroca();
+      } else {
+        swapStatus.classList.remove('active');
+        resetarSelecaoTroca();
+        removerSelecoesCalendario();
+      }
+    });
+  }
+  
+  // Tentar carregar escala salva automaticamente
+  setTimeout(() => {
+    verificarEscalaSalva();
+  }, 500);
 });
+
+function verificarEscalaSalva() {
+  const escalaId = `escala-${mesSelecionado+1}-${anoSelecionado}`;
+  const saved = localStorage.getItem(escalaId);
+  
+  if (saved) {
+    const confirmar = confirm(`Encontramos uma escala salva para ${MESES[mesSelecionado]}/${anoSelecionado}. Deseja carregá-la?`);
+    if (confirmar) {
+      carregarDadosSalvos(JSON.parse(saved));
+    }
+  }
+}
+
+function carregarDadosSalvos(dados) {
+  if (!dados || !dados.dadosProcessados) return;
+  
+  dadosProcessados = dados.dadosProcessados;
+  dadosOriginais = JSON.parse(JSON.stringify(dadosProcessados)); // Cópia profunda
+  trocasRegistradas = dados.trocas || [];
+  
+  // Mostrar calendário
+  document.getElementById('calendarSection').style.display = 'block';
+  document.getElementById('uploadSection').style.display = 'none';
+  document.getElementById('configAccordion').style.display = 'block';
+  document.getElementById('storageControls').style.display = 'block';
+  
+  // Aplicar trocas nos dados
+  aplicarTrocasAosDados();
+  
+  atualizarCalendario();
+  atualizarPainelTrocas();
+  
+  showToast('✅ Escala carregada com sucesso!', 'success');
+}
 
 function aplicarConfiguracao() {
   mesSelecionado = parseInt(document.getElementById('mesSelect').value);
@@ -898,8 +1264,9 @@ function processarArquivo(file) {
       
       dadosPlanilha = dados;
       
-      // Mostrar seção de configuração
+      // Mostrar seção de configuração e armazenamento
       document.getElementById('configAccordion').style.display = 'block';
+      document.getElementById('storageControls').style.display = 'block';
       
       setTimeout(() => {
         processarDadosPlanilha();
@@ -1064,6 +1431,9 @@ function processarDadosPlanilha() {
       }
     }
     
+    // Salvar cópia dos dados originais
+    dadosOriginais = JSON.parse(JSON.stringify(dadosProcessados));
+    
     // Mostrar calendário
     document.getElementById('calendarSection').style.display = 'block';
     document.getElementById('uploadSection').style.display = 'none';
@@ -1121,6 +1491,417 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
   return divisao;
 }
 
+// SISTEMA DE TROCAS
+function handleDiaClick(dia) {
+  if (!modoTroca) {
+    mostrarDetalhesDia(dia);
+    return;
+  }
+  
+  const dadosDia = getDadosDiaComTrocas(dia);
+  if (!dadosDia) {
+    showToast('❌ Este dia não tem dados para troca', 'warning');
+    return;
+  }
+  
+  if (!selecaoTroca.primeiro) {
+    // Primeira seleção
+    selecaoTroca.primeiro = dia;
+    swapStatus.textContent = `Selecionado: Dia ${dia}. Agora selecione o segundo dia...`;
+    atualizarSelecaoVisual();
+  } else if (!selecaoTroca.segundo && selecaoTroca.primeiro !== dia) {
+    // Segunda seleção
+    selecaoTroca.segundo = dia;
+    
+    // Validar troca
+    const dadosDia1 = getDadosDiaComTrocas(selecaoTroca.primeiro);
+    const dadosDia2 = getDadosDiaComTrocas(dia);
+    
+    if (!dadosDia1 || !dadosDia2) {
+      showToast('❌ Um dos dias selecionados não tem dados', 'warning');
+      resetarSelecaoTroca();
+      return;
+    }
+    
+    // Verificar se já existe troca envolvendo esses dias
+    const conflito = trocasRegistradas.some(troca => 
+      (troca.dia_a === selecaoTroca.primeiro || troca.dia_b === selecaoTroca.primeiro ||
+       troca.dia_a === dia || troca.dia_b === dia) && troca.status === 'ativa');
+    
+    if (conflito) {
+      showToast('❌ Um dos dias já está envolvido em uma troca', 'warning');
+      resetarSelecaoTroca();
+      return;
+    }
+    
+    // Mostrar modal de confirmação
+    mostrarModalConfirmacaoTroca(dadosDia1, dadosDia2);
+  }
+}
+
+function getDadosDiaComTrocas(dia) {
+  // Retorna os dados do dia aplicando as trocas registradas
+  let dados = dadosProcessados[dia];
+  if (!dados) return null;
+  
+  // Aplicar trocas
+  const troca = trocasRegistradas.find(t => 
+    (t.dia_a === dia || t.dia_b === dia) && t.status === 'ativa'
+  );
+  
+  if (troca) {
+    // Se este dia está em uma troca, precisamos mostrar os dados trocados
+    if (troca.dia_a === dia) {
+      // Este dia foi trocado com dia_b
+      const dadosOriginaisDiaA = dadosOriginais[dia];
+      const dadosOriginaisDiaB = dadosOriginais[troca.dia_b];
+      
+      if (dadosOriginaisDiaA && dadosOriginaisDiaB) {
+        // Criar dados trocados: pessoa B no dia A
+        const dadosTrocados = {
+          ...dadosOriginaisDiaA,
+          trabalhando: dadosOriginaisDiaB.trabalhando,
+          divisao: {}
+        };
+        
+        // Manter a mesma área, mas com a pessoa do outro dia
+        Object.keys(dadosOriginaisDiaA.divisao).forEach(area => {
+          const pessoaOriginal = dadosOriginaisDiaA.divisao[area];
+          const pessoaTrocada = dadosOriginaisDiaB.trabalhando.includes(pessoaOriginal) 
+            ? pessoaOriginal 
+            : dadosOriginaisDiaB.trabalhando[0];
+          dadosTrocados.divisao[area] = pessoaTrocada;
+        });
+        
+        return dadosTrocados;
+      }
+    }
+  }
+  
+  return dados;
+}
+
+function mostrarModalConfirmacaoTroca(dadosDia1, dadosDia2) {
+  const modal = new bootstrap.Modal(document.getElementById('swapModal'));
+  const swapDetails = document.getElementById('swapDetails');
+  
+  // Encontrar as pessoas principais (primeira de cada lista)
+  const pessoa1 = dadosDia1.trabalhando[0];
+  const pessoa2 = dadosDia2.trabalhando[0];
+  
+  // Encontrar as áreas de cada pessoa
+  const area1 = Object.entries(dadosDia1.divisao).find(([area, pessoa]) => pessoa === pessoa1)?.[0] || 'Área';
+  const area2 = Object.entries(dadosDia2.divisao).find(([area, pessoa]) => pessoa === pessoa2)?.[0] || 'Área';
+  
+  swapDetails.innerHTML = `
+    <p><strong>Troca proposta:</strong></p>
+    <div class="row">
+      <div class="col-6">
+        <div class="card border-info mb-2">
+          <div class="card-body p-2">
+            <h6 class="card-title mb-1">${pessoa1}</h6>
+            <p class="card-text small mb-1">
+              <strong>Dia ${selecaoTroca.primeiro}:</strong> ${area1}<br>
+              <small>Trabalhando: ${dadosDia1.trabalhando.length} pessoa(s)</small>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="card border-info mb-2">
+          <div class="card-body p-2">
+            <h6 class="card-title mb-1">${pessoa2}</h6>
+            <p class="card-text small mb-1">
+              <strong>Dia ${selecaoTroca.segundo}:</strong> ${area2}<br>
+              <small>Trabalhando: ${dadosDia2.trabalhando.length} pessoa(s)</small>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="small text-muted mt-2">
+      <i class="bi bi-info-circle me-1"></i>
+      ${pessoa1} trabalhará no dia ${selecaoTroca.segundo} (${area2}) e 
+      ${pessoa2} trabalhará no dia ${selecaoTroca.primeiro} (${area1}).
+    </p>
+  `;
+  
+  modal.show();
+}
+
+function confirmarTroca() {
+  const observacao = document.getElementById('swapObservation').value;
+  const dadosDia1 = getDadosDiaComTrocas(selecaoTroca.primeiro);
+  const dadosDia2 = getDadosDiaComTrocas(selecaoTroca.segundo);
+  
+  const pessoa1 = dadosDia1.trabalhando[0];
+  const pessoa2 = dadosDia2.trabalhando[0];
+  
+  const area1 = Object.entries(dadosDia1.divisao).find(([area, pessoa]) => pessoa === pessoa1)?.[0] || 'Área';
+  const area2 = Object.entries(dadosDia2.divisao).find(([area, pessoa]) => pessoa === pessoa2)?.[0] || 'Área';
+  
+  const novaTroca = {
+    id: 'troca-' + Date.now(),
+    data_registro: new Date().toISOString().split('T')[0],
+    dia_a: selecaoTroca.primeiro,
+    pessoa_a: pessoa1,
+    area_a: area1,
+    dia_b: selecaoTroca.segundo,
+    pessoa_b: pessoa2,
+    area_b: area2,
+    observacao: observacao,
+    status: 'ativa'
+  };
+  
+  trocasRegistradas.push(novaTroca);
+  
+  // Fechar modal
+  const modal = bootstrap.Modal.getInstance(document.getElementById('swapModal'));
+  modal.hide();
+  
+  // Resetar seleção
+  resetarSelecaoTroca();
+  
+  // Atualizar visualização
+  aplicarTrocasAosDados();
+  atualizarCalendario();
+  atualizarPainelTrocas();
+  
+  // Mostrar painel de trocas
+  mostrarPainelTrocas();
+  
+  showToast('✅ Troca registrada com sucesso!', 'success');
+}
+
+function aplicarTrocasAosDados() {
+  // Restaurar dados originais
+  dadosProcessados = JSON.parse(JSON.stringify(dadosOriginais));
+  
+  // Aplicar cada troca ativa
+  trocasRegistradas
+    .filter(troca => troca.status === 'ativa')
+    .forEach(troca => {
+      // Trocar as pessoas entre os dias
+      const diaA = dadosProcessados[troca.dia_a];
+      const diaB = dadosProcessados[troca.dia_b];
+      
+      if (diaA && diaB) {
+        // Encontrar índice das pessoas nos arrays de trabalhando
+        const idxA = diaA.trabalhando.indexOf(troca.pessoa_a);
+        const idxB = diaB.trabalhando.indexOf(troca.pessoa_b);
+        
+        if (idxA !== -1 && idxB !== -1) {
+          // Trocar as pessoas nos arrays
+          [diaA.trabalhando[idxA], diaB.trabalhando[idxB]] = [diaB.trabalhando[idxB], diaA.trabalhando[idxA]];
+          
+          // Atualizar a divisão de áreas
+          Object.keys(diaA.divisao).forEach(area => {
+            if (diaA.divisao[area] === troca.pessoa_a) {
+              diaA.divisao[area] = troca.pessoa_b;
+            }
+          });
+          
+          Object.keys(diaB.divisao).forEach(area => {
+            if (diaB.divisao[area] === troca.pessoa_b) {
+              diaB.divisao[area] = troca.pessoa_a;
+            }
+          });
+        }
+      }
+    });
+}
+
+function resetarSelecaoTroca() {
+  selecaoTroca = {
+    primeiro: null,
+    segundo: null
+  };
+  removerSelecoesCalendario();
+}
+
+function removerSelecoesCalendario() {
+  document.querySelectorAll('.calendar-day.selected-for-swap').forEach(el => {
+    el.classList.remove('selected-for-swap');
+  });
+}
+
+function atualizarSelecaoVisual() {
+  removerSelecoesCalendario();
+  
+  if (selecaoTroca.primeiro) {
+    const diaElement = document.querySelector(`.calendar-day[data-dia="${selecaoTroca.primeiro}"]`);
+    if (diaElement) {
+      diaElement.classList.add('selected-for-swap');
+    }
+  }
+}
+
+// ARMAZENAMENTO COM JSONBin.io E LOCALSTORAGE
+async function salvarEscala() {
+  showLoading();
+  
+  try {
+    const dadosParaSalvar = {
+      escala_id: `escala-${mesSelecionado+1}-${anoSelecionado}`,
+      mes: mesSelecionado,
+      ano: anoSelecionado,
+      ultima_atualizacao: new Date().toISOString(),
+      dadosProcessados: dadosOriginais, // Salvar dados originais
+      trocas: trocasRegistradas
+    };
+    
+    // Salvar no localStorage (solução mais simples)
+    const chave = `escala-${mesSelecionado+1}-${anoSelecionado}`;
+    localStorage.setItem(chave, JSON.stringify(dadosParaSalvar));
+    
+    // Tentar salvar no JSONBin.io se tiver API key configurada
+    if (JSONBIN_CONFIG.MASTER_KEY && JSONBIN_CONFIG.MASTER_KEY !== '$2a$10$vL9U2J9yGkG5p5q5q5q5q5q5q5q5q5q5q5q5q5q5q5q5q5q5q5q5q') {
+      await salvarNoJSONBin(dadosParaSalvar);
+    }
+    
+    showToast('✅ Escala salva com sucesso!', 'success');
+  } catch (error) {
+    console.error('Erro ao salvar escala:', error);
+    showToast('❌ Erro ao salvar escala', 'danger');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function salvarNoJSONBin(dados) {
+  try {
+    const response = await fetch(JSONBIN_CONFIG.API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
+        'X-Bin-Name': `Escala ${MESES[mesSelecionado]} ${anoSelecionado}`
+      },
+      body: JSON.stringify(dados)
+    });
+    
+    if (!response.ok) throw new Error('Falha ao salvar no JSONBin');
+    
+    const result = await response.json();
+    JSONBIN_CONFIG.BIN_ID = result.metadata.id;
+    
+    showToast('✅ Escala salva na nuvem!', 'success');
+  } catch (error) {
+    console.warn('Não foi possível salvar na nuvem, usando localStorage:', error);
+    // Continua com localStorage apenas
+  }
+}
+
+async function carregarEscalaSalva() {
+  showLoading();
+  
+  try {
+    // Primeiro tentar do localStorage
+    const chave = `escala-${mesSelecionado+1}-${anoSelecionado}`;
+    const saved = localStorage.getItem(chave);
+    
+    if (saved) {
+      carregarDadosSalvos(JSON.parse(saved));
+    } else {
+      // Tentar do JSONBin se tiver ID
+      if (JSONBIN_CONFIG.BIN_ID) {
+        await carregarDoJSONBin();
+      } else {
+        showToast('⚠️ Nenhuma escala salva encontrada para este mês', 'warning');
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao carregar escala:', error);
+    showToast('❌ Erro ao carregar escala', 'danger');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function carregarDoJSONBin() {
+  try {
+    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}/latest`, {
+      headers: {
+        'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY
+      }
+    });
+    
+    if (!response.ok) throw new Error('Falha ao carregar do JSONBin');
+    
+    const result = await response.json();
+    carregarDadosSalvos(result.record);
+  } catch (error) {
+    console.error('Erro ao carregar da nuvem:', error);
+    showToast('❌ Não foi possível carregar da nuvem', 'danger');
+  }
+}
+
+// PAINEL DE TROCAS
+function mostrarPainelTrocas() {
+  const panel = document.getElementById('trocasPanel');
+  panel.style.display = 'block';
+  atualizarPainelTrocas();
+}
+
+function atualizarPainelTrocas() {
+  const trocasList = document.getElementById('trocasList');
+  const trocasAtivas = trocasRegistradas.filter(t => t.status === 'ativa');
+  
+  if (trocasAtivas.length === 0) {
+    trocasList.innerHTML = `
+      <div class="text-center text-muted py-3">
+        <i class="bi bi-arrow-left-right" style="font-size: 2rem;"></i>
+        <p class="mt-2">Nenhuma troca registrada</p>
+      </div>
+    `;
+    return;
+  }
+  
+  trocasList.innerHTML = trocasAtivas.map(troca => `
+    <div class="troca-item">
+      <div class="troca-info">
+        <strong>Troca #${troca.id.split('-')[1]}</strong>
+        <small class="text-muted float-end">${troca.data_registro}</small>
+      </div>
+      <div class="troca-pessoas">
+        <span>${troca.pessoa_a} (Dia ${troca.dia_a})</span>
+        <i class="bi bi-arrow-left-right"></i>
+        <span>${troca.pessoa_b} (Dia ${troca.dia_b})</span>
+      </div>
+      ${troca.observacao ? `<div class="troca-obs">${troca.observacao}</div>` : ''}
+      <div class="troca-actions">
+        <button class="troca-btn cancel" onclick="cancelarTroca('${troca.id}')">
+          <i class="bi bi-x-circle"></i> Cancelar Troca
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function cancelarTroca(trocaId) {
+  const troca = trocasRegistradas.find(t => t.id === trocaId);
+  if (troca) {
+    troca.status = 'cancelada';
+    aplicarTrocasAosDados();
+    atualizarCalendario();
+    atualizarPainelTrocas();
+    showToast('✅ Troca cancelada!', 'success');
+  }
+}
+
+function limparTodasTrocas() {
+  if (confirm('Tem certeza que deseja limpar TODAS as trocas registradas?')) {
+    trocasRegistradas.forEach(troca => {
+      troca.status = 'cancelada';
+    });
+    aplicarTrocasAosDados();
+    atualizarCalendario();
+    atualizarPainelTrocas();
+    showToast('✅ Todas as trocas foram canceladas!', 'success');
+  }
+}
+
+// CALENDÁRIO
 function atualizarCalendario() {
   const hoje = new Date();
   const primeiroDiaMes = new Date(anoSelecionado, mesSelecionado, 1);
@@ -1154,6 +1935,7 @@ function atualizarCalendario() {
   for (let dia = 1; dia <= diasNoMes; dia++) {
     const dayDiv = document.createElement('div');
     dayDiv.className = 'calendar-day';
+    dayDiv.setAttribute('data-dia', dia);
     
     const dataDia = new Date(anoSelecionado, mesSelecionado, dia);
     
@@ -1171,10 +1953,21 @@ function atualizarCalendario() {
     }
     
     // Verificar se há dados para este dia
-    const dadosDia = dadosProcessados[dia];
+    const dadosDia = getDadosDiaComTrocas(dia);
     if (dadosDia) {
       dayDiv.classList.add('has-data');
-      dayDiv.onclick = () => mostrarDetalhesDia(dia);
+      
+      // Verificar se este dia está em uma troca ativa
+      const temTroca = trocasRegistradas.some(troca => 
+        (troca.dia_a === dia || troca.dia_b === dia) && troca.status === 'ativa'
+      );
+      
+      if (temTroca) {
+        dayDiv.classList.add('swapped');
+      }
+      
+      // Adicionar evento de clique
+      dayDiv.onclick = () => handleDiaClick(dia);
     }
     
     let content = `
@@ -1186,6 +1979,15 @@ function atualizarCalendario() {
       content += `<div class="calendar-day-stats">${dadosDia.numPessoas} pessoa(s)</div>`;
       if (dadosDia.ausentes.length > 0) {
         content += `<div class="calendar-day-absent">${dadosDia.ausentes.length} ausente(s)</div>`;
+      }
+      
+      // Adicionar ícone de troca se houver
+      const temTroca = trocasRegistradas.some(troca => 
+        (troca.dia_a === dia || troca.dia_b === dia) && troca.status === 'ativa'
+      );
+      
+      if (temTroca) {
+        content += `<div class="swap-icon"><i class="bi bi-arrow-left-right"></i></div>`;
       }
     }
     
@@ -1205,14 +2007,26 @@ function atualizarCalendario() {
 }
 
 function mostrarDetalhesDia(dia) {
-  const dadosDia = dadosProcessados[dia];
+  const dadosDia = getDadosDiaComTrocas(dia);
   if (!dadosDia) return;
+  
+  // Verificar se há troca para este dia
+  const trocaDia = trocasRegistradas.find(t => 
+    (t.dia_a === dia || t.dia_b === dia) && t.status === 'ativa'
+  );
   
   const modal = new bootstrap.Modal(document.getElementById('dayModal'));
   const modalTitle = document.getElementById('dayModalTitle');
   const modalContent = document.getElementById('dayModalContent');
   
-  modalTitle.textContent = `Dia ${dia} (${dadosDia.diaSemana}) - ${dadosDia.numPessoas} pessoa(s) trabalhando`;
+  let tituloExtra = '';
+  if (trocaDia) {
+    const outroDia = trocaDia.dia_a === dia ? trocaDia.dia_b : trocaDia.dia_a;
+    const outraPessoa = trocaDia.dia_a === dia ? trocaDia.pessoa_b : trocaDia.pessoa_a;
+    tituloExtra = ` <span class="badge bg-purple">Trocado com ${outraPessoa} (dia ${outroDia})</span>`;
+  }
+  
+  modalTitle.innerHTML = `Dia ${dia} (${dadosDia.diaSemana}) - ${dadosDia.numPessoas} pessoa(s) trabalhando${tituloExtra}`;
   
   let html = `
     <div class="day-content">
@@ -1220,6 +2034,7 @@ function mostrarDetalhesDia(dia) {
         <div class="area-title">
           <i class="bi bi-diagram-3"></i>
           <span>Divisão de Áreas</span>
+          ${trocaDia ? '<span class="badge bg-info ms-2">COM TROCA</span>' : ''}
         </div>
         <div class="area-grid">
   `;
@@ -1230,7 +2045,10 @@ function mostrarDetalhesDia(dia) {
         html += `
           <div class="area-item">
             <span class="area-label">${area}</span>
-            <div class="funcionario-name" title="${pessoa}">${pessoa}</div>
+            <div class="funcionario-name" title="${pessoa}">
+              ${pessoa}
+              ${trocaDia ? ' <i class="bi bi-arrow-left-right text-purple"></i>' : ''}
+            </div>
           </div>
         `;
       }
@@ -1287,6 +2105,25 @@ function mostrarDetalhesDia(dia) {
     html += `</div></div>`;
   }
   
+  // Adicionar informações da troca se houver
+  if (trocaDia) {
+    const outroDia = trocaDia.dia_a === dia ? trocaDia.dia_b : trocaDia.dia_a;
+    const outraPessoa = trocaDia.dia_a === dia ? trocaDia.pessoa_b : trocaDia.pessoa_a;
+    const outraArea = trocaDia.dia_a === dia ? trocaDia.area_b : trocaDia.area_a;
+    
+    html += `
+        <div class="status-group mt-3">
+          <div class="status-group-title">Informações da Troca</div>
+          <div class="alert alert-info p-2 small">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Trocado com:</strong> ${outraPessoa} (Dia ${outroDia} - ${outraArea})<br>
+            ${trocaDia.observacao ? `<strong>Motivo:</strong> ${trocaDia.observacao}<br>` : ''}
+            <strong>Registrado em:</strong> ${trocaDia.data_registro}
+          </div>
+        </div>
+    `;
+  }
+  
   html += `
       </div>
     </div>
@@ -1296,6 +2133,7 @@ function mostrarDetalhesDia(dia) {
   modal.show();
 }
 
+// EXPORTAR PDF COM TROCAS
 function gerarPDF() {
   if (Object.keys(dadosProcessados).length === 0) {
     showToast('❌ Nenhum dado para exportar', 'danger');
@@ -1305,6 +2143,8 @@ function gerarPDF() {
   showLoading();
   
   try {
+    const trocasAtivas = trocasRegistradas.filter(t => t.status === 'ativa');
+    
     const docDefinition = {
       pageSize: 'A4',
       pageOrientation: 'portrait',
@@ -1360,9 +2200,54 @@ function gerarPDF() {
           fontSize: 8,
           color: '#555555',
           margin: [8, 0, 0, 0]
+        },
+        trocaHeader: {
+          fontSize: 10,
+          bold: true,
+          color: '#9c27b0',
+          margin: [0, 8, 0, 4]
+        },
+        trocaText: {
+          fontSize: 8,
+          color: '#7b1fa2',
+          margin: [4, 0, 0, 0]
         }
       }
     };
+    
+    // Adicionar seção de trocas se houver
+    if (trocasAtivas.length > 0) {
+      docDefinition.content.push({
+        text: `TROCAS REGISTRADAS (${trocasAtivas.length})`,
+        style: 'trocaHeader',
+        margin: [0, 0, 0, 10]
+      });
+      
+      trocasAtivas.forEach((troca, index) => {
+        docDefinition.content.push({
+          text: `Troca ${index + 1}: ${troca.pessoa_a} (Dia ${troca.dia_a}) ↔ ${troca.pessoa_b} (Dia ${troca.dia_b})`,
+          style: 'trocaText'
+        });
+        
+        if (troca.observacao) {
+          docDefinition.content.push({
+            text: `Motivo: ${troca.observacao}`,
+            style: 'trocaText',
+            margin: [10, 0, 0, 0]
+          });
+        }
+        
+        docDefinition.content.push({
+          text: '',
+          margin: [0, 0, 0, 5]
+        });
+      });
+      
+      docDefinition.content.push({
+        text: '',
+        margin: [0, 0, 0, 15]
+      });
+    }
     
     // Ordenar dias
     const diasOrdenados = Object.keys(dadosProcessados)
@@ -1370,11 +2255,13 @@ function gerarPDF() {
       .sort((a, b) => a - b);
     
     diasOrdenados.forEach((dia, index) => {
-      const dadosDia = dadosProcessados[dia];
+      const dadosDia = getDadosDiaComTrocas(dia);
+      const temTroca = trocasAtivas.some(troca => troca.dia_a === dia || troca.dia_b === dia);
       
       docDefinition.content.push({
-        text: `Dia ${dia} (${dadosDia.diaSemana}) - ${dadosDia.numPessoas} pessoas`,
-        style: 'diaHeader'
+        text: `Dia ${dia} (${dadosDia.diaSemana}) - ${dadosDia.numPessoas} pessoas${temTroca ? ' [COM TROCA]' : ''}`,
+        style: 'diaHeader',
+        color: temTroca ? '#9c27b0' : '#2e7d32'
       });
       
       if (Object.keys(dadosDia.divisao).length > 0) {
@@ -1437,7 +2324,7 @@ function gerarPDF() {
     });
     
     pdfMake.createPdf(docDefinition).download(`divisao-${mesSelecionado+1}-${anoSelecionado}.pdf`);
-    showToast('✅ PDF exportado!', 'success');
+    showToast('✅ PDF exportado com sucesso!', 'success');
   } catch (error) {
     console.error('Erro ao gerar PDF:', error);
     showToast('❌ Erro ao exportar PDF', 'danger');
