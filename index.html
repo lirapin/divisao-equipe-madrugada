@@ -48,8 +48,10 @@
     .app-header {
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       color: #fff;
-      padding: 0.75rem 0;
-      margin-bottom: 1.5rem;
+      padding: 1rem 0;
+      margin-bottom: 0;
+      position: relative;
+      z-index: 100;
     }
     
     .brand-dot {
@@ -66,112 +68,101 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 1rem;
+      position: relative;
     }
     
-    /* Controles Admin */
+    /* Controles Admin - AGORA ABAIXO DO CABEÇALHO */
     .admin-controls {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
+      background: white;
+      border-radius: 0 0 10px 10px;
+      padding: 0.75rem 1rem;
+      margin: 0 auto 1.5rem;
+      max-width: 1200px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      z-index: 1000;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      align-items: center;
+      border-top: 3px solid var(--warning);
     }
     
     .user-controls {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      z-index: 1000;
+      background: white;
+      border-radius: 0 0 10px 10px;
+      padding: 0.75rem 1rem;
+      margin: 0 auto 1.5rem;
+      max-width: 1200px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      align-items: center;
+      border-top: 3px solid var(--primary);
     }
     
     .refresh-btn {
-      position: relative;
       background: var(--primary);
       color: white;
       border: none;
-      border-radius: 50%;
+      border-radius: 8px;
       width: 40px;
       height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
       transition: all 0.3s;
     }
     
     .refresh-btn:hover {
       background: var(--primary-dark);
-      transform: rotate(90deg) scale(1.1);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
     
     .refresh-btn.upload-admin {
       background: var(--warning);
+      color: #333;
     }
     
     .refresh-btn.upload-admin:hover {
       background: #e68900;
-      transform: scale(1.1);
+      color: white;
     }
     
     .refresh-btn.logout-admin {
       background: var(--danger);
+      color: white;
     }
     
     .refresh-btn.logout-admin:hover {
       background: #c82333;
-      transform: scale(1.1);
     }
     
     /* Indicador de modo */
     .mode-indicator {
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      background: rgba(0,0,0,0.8);
-      color: white;
-      padding: 0.3rem 0.8rem;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      z-index: 999;
-      display: flex;
+      background: rgba(0,0,0,0.05);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.5rem;
+      margin-right: auto;
+      font-weight: 500;
     }
     
     .mode-indicator.admin {
-      background: var(--warning);
+      background: rgba(255, 152, 0, 0.15);
+      color: #e68900;
+      border-left: 4px solid var(--warning);
     }
     
     .mode-indicator.viewer {
-      background: var(--primary);
-    }
-    
-    /* Upload Area */
-    .upload-section {
-      background: white;
-      border-radius: 10px;
-      padding: 1.25rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      border: 1px solid var(--border-color);
-    }
-    
-    .upload-drop {
-      border: 2px dashed var(--accent);
-      border-radius: 8px;
-      padding: 1.5rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: #f8fff8;
-    }
-    
-    .upload-drop:hover, .upload-drop.dragover {
-      background: #f0f7f0;
-      border-color: var(--primary);
+      background: rgba(46, 125, 50, 0.15);
+      color: var(--primary-dark);
+      border-left: 4px solid var(--primary);
     }
     
     /* Configuração de Mês/Ano em Acordeão */
@@ -235,63 +226,6 @@
       border-radius: 6px;
       font-size: 0.9rem;
       background: white;
-    }
-    
-    /* Controles de Armazenamento */
-    .storage-controls {
-      background: white;
-      border-radius: 10px;
-      padding: 1rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      border: 1px solid var(--border-color);
-      display: none;
-    }
-    
-    .storage-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    
-    .storage-title {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--primary);
-      margin: 0;
-    }
-    
-    .storage-buttons {
-      display: flex;
-      gap: 0.5rem;
-    }
-    
-    .storage-btn {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.8rem;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      background: white;
-      color: var(--text-dark);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-    
-    .storage-btn:hover {
-      background: #f5f5f5;
-    }
-    
-    .storage-btn.save {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-    
-    .storage-btn.save:hover {
-      background: var(--primary-dark);
     }
     
     /* Calendário Tradicional */
@@ -557,9 +491,16 @@
         padding: 0.1rem 0.3rem;
       }
       
-      .admin-controls {
-        flex-direction: row;
-        gap: 0.3rem;
+      .admin-controls,
+      .user-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .mode-indicator {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 0.5rem;
       }
     }
     
@@ -752,6 +693,11 @@
       z-index: 9999;
     }
     
+    .loading-overlay .spinner-border {
+      width: 3rem;
+      height: 3rem;
+    }
+    
     /* Mensagens */
     .empty-message {
       text-align: center;
@@ -853,25 +799,99 @@
     .troca-btn.cancel:hover {
       background: #f8d7da;
     }
+    
+    /* Modal de Login - NOVO DESIGN */
+    #loginModal .modal-content {
+      border-radius: 12px;
+      border: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    
+    #loginModal .modal-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border-radius: 12px 12px 0 0;
+      padding: 1.5rem;
+      text-align: center;
+      border: none;
+    }
+    
+    #loginModal .modal-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    
+    #loginModal .modal-body {
+      padding: 2rem;
+    }
+    
+    .login-option {
+      margin-bottom: 2rem;
+    }
+    
+    .login-divider {
+      text-align: center;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+    
+    .login-divider::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border-color);
+    }
+    
+    .login-divider span {
+      background: white;
+      padding: 0 1rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      position: relative;
+    }
+    
+    .pin-section {
+      background: #f8fdf8;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .pin-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    
+    #pinError {
+      margin-top: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 6px;
+      display: none;
+    }
   </style>
 </head>
 <body>
 <header class="app-header">
   <div class="main-container">
-    <h1 class="h6 m-0 fw-bold"><span class="brand-dot"></span>Portal de divisão de tarefas</h1>
+    <h1 class="h5 m-0 fw-bold"><span class="brand-dot"></span>Portal de divisão de tarefas</h1>
   </div>
 </header>
 
-<!-- Indicador de Modo -->
-<div class="mode-indicator" id="modeIndicator" style="display: none;">
-  <i class="bi bi-person"></i>
-  <span>Carregando...</span>
-</div>
-
 <!-- Controles Admin (aparece apenas para admin) -->
 <div class="admin-controls" id="adminControls" style="display: none;">
+  <div class="mode-indicator admin">
+    <i class="bi bi-shield-check"></i>
+    <span>Modo Administrador</span>
+  </div>
+  
   <!-- Botão Upload Admin -->
-  <button class="refresh-btn upload-admin" id="btnUploadAdmin" title="Upload da planilha (apenas admin)">
+  <button class="refresh-btn upload-admin" id="btnUploadAdmin" title="Upload da planilha">
     <i class="bi bi-cloud-arrow-up"></i>
     <input type="file" id="fileInputAdmin" accept=".xlsx,.xls,.csv" style="display: none;">
   </button>
@@ -889,6 +909,11 @@
 
 <!-- Controles Usuário (aparece apenas para visualizadores) -->
 <div class="user-controls" id="userControls" style="display: none;">
+  <div class="mode-indicator viewer">
+    <i class="bi bi-eye"></i>
+    <span>Modo Visualização</span>
+  </div>
+  
   <button class="refresh-btn" onclick="location.reload()" title="Recarregar página">
     <i class="bi bi-arrow-clockwise"></i>
   </button>
@@ -969,9 +994,8 @@
         </div>
       </div>
 
-      <!-- Grid do Calendário - AGORA COMEÇA NA SEGUNDA -->
+      <!-- Grid do Calendário -->
       <div class="calendar-grid" id="calendarGrid">
-        <!-- Cabeçalhos dos dias da semana - SEGUNDA É O PRIMEIRO -->
         <div class="calendar-weekday">SEG</div>
         <div class="calendar-weekday">TER</div>
         <div class="calendar-weekday">QUA</div>
@@ -979,8 +1003,6 @@
         <div class="calendar-weekday">SEX</div>
         <div class="calendar-weekday">SÁB</div>
         <div class="calendar-weekday">DOM</div>
-        
-        <!-- Dias serão inseridos DIRETAMENTE aqui -->
       </div>
     </div>
 
@@ -995,7 +1017,6 @@
         </button>
       </div>
       <div class="trocas-list" id="trocasList">
-        <!-- Lista de trocas será inserida aqui -->
       </div>
     </div>
 
@@ -1076,7 +1097,6 @@
         <div id="selectPersonContent">
           <p class="text-center mb-3">Selecione a pessoa para troca:</p>
           <div id="personList" class="list-group">
-            <!-- Lista de pessoas será inserida aqui -->
           </div>
         </div>
       </div>
@@ -1087,40 +1107,58 @@
   </div>
 </div>
 
-<!-- Modal para Login PIN -->
+<!-- Modal para Login PIN - NOVO DESIGN -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog modal-sm">
+  <div class="modal-dialog modal-md">
     <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title">
-          <i class="bi bi-shield-lock me-2"></i>Acesso Administrativo
+      <div class="modal-header">
+        <h5 class="modal-title text-center w-100">
+          <i class="bi bi-calendar-check me-2"></i>Acesso ao Portal
         </h5>
       </div>
       <div class="modal-body">
-        <div class="text-center mb-3">
-          <i class="bi bi-person-badge text-primary" style="font-size: 2.5rem;"></i>
-          <p class="mt-2 small text-muted">Digite o PIN de administrador</p>
+        <div class="login-option text-center">
+          <i class="bi bi-eye text-primary mb-3" style="font-size: 3rem;"></i>
+          <h5 class="mb-3">Visualizar Escala</h5>
+          <p class="text-muted mb-4">Veja a escala atual sem fazer alterações</p>
+          <button type="button" class="btn btn-primary btn-lg w-100 py-3" onclick="entrarComoVisualizador()">
+            <i class="bi bi-eye me-2"></i>Visualizar Escala
+          </button>
         </div>
-        <div class="mb-3">
-          <input type="password" 
-                 class="form-control form-control-lg text-center" 
-                 id="pinInput" 
-                 placeholder="****"
-                 maxlength="10"
-                 autocomplete="off">
-          <div class="form-text text-center">PIN necessário para modificar dados</div>
+        
+        <div class="login-divider">
+          <span>ou</span>
         </div>
-        <div id="pinError" class="alert alert-danger py-2 small" style="display: none;">
-          <i class="bi bi-exclamation-triangle me-1"></i> PIN incorreto
+        
+        <div class="pin-section">
+          <h6 class="text-center mb-3">
+            <i class="bi bi-shield-lock me-2"></i>Acesso Administrativo
+          </h6>
+          <p class="small text-muted text-center mb-3">
+            Digite o PIN para modificar a escala
+          </p>
+          
+          <div class="mb-3">
+            <label class="pin-label">PIN de administrador:</label>
+            <input type="password" 
+                   class="form-control form-control-lg text-center" 
+                   id="pinInput" 
+                   placeholder="home.2025"
+                   autocomplete="off">
+            <div class="form-text text-center mt-1">
+              <i class="bi bi-info-circle me-1"></i>
+              Use o PIN para fazer upload e alterações
+            </div>
+          </div>
+          
+          <div id="pinError" class="alert alert-danger py-2 small" style="display: none;">
+            <i class="bi bi-exclamation-triangle me-1"></i> PIN incorreto. Tente novamente.
+          </div>
+          
+          <button type="button" class="btn btn-outline-primary w-100 mt-2" onclick="verificarPin()">
+            <i class="bi bi-unlock me-2"></i>Acessar como Administrador
+          </button>
         </div>
-      </div>
-      <div class="modal-footer justify-content-center">
-        <button type="button" class="btn btn-primary w-100" onclick="verificarPin()">
-          <i class="bi bi-unlock me-2"></i>Acessar como Admin
-        </button>
-        <button type="button" class="btn btn-outline-secondary w-100 mt-2" onclick="entrarComoVisualizador()">
-          <i class="bi bi-eye me-2"></i>Apenas Visualizar
-        </button>
       </div>
     </div>
   </div>
@@ -1139,11 +1177,11 @@
 // CONFIGURAÇÕES DO SISTEMA
 // ============================================
 
-// PIN de administrador (você pode mudar quando quiser)
-const ADMIN_PIN = "2024@admin";
+// PIN de administrador
+const ADMIN_PIN = "home.2025";
 
-// ID fixo para o JSONBin (todos acessam o mesmo)
-const JSONBIN_ESCALA_ID = "escala-atual-centralizada";
+// ID fixo para o JSONBin
+const JSONBIN_ESCALA_ID = "escala-centralizada-v2";
 
 // Regras de prioridade
 const PRIORIDADES = {
@@ -1174,7 +1212,7 @@ const JSONBIN_CONFIG = {
   API_URL: 'https://api.jsonbin.io/v3/b'
 };
 
-// Mapeamento de dias da semana - COMEÇA NA SEGUNDA
+// Mapeamento de dias da semana
 const DIAS_SEMANA = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'];
 const MESES = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -1203,30 +1241,6 @@ let trocasRegistradas = [];
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Verificar se já está autenticado
-  const auth = localStorage.getItem('escala_auth');
-  const authExpiry = localStorage.getItem('escala_auth_expiry');
-  
-  // Verificar se a autenticação expirou
-  const now = new Date().getTime();
-  if (authExpiry && now > parseInt(authExpiry)) {
-    // Autenticação expirou
-    localStorage.removeItem('escala_auth');
-    localStorage.removeItem('escala_auth_expiry');
-    mostrarModalLogin();
-  } else if (auth === 'admin') {
-    // Já autenticado como admin
-    iniciarComoAdmin();
-  } else if (auth === 'viewer') {
-    // Já autenticado como visualizador
-    iniciarComoVisualizador();
-  } else {
-    // Primeiro acesso, mostrar modal de login
-    setTimeout(() => {
-      mostrarModalLogin();
-    }, 500);
-  }
-  
   // Configurar ano atual como padrão
   const anoSelect = document.getElementById('anoSelect');
   const mesSelect = document.getElementById('mesSelect');
@@ -1235,8 +1249,8 @@ document.addEventListener('DOMContentLoaded', function() {
   mesSelecionado = hoje.getMonth();
   anoSelecionado = hoje.getFullYear();
   
-  mesSelect.value = mesSelecionado;
-  anoSelect.value = anoSelecionado;
+  if (mesSelect) mesSelect.value = mesSelecionado;
+  if (anoSelect) anoSelect.value = anoSelecionado;
   
   // Adicionar listener para o botão de PDF
   const btnPDF = document.getElementById('btnExportarPDF');
@@ -1280,11 +1294,34 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Tentar carregar dados do JSONBin
+  // Verificar autenticação
   setTimeout(() => {
-    carregarDadosDoJSONBin();
-  }, 1000);
+    verificarAutenticacao();
+  }, 500);
 });
+
+function verificarAutenticacao() {
+  const auth = localStorage.getItem('escala_auth');
+  const authExpiry = localStorage.getItem('escala_auth_expiry');
+  
+  // Verificar se a autenticação expirou
+  const now = new Date().getTime();
+  if (authExpiry && now > parseInt(authExpiry)) {
+    localStorage.removeItem('escala_auth');
+    localStorage.removeItem('escala_auth_expiry');
+    mostrarModalLogin();
+  } else if (auth === 'admin') {
+    iniciarComoAdmin();
+    carregarDadosDoJSONBin();
+  } else if (auth === 'viewer') {
+    iniciarComoVisualizador();
+    carregarDadosDoJSONBin();
+  } else {
+    setTimeout(() => {
+      mostrarModalLogin();
+    }, 500);
+  }
+}
 
 function mostrarModalLogin() {
   const loginModal = new bootstrap.Modal(document.getElementById('loginModal'), {
@@ -1295,7 +1332,8 @@ function mostrarModalLogin() {
   
   // Focar no input do PIN
   setTimeout(() => {
-    document.getElementById('pinInput').focus();
+    const pinInput = document.getElementById('pinInput');
+    if (pinInput) pinInput.focus();
   }, 500);
 }
 
@@ -1305,7 +1343,6 @@ function verificarPin() {
   const pin = pinInput.value.trim();
   
   if (pin === ADMIN_PIN) {
-    // PIN correto
     pinError.style.display = 'none';
     
     // Salvar autenticação por 24 horas
@@ -1315,19 +1352,19 @@ function verificarPin() {
     
     // Fechar modal
     const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
-    loginModal.hide();
+    if (loginModal) loginModal.hide();
     
     // Iniciar como admin
     iniciarComoAdmin();
+    carregarDadosDoJSONBin();
     
     showToast('✅ Acesso administrativo concedido!', 'success');
   } else {
-    // PIN incorreto
     pinError.style.display = 'block';
     pinInput.value = '';
     pinInput.focus();
     
-    // Adicionar efeito de shake
+    // Efeito de shake
     pinInput.classList.add('shake');
     setTimeout(() => {
       pinInput.classList.remove('shake');
@@ -1343,10 +1380,11 @@ function entrarComoVisualizador() {
   
   // Fechar modal
   const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
-  loginModal.hide();
+  if (loginModal) loginModal.hide();
   
   // Iniciar como visualizador
   iniciarComoVisualizador();
+  carregarDadosDoJSONBin();
   
   showToast('🔍 Modo de visualização ativado', 'info');
 }
@@ -1355,43 +1393,35 @@ function iniciarComoAdmin() {
   isAdmin = true;
   
   // Mostrar controles admin
-  document.getElementById('adminControls').style.display = 'flex';
-  document.getElementById('userControls').style.display = 'none';
+  const adminControls = document.getElementById('adminControls');
+  const userControls = document.getElementById('userControls');
+  const swapControls = document.getElementById('swapControls');
   
-  // Mostrar indicador de modo
-  const modeIndicator = document.getElementById('modeIndicator');
-  modeIndicator.style.display = 'flex';
-  modeIndicator.className = 'mode-indicator admin';
-  modeIndicator.innerHTML = '<i class="bi bi-shield-check"></i> <span>Modo Administrador</span>';
+  if (adminControls) adminControls.style.display = 'flex';
+  if (userControls) userControls.style.display = 'none';
+  if (swapControls) swapControls.style.display = 'flex';
   
-  // Mostrar controles de troca
-  document.getElementById('swapControls').style.display = 'flex';
-  
-  showToast('👑 Você está no modo Administrador', 'warning');
+  showToast('👑 Modo Administrador ativado', 'warning');
 }
 
 function iniciarComoVisualizador() {
   isAdmin = false;
   
   // Mostrar controles usuário
-  document.getElementById('userControls').style.display = 'block';
-  document.getElementById('adminControls').style.display = 'none';
+  const adminControls = document.getElementById('adminControls');
+  const userControls = document.getElementById('userControls');
+  const swapControls = document.getElementById('swapControls');
   
-  // Mostrar indicador de modo
-  const modeIndicator = document.getElementById('modeIndicator');
-  modeIndicator.style.display = 'flex';
-  modeIndicator.className = 'mode-indicator viewer';
-  modeIndicator.innerHTML = '<i class="bi bi-eye"></i> <span>Modo Visualização</span>';
+  if (adminControls) adminControls.style.display = 'none';
+  if (userControls) userControls.style.display = 'flex';
+  if (swapControls) swapControls.style.display = 'none';
   
-  // Ocultar controles de troca
-  document.getElementById('swapControls').style.display = 'none';
-  
-  // Desativar modo de troca se estiver ativo
+  // Desativar modo de troca
   modoTroca = false;
   const swapModeToggle = document.getElementById('swapModeToggle');
   if (swapModeToggle) swapModeToggle.checked = false;
   
-  showToast('👁️ Você está no modo Visualização', 'info');
+  showToast('👁️ Modo Visualização ativado', 'info');
 }
 
 function logoutAdmin() {
@@ -1403,42 +1433,89 @@ function logoutAdmin() {
 }
 
 // ============================================
-// SISTEMA DE ARMAZENAMENTO CENTRALIZADO (JSONBin)
+// SISTEMA DE ARMAZENAMENTO CENTRALIZADO
 // ============================================
 
-async function salvarNoJSONBin(dados) {
+async function salvarNoJSONBin() {
   showLoading();
   
   try {
-    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}`, {
+    const dadosParaSalvar = {
+      escala_id: JSONBIN_ESCALA_ID,
+      mes: mesSelecionado,
+      ano: anoSelecionado,
+      ultima_atualizacao: new Date().toISOString(),
+      dadosProcessados: dadosOriginais || {},
+      trocas: trocasRegistradas || [],
+      dadosPlanilha: dadosPlanilha || []
+    };
+    
+    console.log('Tentando salvar no JSONBin:', dadosParaSalvar);
+    
+    // Tentar atualizar primeiro
+    let response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
         'X-Bin-Name': `Escala Centralizada - ${MESES[mesSelecionado]} ${anoSelecionado}`
       },
-      body: JSON.stringify({
+      body: JSON.stringify(dadosParaSalvar)
+    });
+    
+    // Se falhar, tentar criar
+    if (!response.ok) {
+      console.log('PUT falhou, tentando POST...');
+      response = await fetch(JSONBIN_CONFIG.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
+          'X-Bin-Name': `Escala Centralizada - ${MESES[mesSelecionado]} ${anoSelecionado}`
+        },
+        body: JSON.stringify(dadosParaSalvar)
+      });
+    }
+    
+    if (!response.ok) {
+      throw new Error(`Falha HTTP: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('Salvo com sucesso:', result);
+    
+    // Também salvar localmente como backup
+    try {
+      localStorage.setItem(JSONBIN_ESCALA_ID, JSON.stringify(dadosParaSalvar));
+    } catch (e) {
+      console.warn('Não foi possível salvar localmente:', e);
+    }
+    
+    showToast('✅ Dados salvos na nuvem!', 'success');
+    return result;
+    
+  } catch (error) {
+    console.error('Erro ao salvar no JSONBin:', error);
+    
+    // Fallback para localStorage
+    try {
+      const dadosParaSalvar = {
         escala_id: JSONBIN_ESCALA_ID,
         mes: mesSelecionado,
         ano: anoSelecionado,
         ultima_atualizacao: new Date().toISOString(),
-        dadosProcessados: dadosOriginais,
-        trocas: trocasRegistradas,
-        dadosPlanilha: dadosPlanilha
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Erro HTTP: ${response.status}`);
+        dadosProcessados: dadosOriginais || {},
+        trocas: trocasRegistradas || [],
+        dadosPlanilha: dadosPlanilha || []
+      };
+      
+      localStorage.setItem(JSONBIN_ESCALA_ID, JSON.stringify(dadosParaSalvar));
+      showToast('⚠️ Salvo localmente (nuvem indisponível)', 'warning');
+    } catch (fallbackError) {
+      console.error('Erro no fallback:', fallbackError);
+      showToast('❌ Erro ao salvar dados', 'danger');
     }
     
-    const result = await response.json();
-    
-    showToast('✅ Dados salvos na nuvem!', 'success');
-    return result;
-  } catch (error) {
-    console.error('Erro ao salvar no JSONBin:', error);
-    showToast('❌ Erro ao salvar na nuvem', 'danger');
     throw error;
   } finally {
     hideLoading();
@@ -1449,6 +1526,8 @@ async function carregarDadosDoJSONBin() {
   showLoading();
   
   try {
+    console.log('Carregando dados do JSONBin...');
+    
     const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${JSONBIN_CONFIG.BIN_ID}/latest`, {
       headers: {
         'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY
@@ -1456,48 +1535,99 @@ async function carregarDadosDoJSONBin() {
     });
     
     if (response.status === 404) {
-      // Bin não existe ainda (primeiro uso)
+      console.log('Bin não existe ainda');
       hideLoading();
-      showToast('📁 Nenhuma escala encontrada. Faça upload como admin.', 'info');
       return;
     }
     
     if (!response.ok) {
-      throw new Error(`Erro HTTP: ${response.status}`);
+      throw new Error(`Falha HTTP: ${response.status}`);
     }
     
     const result = await response.json();
     const dados = result.record;
     
+    console.log('Dados recebidos:', dados);
+    
     if (dados && dados.dadosProcessados) {
       // Carregar dados
       dadosPlanilha = dados.dadosPlanilha || [];
-      mesSelecionado = dados.mes || new Date().getMonth();
+      mesSelecionado = dados.mes !== undefined ? dados.mes : new Date().getMonth();
       anoSelecionado = dados.ano || new Date().getFullYear();
-      dadosOriginais = dados.dadosProcessados;
+      dadosOriginais = dados.dadosProcessados || {};
       trocasRegistradas = dados.trocas || [];
       
       // Atualizar selects
-      document.getElementById('mesSelect').value = mesSelecionado;
-      document.getElementById('anoSelect').value = anoSelecionado;
+      const mesSelect = document.getElementById('mesSelect');
+      const anoSelect = document.getElementById('anoSelect');
+      
+      if (mesSelect) mesSelect.value = mesSelecionado;
+      if (anoSelect) anoSelect.value = anoSelecionado;
       
       // Processar e mostrar dados
       dadosProcessados = JSON.parse(JSON.stringify(dadosOriginais));
       aplicarTrocasAosDados();
       
       // Mostrar calendário
-      document.getElementById('calendarSection').style.display = 'block';
-      document.getElementById('configAccordion').style.display = 'block';
-      document.getElementById('emptyMessage').style.display = 'none';
+      const calendarSection = document.getElementById('calendarSection');
+      const configAccordion = document.getElementById('configAccordion');
+      const emptyMessage = document.getElementById('emptyMessage');
+      
+      if (calendarSection) calendarSection.style.display = 'block';
+      if (configAccordion) configAccordion.style.display = 'block';
+      if (emptyMessage) emptyMessage.style.display = 'none';
       
       atualizarCalendario();
       atualizarPainelTrocas();
       
       showToast('✅ Escala carregada da nuvem!', 'success');
+    } else {
+      console.log('Dados vazios ou inválidos');
     }
   } catch (error) {
     console.error('Erro ao carregar do JSONBin:', error);
-    showToast('⚠️ Não foi possível carregar da nuvem', 'warning');
+    
+    // Tentar carregar do localStorage como fallback
+    try {
+      const dadosSalvos = localStorage.getItem(JSONBIN_ESCALA_ID);
+      if (dadosSalvos) {
+        const dados = JSON.parse(dadosSalvos);
+        
+        dadosPlanilha = dados.dadosPlanilha || [];
+        mesSelecionado = dados.mes !== undefined ? dados.mes : new Date().getMonth();
+        anoSelecionado = dados.ano || new Date().getFullYear();
+        dadosOriginais = dados.dadosProcessados || {};
+        trocasRegistradas = dados.trocas || [];
+        
+        // Atualizar selects
+        const mesSelect = document.getElementById('mesSelect');
+        const anoSelect = document.getElementById('anoSelect');
+        
+        if (mesSelect) mesSelect.value = mesSelecionado;
+        if (anoSelect) anoSelect.value = anoSelecionado;
+        
+        dadosProcessados = JSON.parse(JSON.stringify(dadosOriginais));
+        aplicarTrocasAosDados();
+        
+        const calendarSection = document.getElementById('calendarSection');
+        const configAccordion = document.getElementById('configAccordion');
+        const emptyMessage = document.getElementById('emptyMessage');
+        
+        if (calendarSection) calendarSection.style.display = 'block';
+        if (configAccordion) configAccordion.style.display = 'block';
+        if (emptyMessage) emptyMessage.style.display = 'none';
+        
+        atualizarCalendario();
+        atualizarPainelTrocas();
+        
+        showToast('⚠️ Carregado localmente (nuvem indisponível)', 'warning');
+      } else {
+        showToast('📁 Nenhuma escala encontrada', 'info');
+      }
+    } catch (fallbackError) {
+      console.error('Erro no fallback:', fallbackError);
+      showToast('❌ Erro ao carregar dados', 'danger');
+    }
   } finally {
     hideLoading();
   }
@@ -1579,10 +1709,8 @@ function processarArquivo(file) {
       
       // Salvar no JSONBin
       salvarNoJSONBin().then(() => {
-        // Atualizar calendário
         atualizarCalendario();
         hideLoading();
-        
         showToast('✅ Planilha processada e salva na nuvem!', 'success');
       }).catch(() => {
         hideLoading();
@@ -1590,7 +1718,7 @@ function processarArquivo(file) {
       
     } catch (err) {
       console.error('Erro ao processar arquivo:', err);
-      showToast('❌ Erro ao processar arquivo: ' + err.message, 'danger');
+      showToast('❌ Erro ao processar arquivo', 'danger');
       hideLoading();
     }
   };
@@ -1704,9 +1832,7 @@ function processarDadosPlanilha() {
       
       // Calcular índice do dia da semana (0=Segunda, 6=Domingo)
       let diaSemanaNumero = dataDia.getDay(); // 0=Domingo, 1=Segunda, etc.
-      
-      // Converter para nosso formato (0=Segunda, 6=Domingo)
-      diaSemanaNumero = diaSemanaNumero === 0 ? 6 : diaSemanaNumero - 1;
+      diaSemanaNumero = diaSemanaNumero === 0 ? 6 : diaSemanaNumero - 1; // Converter para 0=Segunda
       
       const diaSemanaNome = DIAS_SEMANA[diaSemanaNumero];
       
@@ -1750,20 +1876,24 @@ function processarDadosPlanilha() {
     dadosOriginais = JSON.parse(JSON.stringify(dadosProcessados));
     
     // Mostrar calendário
-    document.getElementById('calendarSection').style.display = 'block';
-    document.getElementById('configAccordion').style.display = 'block';
-    document.getElementById('storageControls').style.display = 'none';
+    const calendarSection = document.getElementById('calendarSection');
+    const configAccordion = document.getElementById('configAccordion');
+    const emptyMessage = document.getElementById('emptyMessage');
+    
+    if (calendarSection) calendarSection.style.display = 'block';
+    if (configAccordion) configAccordion.style.display = 'block';
     
     if (Object.keys(dadosProcessados).length === 0) {
-      document.getElementById('emptyMessage').style.display = 'block';
+      if (emptyMessage) emptyMessage.style.display = 'block';
       showToast('⚠️ Nenhum dia com pessoas trabalhando encontrado', 'warning');
     } else {
-      document.getElementById('emptyMessage').style.display = 'none';
+      if (emptyMessage) emptyMessage.style.display = 'none';
+      showToast('✅ Dados processados com sucesso!', 'success');
     }
     
   } catch (error) {
     console.error('Erro ao processar dados:', error);
-    showToast('❌ Erro ao processar dados: ' + error.message, 'danger');
+    showToast('❌ Erro ao processar dados', 'danger');
   }
 }
 
@@ -1807,7 +1937,7 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
 }
 
 // ============================================
-// SISTEMA DE TROCAS REFORMULADO
+// SISTEMA DE TROCAS
 // ============================================
 
 function handleDiaClick(dia) {
@@ -1822,7 +1952,7 @@ function handleDiaClick(dia) {
     return;
   }
   
-  // VERIFICAR SE O DIA JÁ ESTÁ EM UMA TROCA ATIVA
+  // Verificar se o dia já está em uma troca ativa
   const trocaAtiva = trocasRegistradas.find(t => 
     (t.dia_a === dia || t.dia_b === dia) && t.status === 'ativa'
   );
@@ -1833,11 +1963,9 @@ function handleDiaClick(dia) {
   }
   
   if (!selecaoTroca.primeiro.dia) {
-    // PRIMEIRA SELEÇÃO: SELECIONAR DIA E PESSOA
     selecaoTroca.primeiro.dia = dia;
     mostrarModalSelecaoPessoa(dia, 'primeiro');
   } else if (!selecaoTroca.segundo.dia && selecaoTroca.primeiro.dia !== dia) {
-    // SEGUNDA SELEÇÃO: SELECIONAR DIA E PESSOA
     selecaoTroca.segundo.dia = dia;
     mostrarModalSelecaoPessoa(dia, 'segundo');
   }
@@ -1857,18 +1985,22 @@ function mostrarModalSelecaoPessoa(dia, etapa) {
     ? `Selecionar pessoa para troca (Dia ${dia})` 
     : `Selecionar pessoa para trocar (Dia ${dia})`;
   
-  document.querySelector('#selectPersonModal .modal-title').innerHTML = 
-    `<i class="bi bi-person-plus me-2"></i>${titulo}`;
+  const modalTitle = document.querySelector('#selectPersonModal .modal-title');
+  if (modalTitle) {
+    modalTitle.innerHTML = `<i class="bi bi-person-plus me-2"></i>${titulo}`;
+  }
   
   // Criar lista de pessoas
-  personList.innerHTML = dadosDia.trabalhando.map(pessoa => `
-    <button type="button" 
-            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-            onclick="selecionarPessoa('${pessoa}', ${dia}, '${etapa}')">
-      <span>${pessoa}</span>
-      <i class="bi bi-check-circle text-primary"></i>
-    </button>
-  `).join('');
+  if (personList) {
+    personList.innerHTML = dadosDia.trabalhando.map(pessoa => `
+      <button type="button" 
+              class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+              onclick="selecionarPessoa('${pessoa.replace(/'/g, "\\'")}', ${dia}, '${etapa}')">
+        <span>${pessoa}</span>
+        <i class="bi bi-check-circle text-primary"></i>
+      </button>
+    `).join('');
+  }
   
   modal.show();
 }
@@ -1879,12 +2011,14 @@ function selecionarPessoa(pessoa, dia, etapa) {
     selecaoTroca.primeiro.dia = dia;
     
     // Atualizar status
-    document.getElementById('swapStatus').textContent = 
-      `Pessoa selecionada: ${pessoa} (Dia ${dia}). Agora selecione o segundo dia...`;
+    const swapStatus = document.getElementById('swapStatus');
+    if (swapStatus) {
+      swapStatus.textContent = `Pessoa selecionada: ${pessoa} (Dia ${dia}). Agora selecione o segundo dia...`;
+    }
     
     // Fechar modal
     const modal = bootstrap.Modal.getInstance(document.getElementById('selectPersonModal'));
-    modal.hide();
+    if (modal) modal.hide();
     
     // Atualizar visualização do calendário
     atualizarSelecaoVisual();
@@ -1895,7 +2029,7 @@ function selecionarPessoa(pessoa, dia, etapa) {
     
     // Fechar modal
     const modal = bootstrap.Modal.getInstance(document.getElementById('selectPersonModal'));
-    modal.hide();
+    if (modal) modal.hide();
     
     // Verificar se não está tentando trocar a mesma pessoa
     if (selecaoTroca.primeiro.pessoa === selecaoTroca.segundo.pessoa) {
@@ -1920,44 +2054,47 @@ function mostrarModalConfirmacaoTroca() {
   const area1 = Object.entries(dadosDia1.divisao).find(([area, pessoa]) => pessoa === selecaoTroca.primeiro.pessoa)?.[0] || 'Área';
   const area2 = Object.entries(dadosDia2.divisao).find(([area, pessoa]) => pessoa === selecaoTroca.segundo.pessoa)?.[0] || 'Área';
   
-  swapDetails.innerHTML = `
-    <p><strong>Troca proposta:</strong></p>
-    <div class="row">
-      <div class="col-6">
-        <div class="card border-info mb-2">
-          <div class="card-body p-2">
-            <h6 class="card-title mb-1">${selecaoTroca.primeiro.pessoa}</h6>
-            <p class="card-text small mb-1">
-              <strong>Dia ${selecaoTroca.primeiro.dia}:</strong> ${area1}<br>
-              <small>Vai para: Dia ${selecaoTroca.segundo.dia}</small>
-            </p>
+  if (swapDetails) {
+    swapDetails.innerHTML = `
+      <p><strong>Troca proposta:</strong></p>
+      <div class="row">
+        <div class="col-6">
+          <div class="card border-info mb-2">
+            <div class="card-body p-2">
+              <h6 class="card-title mb-1">${selecaoTroca.primeiro.pessoa}</h6>
+              <p class="card-text small mb-1">
+                <strong>Dia ${selecaoTroca.primeiro.dia}:</strong> ${area1}<br>
+                <small>Vai para: Dia ${selecaoTroca.segundo.dia}</small>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="card border-info mb-2">
+            <div class="card-body p-2">
+              <h6 class="card-title mb-1">${selecaoTroca.segundo.pessoa}</h6>
+              <p class="card-text small mb-1">
+                <strong>Dia ${selecaoTroca.segundo.dia}:</strong> ${area2}<br>
+                <small>Vai para: Dia ${selecaoTroca.primeiro.dia}</small>
+              </p>
+            </div>
           </div>
         </div>
       </div>
-      <div class="col-6">
-        <div class="card border-info mb-2">
-          <div class="card-body p-2">
-            <h6 class="card-title mb-1">${selecaoTroca.segundo.pessoa}</h6>
-            <p class="card-text small mb-1">
-              <strong>Dia ${selecaoTroca.segundo.dia}:</strong> ${area2}<br>
-              <small>Vai para: Dia ${selecaoTroca.primeiro.dia}</small>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <p class="small text-muted mt-2">
-      <i class="bi bi-info-circle me-1"></i>
-      ${selecaoTroca.primeiro.pessoa} trabalhará no dia ${selecaoTroca.segundo.dia} (${area2}) e 
-      ${selecaoTroca.segundo.pessoa} trabalhará no dia ${selecaoTroca.primeiro.dia} (${area1}).
-    </p>
-  `;
+      <p class="small text-muted mt-2">
+        <i class="bi bi-info-circle me-1"></i>
+        ${selecaoTroca.primeiro.pessoa} trabalhará no dia ${selecaoTroca.segundo.dia} (${area2}) e 
+        ${selecaoTroca.segundo.pessoa} trabalhará no dia ${selecaoTroca.primeiro.dia} (${area1}).
+      </p>
+    `;
+  }
   
   modal.show();
 }
 
 function confirmarTroca() {
-  const observacao = document.getElementById('swapObservation').value;
+  const observacao = document.getElementById('swapObservation');
+  const observacaoTexto = observacao ? observacao.value : '';
   
   const novaTroca = {
     id: 'troca-' + Date.now(),
@@ -1966,7 +2103,7 @@ function confirmarTroca() {
     pessoa_a: selecaoTroca.primeiro.pessoa,
     dia_b: selecaoTroca.segundo.dia,
     pessoa_b: selecaoTroca.segundo.pessoa,
-    observacao: observacao,
+    observacao: observacaoTexto,
     status: 'ativa'
   };
   
@@ -1974,7 +2111,7 @@ function confirmarTroca() {
   
   // Fechar modal
   const modal = bootstrap.Modal.getInstance(document.getElementById('swapModal'));
-  modal.hide();
+  if (modal) modal.hide();
   
   // Resetar seleção
   resetarSelecaoTroca();
@@ -1986,19 +2123,12 @@ function confirmarTroca() {
     atualizarCalendario();
     atualizarPainelTrocas();
     
-    // Mostrar painel de trocas
-    mostrarPainelTrocas();
-    
     showToast('✅ Troca registrada e salva na nuvem!', 'success');
   });
 }
 
 function getDadosDiaComTrocas(dia) {
-  // Retorna os dados do dia aplicando as trocas registradas
-  let dados = dadosProcessados[dia];
-  if (!dados) return null;
-  
-  return dados;
+  return dadosProcessados[dia] || null;
 }
 
 function aplicarTrocasAosDados() {
@@ -2009,7 +2139,6 @@ function aplicarTrocasAosDados() {
   trocasRegistradas
     .filter(troca => troca.status === 'ativa')
     .forEach(troca => {
-      // Trocar as pessoas entre os dias
       const diaA = dadosProcessados[troca.dia_a];
       const diaB = dadosProcessados[troca.dia_b];
       
@@ -2046,8 +2175,9 @@ function resetarSelecaoTroca() {
   };
   removerSelecoesCalendario();
   
-  if (modoTroca) {
-    document.getElementById('swapStatus').textContent = 'Selecione o primeiro dia para troca...';
+  const swapStatus = document.getElementById('swapStatus');
+  if (swapStatus && modoTroca) {
+    swapStatus.textContent = 'Selecione o primeiro dia para troca...';
   }
 }
 
@@ -2080,8 +2210,11 @@ function atualizarSelecaoVisual() {
 // ============================================
 
 function aplicarConfiguracao() {
-  mesSelecionado = parseInt(document.getElementById('mesSelect').value);
-  anoSelecionado = parseInt(document.getElementById('anoSelect').value);
+  const mesSelect = document.getElementById('mesSelect');
+  const anoSelect = document.getElementById('anoSelect');
+  
+  if (mesSelect) mesSelecionado = parseInt(mesSelect.value);
+  if (anoSelect) anoSelecionado = parseInt(anoSelect.value);
   
   if (Object.keys(dadosProcessados).length > 0) {
     showToast('✅ Configuração aplicada!', 'success');
@@ -2106,8 +2239,11 @@ function mudarMes(delta) {
   }
   
   // Atualizar selects
-  document.getElementById('mesSelect').value = mesSelecionado;
-  document.getElementById('anoSelect').value = anoSelecionado;
+  const mesSelect = document.getElementById('mesSelect');
+  const anoSelect = document.getElementById('anoSelect');
+  
+  if (mesSelect) mesSelect.value = mesSelecionado;
+  if (anoSelect) anoSelect.value = anoSelecionado;
   
   atualizarCalendario();
 }
@@ -2123,18 +2259,21 @@ function atualizarCalendario() {
   primeiroDiaSemana = primeiroDiaSemana === 0 ? 6 : primeiroDiaSemana - 1; // Converter para 0=Segunda
   
   // Atualizar título do calendário
-  document.getElementById('calendarTitle').textContent = 
-    `${MESES[mesSelecionado]} de ${anoSelecionado}`;
+  const calendarTitle = document.getElementById('calendarTitle');
+  if (calendarTitle) {
+    calendarTitle.textContent = `${MESES[mesSelecionado]} de ${anoSelecionado}`;
+  }
   
   // Gerar grid do calendário
   const calendarGrid = document.getElementById('calendarGrid');
+  if (!calendarGrid) return;
   
   // Manter os cabeçalhos (primeiros 7 elementos)
   while (calendarGrid.children.length > 7) {
     calendarGrid.removeChild(calendarGrid.lastChild);
   }
   
-  // Dias vazios no início (para alinhar o primeiro dia)
+  // Dias vazios no início
   for (let i = 0; i < primeiroDiaSemana; i++) {
     const emptyDay = document.createElement('div');
     emptyDay.className = 'calendar-day empty';
@@ -2149,7 +2288,7 @@ function atualizarCalendario() {
     
     const dataDia = new Date(anoSelecionado, mesSelecionado, dia);
     
-    // Calcular dia da semana (0=Segunda, 6=Domingo)
+    // Calcular dia da semana
     let diaSemanaNumero = dataDia.getDay();
     diaSemanaNumero = diaSemanaNumero === 0 ? 6 : diaSemanaNumero - 1;
     
@@ -2205,7 +2344,7 @@ function atualizarCalendario() {
     calendarGrid.appendChild(dayDiv);
   }
   
-  // Preencher células restantes para completar a grade (máximo 42 células = 6 semanas)
+  // Preencher células restantes
   const totalCells = primeiroDiaSemana + diasNoMes;
   const remainingCells = Math.ceil(totalCells / 7) * 7 - totalCells;
   
@@ -2220,7 +2359,6 @@ function mostrarDetalhesDia(dia) {
   const dadosDia = getDadosDiaComTrocas(dia);
   if (!dadosDia) return;
   
-  // Verificar se há troca para este dia
   const trocaDia = trocasRegistradas.find(t => 
     (t.dia_a === dia || t.dia_b === dia) && t.status === 'ativa'
   );
@@ -2228,6 +2366,8 @@ function mostrarDetalhesDia(dia) {
   const modal = new bootstrap.Modal(document.getElementById('dayModal'));
   const modalTitle = document.getElementById('dayModalTitle');
   const modalContent = document.getElementById('dayModalContent');
+  
+  if (!modalTitle || !modalContent) return;
   
   let tituloExtra = '';
   if (trocaDia) {
@@ -2319,7 +2459,8 @@ function mostrarDetalhesDia(dia) {
   if (trocaDia) {
     const outroDia = trocaDia.dia_a === dia ? trocaDia.dia_b : trocaDia.dia_a;
     const outraPessoa = trocaDia.dia_a === dia ? trocaDia.pessoa_b : trocaDia.pessoa_a;
-    const outraArea = Object.entries(getDadosDiaComTrocas(outroDia)?.divisao || {}).find(([area, pessoa]) => pessoa === outraPessoa)?.[0] || 'Área';
+    const outroDiaDados = getDadosDiaComTrocas(outroDia);
+    const outraArea = outroDiaDados ? Object.entries(outroDiaDados.divisao).find(([area, pessoa]) => pessoa === outraPessoa)?.[0] || 'Área' : 'Área';
     
     html += `
         <div class="status-group mt-3">
@@ -2349,12 +2490,16 @@ function mostrarDetalhesDia(dia) {
 
 function mostrarPainelTrocas() {
   const panel = document.getElementById('trocasPanel');
-  panel.style.display = 'block';
-  atualizarPainelTrocas();
+  if (panel) {
+    panel.style.display = 'block';
+    atualizarPainelTrocas();
+  }
 }
 
 function atualizarPainelTrocas() {
   const trocasList = document.getElementById('trocasList');
+  if (!trocasList) return;
+  
   const trocasAtivas = trocasRegistradas.filter(t => t.status === 'ativa');
   
   if (trocasAtivas.length === 0) {
@@ -2644,7 +2789,7 @@ function showLoading() {
   overlay.id = 'loadingOverlay';
   overlay.innerHTML = `
     <div class="text-center">
-      <div class="spinner-border text-primary" style="width: 2rem; height: 2rem;" role="status">
+      <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Carregando...</span>
       </div>
       <p class="mt-2 text-muted" style="font-size: 0.9rem;">Processando...</p>
