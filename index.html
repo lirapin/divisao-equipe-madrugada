@@ -63,7 +63,7 @@
     
     /* Container Principal */
     .main-container {
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 0 1rem;
     }
@@ -181,7 +181,7 @@
       background: white;
     }
     
-    /* Calendário Tradicional - FIXED GRID */
+    /* Calendário Tradicional - CORRIGIDO */
     .calendar-container {
       background: white;
       border-radius: 10px;
@@ -230,7 +230,7 @@
       background: #e8e8e8;
     }
     
-    /* Grid do Calendário - FIXED LAYOUT */
+    /* Grid do Calendário - CORRIGIDO */
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -239,7 +239,6 @@
       border: 1px solid var(--border-color);
       border-radius: 8px;
       overflow: hidden;
-      min-height: 400px;
     }
     
     /* Cabeçalho dos dias da semana */
@@ -258,10 +257,10 @@
       color: var(--danger);
     }
     
-    /* Células dos dias - FIXED SIZE */
+    /* Células dos dias */
     .calendar-day {
       background: white;
-      min-height: 80px;
+      min-height: 100px;
       padding: 0.5rem;
       position: relative;
       cursor: pointer;
@@ -367,13 +366,8 @@
         grid-template-columns: 1fr;
       }
       
-      .calendar-grid {
-        grid-template-columns: repeat(7, 1fr);
-        min-height: 300px;
-      }
-      
       .calendar-day {
-        min-height: 70px;
+        min-height: 80px;
         padding: 0.4rem;
       }
       
@@ -675,8 +669,8 @@
         </div>
       </div>
 
-      <!-- Grid do Calendário - AGORA CORRETO -->
-      <div class="calendar-grid">
+      <!-- Grid do Calendário - CORRIGIDO: Sem container intermediário -->
+      <div class="calendar-grid" id="calendarGrid">
         <!-- Cabeçalhos dos dias da semana -->
         <div class="calendar-weekday">DOM</div>
         <div class="calendar-weekday">SEG</div>
@@ -686,8 +680,8 @@
         <div class="calendar-weekday">SEX</div>
         <div class="calendar-weekday weekend">SÁB</div>
         
-        <!-- Dias serão inseridos aqui pelo JavaScript -->
-        <div id="calendarDays"></div>
+        <!-- Dias serão inseridos DIRETAMENTE aqui -->
+        <!-- JavaScript vai inserir .calendar-day diretamente nesta grid -->
       </div>
     </div>
 
@@ -766,7 +760,6 @@ const MESES = [
 
 // Variáveis globais
 let dadosPlanilha = [];
-let resultadosGlobal = [];
 let mesSelecionado = new Date().getMonth();
 let anoSelecionado = new Date().getFullYear();
 let dadosProcessados = {};
@@ -1156,15 +1149,19 @@ function atualizarCalendario() {
   document.getElementById('calendarTitle').textContent = 
     `${MESES[mesSelecionado]} de ${anoSelecionado}`;
   
-  // Gerar grid do calendário - AGORA CORRETAMENTE
-  const calendarDays = document.getElementById('calendarDays');
-  calendarDays.innerHTML = '';
+  // Gerar grid do calendário - CORRETO: dias inseridos diretamente na grid
+  const calendarGrid = document.getElementById('calendarGrid');
+  
+  // Manter os cabeçalhos (primeiros 7 elementos)
+  while (calendarGrid.children.length > 7) {
+    calendarGrid.removeChild(calendarGrid.lastChild);
+  }
   
   // Dias vazios no início (para alinhar o primeiro dia)
   for (let i = 0; i < primeiroDiaSemana; i++) {
     const emptyDay = document.createElement('div');
     emptyDay.className = 'calendar-day empty';
-    calendarDays.appendChild(emptyDay);
+    calendarGrid.appendChild(emptyDay);
   }
   
   // Dias do mês - AGORA EM GRADE 7x[5-6]
@@ -1203,7 +1200,7 @@ function atualizarCalendario() {
     }
     
     dayDiv.innerHTML = content;
-    calendarDays.appendChild(dayDiv);
+    calendarGrid.appendChild(dayDiv);
   }
   
   // Preencher células restantes para completar a grade (máximo 42 células = 6 semanas)
@@ -1213,7 +1210,7 @@ function atualizarCalendario() {
   for (let i = 0; i < remainingCells; i++) {
     const emptyDay = document.createElement('div');
     emptyDay.className = 'calendar-day empty';
-    calendarDays.appendChild(emptyDay);
+    calendarGrid.appendChild(emptyDay);
   }
 }
 
