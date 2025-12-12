@@ -12,15 +12,20 @@ const API = {
 
   /**
    * Obtém o BIN_ID atual
-   * Prioridade: 1) config.js, 2) localStorage
+   * Prioridade: 1) config.js (compartilhado por todos), 2) localStorage (fallback)
    */
   getBinId() {
     // Prioridade 1: ID no arquivo de configuração (compartilhado por todos)
-    if (CONFIG.BIN_ID) {
+    if (CONFIG.BIN_ID && CONFIG.BIN_ID !== 'null' && CONFIG.BIN_ID.length > 10) {
+      console.log('[API] Usando BIN_ID do config.js:', CONFIG.BIN_ID);
       return CONFIG.BIN_ID;
     }
     // Prioridade 2: ID salvo localmente (fallback)
-    return localStorage.getItem(CONFIG.STORAGE_KEYS.BIN_ID);
+    const localId = localStorage.getItem(CONFIG.STORAGE_KEYS.BIN_ID);
+    if (localId) {
+      console.log('[API] Usando BIN_ID do localStorage:', localId);
+    }
+    return localId;
   },
 
   /**
