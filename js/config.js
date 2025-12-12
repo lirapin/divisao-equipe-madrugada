@@ -20,7 +20,7 @@ const CONFIG = {
    *
    * Exemplo: BIN_ID: "67acf6e1ad19ca34f89c1234"
    */
-  BIN_ID: 693a8a43ae596e708f923822,
+  BIN_ID:693a8a43ae596e708f923822,
 
   /**
    * Credenciais JSONBin.io
