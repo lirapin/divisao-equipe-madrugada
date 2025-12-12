@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Portal de divisão de tarefas</title>
+  <title>Portal de Divisão de Tarefas</title>
 
   <!-- CSS & Libs -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
@@ -48,10 +48,16 @@
     .app-header {
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       color: #fff;
-      padding: 1rem 0;
+      padding: 1.25rem 0;
       margin-bottom: 0;
       position: relative;
       z-index: 100;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .app-header h1 {
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      letter-spacing: 0.5px;
     }
     
     .brand-dot {
@@ -122,51 +128,52 @@
     }
     
     .refresh-btn.upload-admin {
-      background: var(--warning);
-      color: #333;
+      background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+      color: #fff;
     }
-    
+
     .refresh-btn.upload-admin:hover {
-      background: #e68900;
+      background: linear-gradient(135deg, #f57c00 0%, #e65100 100%);
       color: white;
     }
-    
+
     .refresh-btn.logout-admin {
-      background: var(--danger);
+      background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
       color: white;
     }
 
     .refresh-btn.logout-admin:hover {
-      background: #c82333;
-    }
-
-    .refresh-btn.logout-viewer {
-      background: var(--info);
-      color: white;
-    }
-
-    .refresh-btn.logout-viewer:hover {
-      background: #117a8b;
+      background: linear-gradient(135deg, #7b1fa2 0%, #6a1b9a 100%);
     }
 
     .refresh-btn.delete-admin {
-      background: #dc3545;
+      background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
       color: white;
     }
 
     .refresh-btn.delete-admin:hover {
-      background: #c82333;
+      background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
     }
 
-    .refresh-btn.test-connection {
-      background: #17a2b8;
+    /* Botão refresh admin com degradê */
+    .admin-controls .refresh-btn:not(.upload-admin):not(.delete-admin):not(.logout-admin) {
+      background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
       color: white;
     }
 
-    .refresh-btn.test-connection:hover {
-      background: #138496;
+    .admin-controls .refresh-btn:not(.upload-admin):not(.delete-admin):not(.logout-admin):hover {
+      background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
     }
-    
+
+    .refresh-btn.logout-viewer {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+      color: white;
+    }
+
+    .refresh-btn.logout-viewer:hover {
+      background: linear-gradient(135deg, #c82333 0%, #a71d2a 100%);
+    }
+
     /* Indicador de modo */
     .mode-indicator {
       background: rgba(0,0,0,0.05);
@@ -906,7 +913,7 @@
 <body>
 <header class="app-header">
   <div class="main-container">
-    <h1 class="h5 m-0 fw-bold"><span class="brand-dot"></span>Portal de divisão de tarefas</h1>
+    <h1 class="h5 m-0 fw-bold"><span class="brand-dot"></span>Portal de Divisão de Tarefas</h1>
   </div>
 </header>
 
@@ -917,25 +924,14 @@
     <span>Modo Administrador</span>
   </div>
   
-  <!-- Botão Upload Admin -->
-  <button class="refresh-btn upload-admin" id="btnUploadAdmin" title="Upload da planilha">
+  <!-- Botão Upload Admin - abre painel de gerenciamento de calendários -->
+  <button class="refresh-btn upload-admin" id="btnUploadAdmin" title="Gerenciar calendários e uploads">
     <i class="bi bi-cloud-arrow-up"></i>
-    <input type="file" id="fileInputAdmin" accept=".xlsx,.xls,.csv" style="display: none;">
   </button>
 
   <!-- Botão Excluir Planilha -->
   <button class="refresh-btn delete-admin" onclick="excluirPlanilha()" title="Excluir planilha da nuvem">
     <i class="bi bi-trash3"></i>
-  </button>
-
-  <!-- Botão Testar Conexão -->
-  <button class="refresh-btn test-connection" onclick="testarConexaoNuvem()" title="Testar conexão com a nuvem">
-    <i class="bi bi-cloud-check"></i>
-  </button>
-
-  <!-- Botão Gerenciar Armazenamento -->
-  <button class="refresh-btn storage-admin" onclick="gerenciarArmazenamento()" title="Gerenciar armazenamento na nuvem">
-    <i class="bi bi-database-gear"></i>
   </button>
 
   <!-- Botão Refresh -->
@@ -953,16 +949,11 @@
 <div class="user-controls" id="userControls" style="display: none;">
   <div class="mode-indicator viewer">
     <i class="bi bi-eye"></i>
-    <span>Modo Visualização</span>
+    <span>Modo visualização</span>
   </div>
 
   <button class="refresh-btn" onclick="location.reload()" title="Recarregar página">
     <i class="bi bi-arrow-clockwise"></i>
-  </button>
-
-  <!-- Botão Configurar Armazenamento (para usuários inserirem BIN_ID) -->
-  <button class="refresh-btn" onclick="configurarBinIdUsuario()" title="Configurar armazenamento (inserir BIN_ID)">
-    <i class="bi bi-cloud-download"></i>
   </button>
 
   <!-- Botão Logout Viewer -->
@@ -973,6 +964,69 @@
 
 <div class="main-container">
   
+  <!-- Painel de Gerenciamento de Calendários (somente Admin) -->
+  <div class="config-accordion" id="calendarioPanel" style="display: none;">
+    <div class="config-header collapsed" data-bs-toggle="collapse" data-bs-target="#calendarioPanelBody">
+      <span><i class="bi bi-calendar2-range me-2"></i>Gerenciar calendários</span>
+      <i class="bi bi-chevron-down"></i>
+    </div>
+    <div id="calendarioPanelBody" class="collapse">
+      <div class="config-body">
+        <p class="mb-3 text-muted" style="font-size: 0.85rem;">
+          Faça upload de até duas planilhas (uma para cada mês) e escolha qual calendário será exibido para os usuários.
+        </p>
+
+        <!-- Calendário 1 -->
+        <div class="calendario-item mb-3 p-3" style="background: #f8f9fa; border-radius: 8px; border-left: 4px solid #ff9800;">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong><i class="bi bi-1-circle me-2"></i>Calendário 1</strong>
+            <span class="badge bg-secondary" id="cal1Status">Vazio</span>
+          </div>
+          <div class="d-flex gap-2 align-items-center">
+            <button class="btn btn-sm btn-outline-primary" onclick="document.getElementById('fileInputCal1').click()">
+              <i class="bi bi-upload me-1"></i>Upload planilha
+            </button>
+            <input type="file" id="fileInputCal1" accept=".xlsx,.xls,.csv" style="display: none;" onchange="uploadCalendario(1, this)">
+            <span class="text-muted small" id="cal1Info">Nenhuma planilha carregada</span>
+          </div>
+        </div>
+
+        <!-- Calendário 2 -->
+        <div class="calendario-item mb-3 p-3" style="background: #f8f9fa; border-radius: 8px; border-left: 4px solid #2196f3;">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong><i class="bi bi-2-circle me-2"></i>Calendário 2</strong>
+            <span class="badge bg-secondary" id="cal2Status">Vazio</span>
+          </div>
+          <div class="d-flex gap-2 align-items-center">
+            <button class="btn btn-sm btn-outline-primary" onclick="document.getElementById('fileInputCal2').click()">
+              <i class="bi bi-upload me-1"></i>Upload planilha
+            </button>
+            <input type="file" id="fileInputCal2" accept=".xlsx,.xls,.csv" style="display: none;" onchange="uploadCalendario(2, this)">
+            <span class="text-muted small" id="cal2Info">Nenhuma planilha carregada</span>
+          </div>
+        </div>
+
+        <!-- Seleção do Calendário Ativo -->
+        <div class="mt-3 p-3" style="background: #e8f5e9; border-radius: 8px;">
+          <label class="form-label fw-bold"><i class="bi bi-eye me-2"></i>Calendário visível para usuários:</label>
+          <div class="d-flex gap-3">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="calendarioAtivo" id="radioCalendario1" value="calendario1" checked onchange="alterarCalendarioAtivo('calendario1')">
+              <label class="form-check-label" for="radioCalendario1">Calendário 1</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="calendarioAtivo" id="radioCalendario2" value="calendario2" onchange="alterarCalendarioAtivo('calendario2')">
+              <label class="form-check-label" for="radioCalendario2">Calendário 2</label>
+            </div>
+          </div>
+          <button class="btn btn-success btn-sm mt-2" onclick="salvarConfiguracaoCalendarios()">
+            <i class="bi bi-cloud-arrow-up me-1"></i>Salvar e publicar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Configuração de Mês/Ano em Acordeão -->
   <div class="config-accordion" id="configAccordion" style="display: none;">
     <div class="config-header collapsed" data-bs-toggle="collapse" data-bs-target="#configBody">
@@ -1025,7 +1079,7 @@
     <div class="swap-controls" id="swapControls" style="display: none;">
       <div class="swap-toggle">
         <input type="checkbox" id="swapModeToggle">
-        <label for="swapModeToggle">Modo de Troca de Dias</label>
+        <label for="swapModeToggle">Agendar trocas</label>
       </div>
       <div class="swap-status" id="swapStatus">
         Selecione o primeiro dia para troca...
@@ -1212,7 +1266,7 @@
 <!-- Assinatura -->
 <div class="main-container">
   <div class="assinatura">
-    <strong>Desenvolvido por:</strong> N6105010 e N5923221
+    <strong>Desenvolvido por:</strong> N6105010 & N5923221
   </div>
 </div>
 
@@ -1259,6 +1313,368 @@ let selecaoTroca = {
   segundo: { dia: null, pessoa: null }
 };
 let trocasRegistradas = [];
+
+// Sistema de múltiplos calendários
+let calendarios = {
+  calendario1: null,  // Dados do primeiro calendário
+  calendario2: null   // Dados do segundo calendário
+};
+let calendarioAtivo = 'calendario1';  // Qual calendário está sendo visualizado
+
+// ============================================
+// FUNÇÕES AUXILIARES
+// ============================================
+
+// Função para extrair o primeiro nome de uma string
+function obterPrimeiroNome(nomeCompleto) {
+  if (!nomeCompleto) return '';
+  const nome = String(nomeCompleto).trim();
+  const partes = nome.split(/\s+/);
+  if (partes.length > 0) {
+    // Capitaliza o primeiro nome corretamente
+    const primeiro = partes[0];
+    return primeiro.charAt(0).toUpperCase() + primeiro.slice(1).toLowerCase();
+  }
+  return nome;
+}
+
+// Função para ordenar array de nomes alfabeticamente (pelo primeiro nome)
+function ordenarNomesAlfabeticamente(nomes) {
+  return [...nomes].sort((a, b) => {
+    const nomeA = obterPrimeiroNome(a).toLowerCase();
+    const nomeB = obterPrimeiroNome(b).toLowerCase();
+    return nomeA.localeCompare(nomeB, 'pt-BR');
+  });
+}
+
+// ============================================
+// SISTEMA DE MÚLTIPLOS CALENDÁRIOS
+// ============================================
+
+// Upload de planilha para um calendário específico
+function uploadCalendario(numCalendario, inputElement) {
+  const file = inputElement.files?.[0];
+  if (!file) return;
+
+  console.log(`📤 Upload para Calendário ${numCalendario}:`, file.name);
+  showLoading();
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
+
+      if (jsonData.length < 2) {
+        showToast('❌ Planilha vazia ou inválida', 'danger');
+        hideLoading();
+        return;
+      }
+
+      // Processar dados
+      const headers = jsonData[0].map(h => String(h).trim());
+      const dados = [];
+
+      for (let i = 1; i < jsonData.length; i++) {
+        const row = jsonData[i];
+        const obj = {};
+        for (let j = 0; j < headers.length; j++) {
+          obj[headers[j]] = row[j] || '';
+        }
+        const primeiroValor = obj[headers[0]];
+        if (primeiroValor && String(primeiroValor).trim() !== '') {
+          dados.push(obj);
+        }
+      }
+
+      if (dados.length === 0) {
+        showToast('❌ Nenhum dado válido encontrado', 'danger');
+        hideLoading();
+        return;
+      }
+
+      // Processar dados da planilha temporariamente
+      const dadosPlanilhaTemp = dados;
+      const dadosOriginaisTemp = processarPlanilhaParaCalendario(dadosPlanilhaTemp);
+
+      // Salvar no calendário apropriado
+      const calKey = `calendario${numCalendario}`;
+      calendarios[calKey] = {
+        dadosPlanilha: dadosPlanilhaTemp,
+        dadosOriginais: dadosOriginaisTemp,
+        mes: mesSelecionado,
+        ano: anoSelecionado,
+        trocas: [],
+        nomeArquivo: file.name,
+        dataUpload: new Date().toISOString()
+      };
+
+      // Atualizar interface
+      atualizarStatusCalendarios();
+
+      // Se este é o calendário ativo, carregar os dados
+      if (calendarioAtivo === calKey) {
+        carregarCalendarioAtivo();
+      }
+
+      hideLoading();
+      showToast(`✅ Calendário ${numCalendario} carregado com sucesso!`, 'success');
+
+      // Limpar input
+      inputElement.value = '';
+
+    } catch (err) {
+      console.error('Erro ao processar arquivo:', err);
+      showToast('❌ Erro ao processar arquivo', 'danger');
+      hideLoading();
+    }
+  };
+
+  reader.onerror = function() {
+    showToast('❌ Erro ao ler arquivo', 'danger');
+    hideLoading();
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
+// Processar planilha para gerar dados do calendário
+function processarPlanilhaParaCalendario(dadosPlanilhaTemp) {
+  try {
+    if (!dadosPlanilhaTemp || dadosPlanilhaTemp.length === 0) return {};
+
+    const primeiraLinha = dadosPlanilhaTemp[0];
+    const todasColunas = Object.keys(primeiraLinha);
+
+    // Encontrar coluna do NOME
+    let colunaNome = null;
+    for (let col of todasColunas) {
+      const colUpper = String(col).toUpperCase().trim();
+      if (colUpper === 'NOME' || colUpper.includes('NOME') || colUpper.includes('FUNCION')) {
+        colunaNome = col;
+        break;
+      }
+    }
+
+    if (!colunaNome) {
+      colunaNome = todasColunas[0];
+    }
+
+    // Encontrar colunas de dias
+    const colunaDias = [];
+    for (let col of todasColunas) {
+      const colStr = String(col).trim();
+      if (colStr === colunaNome) continue;
+
+      let diaNumero = null;
+      if (/^\d+$/.test(colStr)) {
+        diaNumero = parseInt(colStr);
+      } else if (/^(\d+)\s*[\(\[]/.test(colStr)) {
+        const match = colStr.match(/^(\d+)/);
+        diaNumero = parseInt(match[1]);
+      } else if (/^\d{1,2}[\/\-]\d{1,2}/.test(colStr)) {
+        const match = colStr.match(/^(\d{1,2})[\/\-]/);
+        diaNumero = parseInt(match[1]);
+      } else {
+        const match = colStr.match(/\b(\d{1,2})\b/);
+        if (match) {
+          diaNumero = parseInt(match[1]);
+        }
+      }
+
+      if (diaNumero !== null && diaNumero >= 1 && diaNumero <= 31) {
+        colunaDias.push({ coluna: col, dia: diaNumero });
+      }
+    }
+
+    colunaDias.sort((a, b) => a.dia - b.dia);
+    if (colunaDias.length === 0) return {};
+
+    const dadosProcessadosTemp = {};
+
+    for (let diaInfo of colunaDias) {
+      const colunaDia = diaInfo.coluna;
+      const diaNumero = diaInfo.dia;
+
+      const dataDia = new Date(anoSelecionado, mesSelecionado, diaNumero);
+      if (dataDia.getMonth() !== mesSelecionado) continue;
+
+      let diaSemanaNumero = dataDia.getDay();
+      diaSemanaNumero = diaSemanaNumero === 0 ? 6 : diaSemanaNumero - 1;
+      const diaSemanaNome = DIAS_SEMANA[diaSemanaNumero];
+
+      const trabalhandoHoje = [];
+      const ausentesHoje = [];
+
+      for (let funcionario of dadosPlanilhaTemp) {
+        let nome = String(funcionario[colunaNome] || '').trim().toUpperCase();
+        if (!nome || nome === '' || nome === 'TOTAL' || nome === 'TOTAIS') continue;
+
+        let valorCelula = funcionario[colunaDia];
+        let status = String(valorCelula || '').trim().toUpperCase();
+
+        const trabalhando = status === '' || status === '22';
+        const ausente = !trabalhando && status !== '';
+
+        if (trabalhando) {
+          trabalhandoHoje.push(nome);
+        } else if (ausente) {
+          ausentesHoje.push({ nome, motivo: status || 'AUSENTE' });
+        }
+      }
+
+      if (trabalhandoHoje.length > 0) {
+        const divisao = calcularDivisaoPorNumero(trabalhandoHoje.length, trabalhandoHoje);
+
+        dadosProcessadosTemp[diaNumero] = {
+          dia: diaNumero,
+          diaSemana: diaSemanaNome,
+          numPessoas: trabalhandoHoje.length,
+          trabalhando: [...trabalhandoHoje],
+          ausentes: [...ausentesHoje],
+          divisao
+        };
+      }
+    }
+
+    return dadosProcessadosTemp;
+  } catch (error) {
+    console.error('Erro ao processar planilha:', error);
+    return {};
+  }
+}
+
+// Alterar calendário ativo
+function alterarCalendarioAtivo(calKey) {
+  calendarioAtivo = calKey;
+  console.log('📅 Calendário ativo alterado para:', calKey);
+
+  // Atualizar radio buttons
+  document.getElementById('radioCalendario1').checked = (calKey === 'calendario1');
+  document.getElementById('radioCalendario2').checked = (calKey === 'calendario2');
+
+  // Carregar dados do calendário ativo
+  carregarCalendarioAtivo();
+}
+
+// Carregar dados do calendário ativo na tela
+function carregarCalendarioAtivo() {
+  const calDados = calendarios[calendarioAtivo];
+
+  if (calDados && calDados.dadosOriginais) {
+    dadosPlanilha = calDados.dadosPlanilha || [];
+    dadosOriginais = calDados.dadosOriginais || {};
+    dadosProcessados = JSON.parse(JSON.stringify(dadosOriginais));
+    mesSelecionado = calDados.mes ?? new Date().getMonth();
+    anoSelecionado = calDados.ano ?? new Date().getFullYear();
+    trocasRegistradas = calDados.trocas || [];
+
+    // Atualizar selects
+    const mesSelect = document.getElementById('mesSelect');
+    const anoSelect = document.getElementById('anoSelect');
+    if (mesSelect) mesSelect.value = mesSelecionado;
+    if (anoSelect) anoSelect.value = anoSelecionado;
+
+    aplicarTrocasAosDados();
+    atualizarCalendario();
+    atualizarPainelTrocas();
+
+    // Mostrar calendário
+    const calendarSection = document.getElementById('calendarSection');
+    if (calendarSection) calendarSection.style.display = 'block';
+
+    showToast(`📅 Visualizando ${calendarioAtivo === 'calendario1' ? 'Calendário 1' : 'Calendário 2'}`, 'info');
+  } else {
+    console.log('⚠️ Calendário ativo não tem dados');
+  }
+}
+
+// Atualizar badges de status dos calendários
+function atualizarStatusCalendarios() {
+  // Calendário 1
+  const cal1Status = document.getElementById('cal1Status');
+  const cal1Info = document.getElementById('cal1Info');
+  if (calendarios.calendario1) {
+    const cal1 = calendarios.calendario1;
+    cal1Status.textContent = 'Carregado';
+    cal1Status.className = 'badge bg-success';
+    const mesNome = MESES[cal1.mes] || 'N/A';
+    const dias = Object.keys(cal1.dadosOriginais || {}).length;
+    cal1Info.textContent = `${mesNome}/${cal1.ano} - ${dias} dias`;
+  } else {
+    cal1Status.textContent = 'Vazio';
+    cal1Status.className = 'badge bg-secondary';
+    cal1Info.textContent = 'Nenhuma planilha carregada';
+  }
+
+  // Calendário 2
+  const cal2Status = document.getElementById('cal2Status');
+  const cal2Info = document.getElementById('cal2Info');
+  if (calendarios.calendario2) {
+    const cal2 = calendarios.calendario2;
+    cal2Status.textContent = 'Carregado';
+    cal2Status.className = 'badge bg-success';
+    const mesNome = MESES[cal2.mes] || 'N/A';
+    const dias = Object.keys(cal2.dadosOriginais || {}).length;
+    cal2Info.textContent = `${mesNome}/${cal2.ano} - ${dias} dias`;
+  } else {
+    cal2Status.textContent = 'Vazio';
+    cal2Status.className = 'badge bg-secondary';
+    cal2Info.textContent = 'Nenhuma planilha carregada';
+  }
+}
+
+// Salvar configuração dos calendários na nuvem
+async function salvarConfiguracaoCalendarios() {
+  console.log('💾 Salvando configuração dos calendários...');
+  showLoading();
+
+  try {
+    const binId = obterBinId();
+    if (!binId) {
+      showToast('❌ Nenhum armazenamento configurado', 'danger');
+      hideLoading();
+      return;
+    }
+
+    const dadosParaSalvar = {
+      escala_id: 'portal_escala_v3_multi',
+      versao: '3.0',
+      calendarioAtivo: calendarioAtivo,
+      calendario1: calendarios.calendario1,
+      calendario2: calendarios.calendario2,
+      ultima_atualizacao: new Date().toISOString()
+    };
+
+    const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${binId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
+        'X-Access-Key': JSONBIN_CONFIG.ACCESS_KEY
+      },
+      body: JSON.stringify(dadosParaSalvar)
+    });
+
+    if (response.ok) {
+      showToast('✅ Calendários salvos e publicados!', 'success');
+
+      // Salvar backup local
+      localStorage.setItem('escala_backup', JSON.stringify(dadosParaSalvar));
+      localStorage.setItem('escala_ultimo_salvamento', new Date().toISOString());
+    } else {
+      throw new Error('Falha ao salvar na nuvem');
+    }
+  } catch (error) {
+    console.error('❌ Erro ao salvar calendários:', error);
+    showToast('❌ Erro ao salvar: ' + error.message, 'danger');
+  } finally {
+    hideLoading();
+  }
+}
 
 // ============================================
 // SISTEMA DE SALVAMENTO NA NUVEM - REESCRITO
@@ -1631,32 +2047,90 @@ function carregarDoBackupLocal() {
 }
 
 function processarDadosCarregados(dados) {
-  dadosPlanilha = dados.dadosPlanilha || [];
-  // Usar ?? para tratar tanto null quanto undefined corretamente
-  mesSelecionado = dados.mes ?? new Date().getMonth();
-  anoSelecionado = dados.ano ?? new Date().getFullYear();
-  dadosOriginais = dados.dadosOriginais || {};
-  trocasRegistradas = dados.trocas || [];
-  
+  // Verificar se é o novo formato com múltiplos calendários
+  if (dados.versao === '3.0' || dados.calendario1 || dados.calendario2) {
+    console.log('📅 Carregando formato multi-calendário v3');
+
+    // Carregar calendários
+    calendarios.calendario1 = dados.calendario1 || null;
+    calendarios.calendario2 = dados.calendario2 || null;
+    calendarioAtivo = dados.calendarioAtivo || 'calendario1';
+
+    // Atualizar interface do painel de calendários
+    atualizarStatusCalendarios();
+
+    // Atualizar radio buttons
+    const radio1 = document.getElementById('radioCalendario1');
+    const radio2 = document.getElementById('radioCalendario2');
+    if (radio1) radio1.checked = (calendarioAtivo === 'calendario1');
+    if (radio2) radio2.checked = (calendarioAtivo === 'calendario2');
+
+    // Carregar o calendário ativo
+    const calDados = calendarios[calendarioAtivo];
+    if (calDados) {
+      dadosPlanilha = calDados.dadosPlanilha || [];
+      mesSelecionado = calDados.mes ?? new Date().getMonth();
+      anoSelecionado = calDados.ano ?? new Date().getFullYear();
+      dadosOriginais = calDados.dadosOriginais || {};
+      trocasRegistradas = calDados.trocas || [];
+    } else {
+      // Tentar o outro calendário
+      const outroKey = calendarioAtivo === 'calendario1' ? 'calendario2' : 'calendario1';
+      const outroDados = calendarios[outroKey];
+      if (outroDados) {
+        dadosPlanilha = outroDados.dadosPlanilha || [];
+        mesSelecionado = outroDados.mes ?? new Date().getMonth();
+        anoSelecionado = outroDados.ano ?? new Date().getFullYear();
+        dadosOriginais = outroDados.dadosOriginais || {};
+        trocasRegistradas = outroDados.trocas || [];
+      }
+    }
+  } else {
+    // Formato antigo - compatibilidade
+    console.log('📅 Carregando formato legado v2');
+    dadosPlanilha = dados.dadosPlanilha || [];
+    mesSelecionado = dados.mes ?? new Date().getMonth();
+    anoSelecionado = dados.ano ?? new Date().getFullYear();
+    dadosOriginais = dados.dadosOriginais || {};
+    trocasRegistradas = dados.trocas || [];
+
+    // Migrar para novo formato se for admin
+    if (isAdmin && dadosOriginais && Object.keys(dadosOriginais).length > 0) {
+      calendarios.calendario1 = {
+        dadosPlanilha: dadosPlanilha,
+        dadosOriginais: dadosOriginais,
+        mes: mesSelecionado,
+        ano: anoSelecionado,
+        trocas: trocasRegistradas,
+        dataUpload: new Date().toISOString()
+      };
+      atualizarStatusCalendarios();
+    }
+  }
+
   // Atualizar selects
   const mesSelect = document.getElementById('mesSelect');
   const anoSelect = document.getElementById('anoSelect');
-  
+
   if (mesSelect) mesSelect.value = mesSelecionado;
   if (anoSelect) anoSelect.value = anoSelecionado;
-  
+
   dadosProcessados = JSON.parse(JSON.stringify(dadosOriginais));
   aplicarTrocasAosDados();
-  
+
   // Mostrar calendário
   const calendarSection = document.getElementById('calendarSection');
   const configAccordion = document.getElementById('configAccordion');
+  const calendarioPanel = document.getElementById('calendarioPanel');
   const emptyMessage = document.getElementById('emptyMessage');
-  
+
   if (calendarSection) calendarSection.style.display = 'block';
-  if (configAccordion) configAccordion.style.display = 'block';
+  // Configuração de mês só aparece para admin
+  if (configAccordion) configAccordion.style.display = isAdmin ? 'block' : 'none';
+  // Painel de calendários só aparece para admin
+  if (calendarioPanel) calendarioPanel.style.display = isAdmin ? 'block' : 'none';
   if (emptyMessage) emptyMessage.style.display = 'none';
-  
+
   atualizarCalendario();
   atualizarPainelTrocas();
 }
@@ -1702,19 +2176,22 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Configurar botão de upload admin
+  // Configurar botão de upload admin - abre o painel de calendários
   const btnUploadAdmin = document.getElementById('btnUploadAdmin');
-  const fileInputAdmin = document.getElementById('fileInputAdmin');
-  
-  if (btnUploadAdmin && fileInputAdmin) {
+
+  if (btnUploadAdmin) {
     btnUploadAdmin.addEventListener('click', () => {
-      fileInputAdmin.click();
-    });
-    
-    fileInputAdmin.addEventListener('change', function(e) {
-      const file = e.target.files?.[0];
-      if (file) {
-        processarArquivo(file);
+      // Abrir painel de calendários
+      const calendarioPanel = document.getElementById('calendarioPanel');
+      const calendarioPanelBody = document.getElementById('calendarioPanelBody');
+      if (calendarioPanel) {
+        calendarioPanel.style.display = 'block';
+        // Expandir o collapse
+        if (calendarioPanelBody && !calendarioPanelBody.classList.contains('show')) {
+          const bsCollapse = new bootstrap.Collapse(calendarioPanelBody, { toggle: true });
+        }
+        // Scroll para o painel
+        calendarioPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     });
   }
@@ -2491,9 +2968,10 @@ function processarDadosPlanilha() {
     const calendarSection = document.getElementById('calendarSection');
     const configAccordion = document.getElementById('configAccordion');
     const emptyMessage = document.getElementById('emptyMessage');
-    
+
     if (calendarSection) calendarSection.style.display = 'block';
-    if (configAccordion) configAccordion.style.display = 'block';
+    // Configuração de mês só aparece para admin
+    if (configAccordion) configAccordion.style.display = isAdmin ? 'block' : 'none';
     
     if (Object.keys(dadosProcessados).length === 0) {
       if (emptyMessage) emptyMessage.style.display = 'block';
@@ -3035,21 +3513,29 @@ function mostrarDetalhesDia(dia) {
   `;
   
   if (Object.keys(dadosDia.divisao).length > 0) {
-    Object.entries(dadosDia.divisao).forEach(([area, pessoa]) => {
-      if (pessoa) {
-        // Verificar se esta pessoa está em alguma troca
-        const pessoaEmTroca = trocasDia.some(t => t.pessoa_a === pessoa || t.pessoa_b === pessoa);
-        
-        html += `
-          <div class="area-item">
-            <span class="area-label">${area}</span>
-            <div class="funcionario-name" title="${pessoa}">
-              ${pessoa}
-              ${pessoaEmTroca ? ' <i class="bi bi-arrow-left-right text-purple"></i>' : ''}
-            </div>
+    // Ordenar as entradas alfabeticamente pelo primeiro nome da pessoa
+    const entradasOrdenadas = Object.entries(dadosDia.divisao)
+      .filter(([area, pessoa]) => pessoa)
+      .sort((a, b) => {
+        const nomeA = obterPrimeiroNome(a[1]).toLowerCase();
+        const nomeB = obterPrimeiroNome(b[1]).toLowerCase();
+        return nomeA.localeCompare(nomeB, 'pt-BR');
+      });
+
+    entradasOrdenadas.forEach(([area, pessoa]) => {
+      // Verificar se esta pessoa está em alguma troca
+      const pessoaEmTroca = trocasDia.some(t => t.pessoa_a === pessoa || t.pessoa_b === pessoa);
+      const primeiroNome = obterPrimeiroNome(pessoa);
+
+      html += `
+        <div class="area-item">
+          <span class="area-label">${area}</span>
+          <div class="funcionario-name" title="${pessoa}">
+            ${primeiroNome}
+            ${pessoaEmTroca ? ' <i class="bi bi-arrow-left-right text-purple"></i>' : ''}
           </div>
-        `;
-      }
+        </div>
+      `;
     });
   } else {
     html += `<div class="text-muted small">Não foi possível fazer a divisão.</div>`;
@@ -3069,14 +3555,18 @@ function mostrarDetalhesDia(dia) {
           <div class="status-group-title">Trabalhando (${dadosDia.trabalhando.length})</div>
           <div class="status-list">
   `;
-  
-  dadosDia.trabalhando.forEach(nome => {
+
+  // Ordenar trabalhando alfabeticamente pelo primeiro nome
+  const trabalhandoOrdenado = ordenarNomesAlfabeticamente(dadosDia.trabalhando);
+
+  trabalhandoOrdenado.forEach(nome => {
     const pessoaEmTroca = trocasDia.some(t => t.pessoa_a === nome || t.pessoa_b === nome);
-    
+    const primeiroNome = obterPrimeiroNome(nome);
+
     html += `
       <div class="status-item">
         <span class="status-badge badge-presente">✓</span>
-        <span>${nome} ${pessoaEmTroca ? '<i class="bi bi-arrow-left-right text-purple ms-1"></i>' : ''}</span>
+        <span>${primeiroNome} ${pessoaEmTroca ? '<i class="bi bi-arrow-left-right text-purple ms-1"></i>' : ''}</span>
       </div>
     `;
   });
@@ -3092,16 +3582,24 @@ function mostrarDetalhesDia(dia) {
           <div class="status-group-title">Ausentes (${dadosDia.ausentes.length})</div>
           <div class="status-list">
     `;
-    
-    dadosDia.ausentes.forEach(({nome, motivo}) => {
+
+    // Ordenar ausentes alfabeticamente pelo primeiro nome
+    const ausentesOrdenados = [...dadosDia.ausentes].sort((a, b) => {
+      const nomeA = obterPrimeiroNome(a.nome).toLowerCase();
+      const nomeB = obterPrimeiroNome(b.nome).toLowerCase();
+      return nomeA.localeCompare(nomeB, 'pt-BR');
+    });
+
+    ausentesOrdenados.forEach(({nome, motivo}) => {
+      const primeiroNome = obterPrimeiroNome(nome);
       html += `
         <div class="status-item">
           <span class="status-badge badge-ausente">${motivo}</span>
-          <span>${nome}</span>
+          <span>${primeiroNome}</span>
         </div>
       `;
     });
-    
+
     html += `</div></div>`;
   }
   
@@ -3255,7 +3753,7 @@ function gerarPDF() {
       pageMargins: [30, 50, 30, 50],
       content: [
         {
-          text: 'Portal de divisão de tarefas',
+          text: 'Portal de Divisão de Tarefas',
           style: 'header',
           alignment: 'center',
           margin: [0, 0, 0, 15]
@@ -3421,7 +3919,7 @@ function gerarPDF() {
     });
     
     docDefinition.content.push({
-      text: '\n\nDesenvolvido por: N6105010 e N5923221',
+      text: '\n\nDesenvolvido por: N6105010 & N5923221',
       style: 'subheader',
       alignment: 'center',
       margin: [0, 20, 0, 0]
