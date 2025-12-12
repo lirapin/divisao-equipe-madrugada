@@ -2383,25 +2383,39 @@ function processarDadosPlanilha() {
     }
     
     colunaDias.sort((a, b) => a.dia - b.dia);
-    
+
+    console.log('🔍 DEBUG processarDadosPlanilha:', {
+      todasColunas: todasColunas,
+      colunaNome: colunaNome,
+      colunaDiasEncontradas: colunaDias,
+      mesSelecionado: mesSelecionado,
+      anoSelecionado: anoSelecionado
+    });
+
     if (colunaDias.length === 0) {
       showToast('❌ Não foi possível identificar colunas de dias.', 'danger');
       return;
     }
-    
+
     dadosProcessados = {};
     dadosOriginais = {};
     
     // Processar cada dia encontrado na planilha
+    let diasPulados = [];
+    let diasProcessados = [];
+
     for (let diaInfo of colunaDias) {
       const colunaDia = diaInfo.coluna;
       const diaNumero = diaInfo.dia;
-      
+
       // Calcular dia da semana considerando o mês/ano selecionado
       const dataDia = new Date(anoSelecionado, mesSelecionado, diaNumero);
-      
+
       // Verificar se o dia pertence ao mês selecionado
-      if (dataDia.getMonth() !== mesSelecionado) continue;
+      if (dataDia.getMonth() !== mesSelecionado) {
+        diasPulados.push({ dia: diaNumero, motivo: 'mes_diferente', mesData: dataDia.getMonth(), mesSelecionado });
+        continue;
+      }
       
       // Calcular índice do dia da semana (0=Segunda, 6=Domingo)
       let diaSemanaNumero = dataDia.getDay(); // 0=Domingo, 1=Segunda, etc.
@@ -2411,29 +2425,40 @@ function processarDadosPlanilha() {
       
       const trabalhandoHoje = [];
       const ausentesHoje = [];
-      
+      const debugCelulas = []; // Para debug do primeiro dia apenas
+
       for (let funcionario of dadosPlanilha) {
         let nome = String(funcionario[colunaNome] || '').trim().toUpperCase();
-        
+
         if (!nome || nome === '' || nome === 'TOTAL' || nome === 'TOTAIS') continue;
-        
+
         let valorCelula = funcionario[colunaDia];
         let status = String(valorCelula || '').trim().toUpperCase();
-        
+
+        // Debug: guardar info das células no primeiro dia
+        if (diaNumero === colunaDias[0]?.dia) {
+          debugCelulas.push({ nome: nome.substring(0, 20), valor: valorCelula, status });
+        }
+
         // REGRA SIMPLIFICADA: vazio ou "22" = presente, qualquer outra coisa = ausente
         const trabalhando = status === '' || status === '22';
         const ausente = !trabalhando && status !== '';
-        
+
         if (trabalhando) {
           trabalhandoHoje.push(nome);
         } else if (ausente) {
           ausentesHoje.push({ nome, motivo: status || 'AUSENTE' });
         }
       }
+
+      // Debug do primeiro dia
+      if (diaNumero === colunaDias[0]?.dia) {
+        console.log('🔍 DEBUG Valores do primeiro dia (' + diaNumero + '):', debugCelulas);
+      }
       
       if (trabalhandoHoje.length > 0) {
         const divisao = calcularDivisaoPorNumero(trabalhandoHoje.length, trabalhandoHoje);
-        
+
         dadosProcessados[diaNumero] = {
           dia: diaNumero,
           diaSemana: diaSemanaNome,
@@ -2442,9 +2467,18 @@ function processarDadosPlanilha() {
           ausentes: [...ausentesHoje],
           divisao
         };
+        diasProcessados.push({ dia: diaNumero, trabalhadores: trabalhandoHoje.length });
+      } else {
+        diasPulados.push({ dia: diaNumero, motivo: 'sem_trabalhadores', ausentes: ausentesHoje.length });
       }
     }
-    
+
+    console.log('🔍 DEBUG Resultado processamento:', {
+      diasProcessados: diasProcessados,
+      diasPulados: diasPulados,
+      totalDadosProcessados: Object.keys(dadosProcessados).length
+    });
+
     // Salvar cópia dos dados originais
     dadosOriginais = JSON.parse(JSON.stringify(dadosProcessados));
     
