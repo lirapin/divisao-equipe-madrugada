@@ -2384,15 +2384,15 @@ function processarDadosPlanilha() {
     
     colunaDias.sort((a, b) => a.dia - b.dia);
 
-    console.log('🔍 DEBUG processarDadosPlanilha:', {
-      todasColunas: todasColunas,
-      colunaNome: colunaNome,
-      colunaDiasEncontradas: colunaDias,
-      mesSelecionado: mesSelecionado,
-      anoSelecionado: anoSelecionado
-    });
+    console.log('🔍 DEBUG processarDadosPlanilha:');
+    console.log('   - Todas colunas: ' + todasColunas.join(', '));
+    console.log('   - Coluna Nome: ' + colunaNome);
+    console.log('   - Colunas de dias encontradas: ' + colunaDias.map(d => d.dia).join(', '));
+    console.log('   - Mês selecionado: ' + mesSelecionado + ' (' + (MESES[mesSelecionado] || 'N/A') + ')');
+    console.log('   - Ano selecionado: ' + anoSelecionado);
 
     if (colunaDias.length === 0) {
+      console.error('❌ ERRO: Nenhuma coluna de dia encontrada!');
       showToast('❌ Não foi possível identificar colunas de dias.', 'danger');
       return;
     }
@@ -2453,7 +2453,9 @@ function processarDadosPlanilha() {
 
       // Debug do primeiro dia
       if (diaNumero === colunaDias[0]?.dia) {
-        console.log('🔍 DEBUG Valores do primeiro dia (' + diaNumero + '):', debugCelulas);
+        console.log('🔍 DEBUG Valores do primeiro dia (' + diaNumero + '):');
+        debugCelulas.forEach(c => console.log('   - ' + c.nome + ': valor="' + c.valor + '" status="' + c.status + '"'));
+        console.log('   - Trabalhando: ' + trabalhandoHoje.length + ' | Ausentes: ' + ausentesHoje.length);
       }
       
       if (trabalhandoHoje.length > 0) {
@@ -2473,11 +2475,10 @@ function processarDadosPlanilha() {
       }
     }
 
-    console.log('🔍 DEBUG Resultado processamento:', {
-      diasProcessados: diasProcessados,
-      diasPulados: diasPulados,
-      totalDadosProcessados: Object.keys(dadosProcessados).length
-    });
+    console.log('🔍 DEBUG Resultado processamento:');
+    console.log('   - Dias processados com sucesso: ' + diasProcessados.map(d => 'dia ' + d.dia + ' (' + d.trabalhadores + ' pessoas)').join(', '));
+    console.log('   - Dias pulados: ' + diasPulados.map(d => 'dia ' + d.dia + ' (' + d.motivo + ')').join(', '));
+    console.log('   - Total dias no dadosProcessados: ' + Object.keys(dadosProcessados).length);
 
     // Salvar cópia dos dados originais
     dadosOriginais = JSON.parse(JSON.stringify(dadosProcessados));
