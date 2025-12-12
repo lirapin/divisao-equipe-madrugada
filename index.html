@@ -1334,11 +1334,14 @@ async function salvarDadosNaNuvem() {
   showLoading();
 
   try {
-    // 1. Preparar dados
+    // 1. Preparar dados (garantir que mês/ano nunca sejam null)
+    const mesParaSalvar = mesSelecionado ?? new Date().getMonth();
+    const anoParaSalvar = anoSelecionado ?? new Date().getFullYear();
+
     const dadosParaSalvar = {
       escala_id: 'portal_escala_v2',
-      mes: mesSelecionado,
-      ano: anoSelecionado,
+      mes: mesParaSalvar,
+      ano: anoParaSalvar,
       ultima_atualizacao: new Date().toISOString(),
       dadosOriginais: dadosOriginais || {},
       trocas: trocasRegistradas || [],
@@ -1351,8 +1354,8 @@ async function salvarDadosNaNuvem() {
     };
 
     console.log('📦 Dados preparados para salvar:', {
-      mes: MESES[mesSelecionado],
-      ano: anoSelecionado,
+      mes: MESES[mesParaSalvar],
+      ano: anoParaSalvar,
       totalDias: Object.keys(dadosOriginais).length,
       totalFuncionarios: dadosPlanilha.length,
       totalTrocas: trocasRegistradas.length
@@ -1629,8 +1632,9 @@ function carregarDoBackupLocal() {
 
 function processarDadosCarregados(dados) {
   dadosPlanilha = dados.dadosPlanilha || [];
-  mesSelecionado = dados.mes !== undefined ? dados.mes : new Date().getMonth();
-  anoSelecionado = dados.ano || new Date().getFullYear();
+  // Usar ?? para tratar tanto null quanto undefined corretamente
+  mesSelecionado = dados.mes ?? new Date().getMonth();
+  anoSelecionado = dados.ano ?? new Date().getFullYear();
   dadosOriginais = dados.dadosOriginais || {};
   trocasRegistradas = dados.trocas || [];
   
