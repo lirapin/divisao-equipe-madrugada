@@ -113,6 +113,32 @@ app.post('/api/telegram/parar', async (req, res) => {
 });
 
 /**
+ * Forçar reinício do Telegram (reseta contadores e reinicia)
+ */
+app.post('/api/telegram/reiniciar', async (req, res) => {
+  try {
+    console.log('[API] Forçando reinício do Telegram...');
+
+    // Parar se estiver rodando
+    await telegram.parar();
+
+    // Aguardar
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // Reiniciar
+    await telegram.inicializar(true);
+
+    res.json({
+      sucesso: true,
+      mensagem: 'Telegram reiniciado',
+      stats: telegram.obterEstatisticas()
+    });
+  } catch (error) {
+    res.status(500).json({ sucesso: false, erro: error.message });
+  }
+});
+
+/**
  * Sincronizar mensagens manualmente
  */
 app.post('/api/telegram/sincronizar', async (req, res) => {

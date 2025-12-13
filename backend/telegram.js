@@ -11,6 +11,11 @@ const { adicionarCopRedeInforma, adicionarAlerta } = require('./storage');
 let bot = null;
 let isRunning = false;
 let ultimoUpdateProcessado = 0;
+let tentativasRecuperacao = 0;
+let ultimaTentativaRecuperacao = 0;
+const MAX_TENTATIVAS_RECUPERACAO = 3;
+const COOLDOWN_RECUPERACAO = 60000; // 1 minuto entre tentativas
+
 let estatisticas = {
   mensagensRecebidas: 0,
   mensagensProcessadas: 0,
@@ -185,26 +190,51 @@ function configurarHandlers() {
     estatisticas.erros++;
     console.error('[Telegram] Erro de polling:', error.message);
 
-    // Se for erro 409 Conflict, tentar recuperar
+    // Se for erro 409 Conflict, tentar recuperar COM CONTROLE
     if (error.message && error.message.includes('409')) {
-      console.log('[Telegram] Detectado conflito 409, tentando recuperar...');
+      const agora = Date.now();
+
+      // Verificar cooldown
+      if (agora - ultimaTentativaRecuperacao < COOLDOWN_RECUPERACAO) {
+        console.log('[Telegram] 409 detectado, mas ainda em cooldown. Aguardando...');
+        return;
+      }
+
+      // Verificar limite de tentativas
+      if (tentativasRecuperacao >= MAX_TENTATIVAS_RECUPERACAO) {
+        console.log('[Telegram] Limite de tentativas de recuperação atingido. Parando polling.');
+        console.log('[Telegram] IMPORTANTE: Reinicie o serviço manualmente no Render.');
+        try {
+          await bot.stopPolling();
+          isRunning = false;
+        } catch (e) {}
+        return;
+      }
+
+      tentativasRecuperacao++;
+      ultimaTentativaRecuperacao = agora;
+
+      console.log(`[Telegram] Tentativa de recuperação ${tentativasRecuperacao}/${MAX_TENTATIVAS_RECUPERACAO}...`);
 
       try {
         // Parar polling atual
         await bot.stopPolling();
         isRunning = false;
 
-        // Aguardar
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        // Aguardar tempo maior (10-30 segundos baseado na tentativa)
+        const tempoEspera = 10000 + (tentativasRecuperacao * 10000);
+        console.log(`[Telegram] Aguardando ${tempoEspera/1000}s antes de recuperar...`);
+        await new Promise(resolve => setTimeout(resolve, tempoEspera));
 
-        // Limpar e reiniciar
+        // Limpar conexões
         await limparConexoesAnteriores();
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
 
         // Reiniciar polling
         await bot.startPolling();
         isRunning = true;
-        console.log('[Telegram] Polling reiniciado após recuperação');
+        tentativasRecuperacao = 0; // Reset se sucesso
+        console.log('[Telegram] Polling reiniciado com sucesso!');
 
       } catch (recoverError) {
         console.error('[Telegram] Falha na recuperação:', recoverError.message);
@@ -225,17 +255,25 @@ function configurarHandlers() {
  * Para o bot
  */
 async function parar() {
-  if (!bot || !isRunning) {
-    console.log('[Telegram] Bot não está rodando');
-    return;
-  }
+  console.log('[Telegram] Parando bot...');
 
   try {
-    await bot.stopPolling();
+    if (bot && isRunning) {
+      await bot.stopPolling();
+    }
     isRunning = false;
-    console.log('[Telegram] Bot parado');
+
+    // Resetar contadores de recuperação
+    tentativasRecuperacao = 0;
+    ultimaTentativaRecuperacao = 0;
+
+    // Limpar conexões
+    await limparConexoesAnteriores();
+
+    console.log('[Telegram] Bot parado e contadores resetados');
   } catch (error) {
     console.error('[Telegram] Erro ao parar bot:', error);
+    isRunning = false;
   }
 }
 
