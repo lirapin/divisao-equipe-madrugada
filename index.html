@@ -2385,6 +2385,10 @@ function atualizarStatusCalendarios() {
 // Salvar configuração dos calendários na nuvem
 async function salvarConfiguracaoCalendarios() {
   console.log('💾 Salvando configuração dos calendários...');
+  console.log('📅 Calendário ativo:', calendarioAtivo);
+  console.log('📦 Calendário 1:', calendarios.calendario1 ? 'Preenchido' : 'Vazio');
+  console.log('📦 Calendário 2:', calendarios.calendario2 ? 'Preenchido' : 'Vazio');
+
   showLoading();
 
   try {
@@ -2403,6 +2407,14 @@ async function salvarConfiguracaoCalendarios() {
       calendario2: calendarios.calendario2,
       ultima_atualizacao: new Date().toISOString()
     };
+
+    console.log('📤 Enviando para nuvem:', {
+      binId,
+      versao: dadosParaSalvar.versao,
+      calendarioAtivo: dadosParaSalvar.calendarioAtivo,
+      temCal1: !!dadosParaSalvar.calendario1,
+      temCal2: !!dadosParaSalvar.calendario2
+    });
 
     const response = await fetch(`${JSONBIN_CONFIG.API_URL}/${binId}`, {
       method: 'PUT',
@@ -2802,6 +2814,15 @@ function carregarDoBackupLocal() {
 }
 
 function processarDadosCarregados(dados) {
+  console.log('🔄 processarDadosCarregados - Dados recebidos:', {
+    versao: dados.versao,
+    temCal1: !!dados.calendario1,
+    temCal2: !!dados.calendario2,
+    calendarioAtivo: dados.calendarioAtivo,
+    temDadosOriginais: !!dados.dadosOriginais,
+    temDadosPlanilha: !!dados.dadosPlanilha
+  });
+
   // Verificar se é o novo formato com múltiplos calendários
   if (dados.versao === '3.0' || dados.calendario1 || dados.calendario2) {
     console.log('📅 Carregando formato multi-calendário v3');
@@ -2810,6 +2831,12 @@ function processarDadosCarregados(dados) {
     calendarios.calendario1 = dados.calendario1 || null;
     calendarios.calendario2 = dados.calendario2 || null;
     calendarioAtivo = dados.calendarioAtivo || 'calendario1';
+
+    console.log('✅ Calendários restaurados:', {
+      cal1: calendarios.calendario1 ? `${MESES[calendarios.calendario1.mes]}/${calendarios.calendario1.ano}` : 'Vazio',
+      cal2: calendarios.calendario2 ? `${MESES[calendarios.calendario2.mes]}/${calendarios.calendario2.ano}` : 'Vazio',
+      ativo: calendarioAtivo
+    });
 
     // Atualizar interface do painel de calendários
     atualizarStatusCalendarios();
