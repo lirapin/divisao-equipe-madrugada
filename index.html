@@ -2172,6 +2172,12 @@ function uploadCalendario(numCalendario, inputElement) {
       hideLoading();
       showToast(`✅ Calendário ${numCalendario} carregado com sucesso!`, 'success');
 
+      // Salvar automaticamente na nuvem após upload
+      console.log('💾 Salvando automaticamente após upload...');
+      setTimeout(() => {
+        salvarConfiguracaoCalendarios();
+      }, 500);
+
       // Limpar input
       inputElement.value = '';
 
@@ -3070,16 +3076,28 @@ function entrarComoVisualizador() {
 
 function iniciarComoAdmin() {
   isAdmin = true;
-  
+
   // Mostrar controles admin
   const adminControls = document.getElementById('adminControls');
   const userControls = document.getElementById('userControls');
   const swapControls = document.getElementById('swapControls');
-  
+
   if (adminControls) adminControls.style.display = 'flex';
   if (userControls) userControls.style.display = 'none';
   if (swapControls) swapControls.style.display = 'flex';
-  
+
+  // Mostrar navegação de abas do admin (incluindo Telegram)
+  const adminNavTabs = document.getElementById('adminNavTabs');
+  if (adminNavTabs) adminNavTabs.classList.add('show');
+
+  // Mostrar painel de gerenciamento de calendários
+  const calendarioPanel = document.getElementById('calendarioPanel');
+  if (calendarioPanel) calendarioPanel.style.display = 'block';
+
+  // Mostrar configuração de mês
+  const configAccordion = document.getElementById('configAccordion');
+  if (configAccordion) configAccordion.style.display = 'block';
+
   showToast('👑 Modo Administrador ativado', 'warning');
 }
 
