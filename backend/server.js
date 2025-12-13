@@ -329,6 +329,24 @@ app.put('/api/alertas/:id/status', async (req, res) => {
 });
 
 /**
+ * Excluir um alerta
+ */
+app.delete('/api/alertas/:id', async (req, res) => {
+  try {
+    const sucesso = await storage.excluirAlerta(req.params.id);
+
+    if (!sucesso) {
+      return res.status(404).json({ sucesso: false, erro: 'Alerta não encontrado' });
+    }
+
+    res.json({ sucesso: true, mensagem: 'Alerta excluído com sucesso' });
+  } catch (error) {
+    console.error('[API] Erro ao excluir alerta:', error);
+    res.status(500).json({ sucesso: false, erro: error.message });
+  }
+});
+
+/**
  * Resumo de alertas por status
  */
 app.get('/api/alertas/resumo/status', async (req, res) => {

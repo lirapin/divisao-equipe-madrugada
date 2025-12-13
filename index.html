@@ -1129,6 +1129,15 @@
       background: #f57c00;
     }
 
+    .telegram-btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .telegram-btn-danger:hover {
+      background: #d32f2f;
+    }
+
     .telegram-btn-outline {
       background: transparent;
       border: 1px solid var(--border-color);
@@ -5393,6 +5402,9 @@ function atualizarTabelaAlertas(dados) {
               <i class="bi bi-check-circle"></i>
             </button>
           ` : ''}
+          <button class="telegram-btn telegram-btn-danger" onclick="excluirAlerta('${item.id}')" title="Excluir alerta">
+            <i class="bi bi-trash"></i>
+          </button>
         </td>
       </tr>
     `;
@@ -5522,6 +5534,39 @@ async function alterarStatusAlerta(alertaId, novoStatus) {
   } catch (error) {
     console.error('Erro ao alterar status:', error);
     showToast('Erro ao atualizar status', 'danger');
+  }
+}
+
+async function excluirAlerta(alertaId) {
+  if (!confirm('Tem certeza que deseja excluir este alerta?')) {
+    return;
+  }
+
+  if (!backendUrl) {
+    showToast('Configure a URL do backend primeiro', 'warning');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${backendUrl}/api/alertas/${alertaId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!response.ok) throw new Error('Erro ao excluir alerta');
+
+    showToast('✅ Alerta excluído com sucesso!', 'success');
+
+    // Fechar modal se estiver aberto
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalDetalhesAlerta'));
+    if (modal) modal.hide();
+
+    // Recarregar dados
+    await carregarAlertas();
+
+  } catch (error) {
+    console.error('Erro ao excluir alerta:', error);
+    showToast('❌ Erro ao excluir alerta: ' + error.message, 'danger');
   }
 }
 
