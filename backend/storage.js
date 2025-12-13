@@ -281,6 +281,33 @@ async function atualizarStatusAlerta(alertaId, novoStatus) {
 }
 
 /**
+ * Excluir um alerta
+ * @param {string} alertaId - ID do alerta
+ * @returns {Promise<boolean>} True se excluído com sucesso
+ */
+async function excluirAlerta(alertaId) {
+  try {
+    const dados = await carregarDados(true);
+
+    const index = dados.alertas.findIndex(a => a.id === alertaId);
+    if (index === -1) {
+      console.log('[Storage] Alerta não encontrado:', alertaId);
+      return false;
+    }
+
+    dados.alertas.splice(index, 1);
+
+    await salvarDados(dados);
+    console.log('[Storage] Alerta excluído:', alertaId);
+    return true;
+
+  } catch (error) {
+    console.error('[Storage] Erro ao excluir alerta:', error);
+    return false;
+  }
+}
+
+/**
  * Obtém mensagens COP REDE INFORMA com filtros
  * @param {object} filtros - Filtros opcionais
  * @param {boolean} forcarAtualizacao - Forçar atualização do cache
@@ -441,6 +468,7 @@ module.exports = {
   adicionarCopRedeInforma,
   adicionarAlerta,
   atualizarStatusAlerta,
+  excluirAlerta,
   obterCopRedeInforma,
   obterAlertas,
   obterEstatisticas,
