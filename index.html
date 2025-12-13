@@ -1237,6 +1237,91 @@
         flex-direction: column;
       }
     }
+
+    /* ============================================
+       NAVEGAÇÃO DE ABAS ADMIN
+       ============================================ */
+    .admin-nav-tabs {
+      display: none;
+      background: white;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border: 1px solid var(--border-color);
+      gap: 0.5rem;
+    }
+
+    .admin-nav-tabs.show {
+      display: flex;
+    }
+
+    .admin-nav-tab {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: none;
+      background: #f8f9fa;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .admin-nav-tab:hover {
+      background: #e9ecef;
+      color: var(--text-dark);
+    }
+
+    .admin-nav-tab.active {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      box-shadow: 0 2px 6px rgba(46, 125, 50, 0.3);
+    }
+
+    .admin-nav-tab.telegram-tab-nav {
+      background: #f0f7ff;
+      color: #0088cc;
+    }
+
+    .admin-nav-tab.telegram-tab-nav:hover {
+      background: #e3f2fd;
+    }
+
+    .admin-nav-tab.telegram-tab-nav.active {
+      background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+      color: white;
+      box-shadow: 0 2px 6px rgba(0, 136, 204, 0.3);
+    }
+
+    .admin-nav-tab .badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      margin-left: 0.25rem;
+    }
+
+    .admin-tab-content {
+      display: none;
+    }
+
+    .admin-tab-content.active {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .admin-nav-tabs {
+        flex-direction: column;
+      }
+
+      .admin-nav-tab {
+        justify-content: flex-start;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1292,7 +1377,23 @@
 </div>
 
 <div class="main-container">
-  
+
+  <!-- Navegação de Abas Admin -->
+  <div class="admin-nav-tabs" id="adminNavTabs">
+    <button class="admin-nav-tab active" data-admin-tab="divisao" onclick="trocarAbaAdmin('divisao')">
+      <i class="bi bi-calendar3"></i>
+      Divisão de Tarefas
+    </button>
+    <button class="admin-nav-tab telegram-tab-nav" data-admin-tab="telegram" onclick="trocarAbaAdmin('telegram')">
+      <i class="bi bi-telegram"></i>
+      COP Rede Informa
+      <span class="badge bg-primary" id="badgeTelegramNav">0</span>
+    </button>
+  </div>
+
+  <!-- Conteúdo da Aba Divisão de Tarefas -->
+  <div class="admin-tab-content active" id="tabDivisao">
+
   <!-- Painel de Gerenciamento de Calendários (somente Admin) -->
   <div class="config-accordion" id="calendarioPanel" style="display: none;">
     <div class="config-header collapsed" data-bs-toggle="collapse" data-bs-target="#calendarioPanelBody">
@@ -1356,13 +1457,18 @@
     </div>
   </div>
 
-  <!-- Painel Telegram COP REDE INFORMA (somente Admin) -->
-  <div class="telegram-panel" id="telegramPanel" style="display: none;">
+  </div><!-- Fim tabDivisao -->
+
+  <!-- Conteúdo da Aba Telegram -->
+  <div class="admin-tab-content" id="tabTelegram">
+
+  <!-- Painel Telegram COP REDE INFORMA -->
+  <div class="telegram-panel" id="telegramPanel">
     <div class="telegram-header">
       <span><i class="bi bi-telegram me-2"></i>COP Rede Informa - Telegram</span>
       <div class="backend-status offline" id="backendStatus">
         <span class="dot"></span>
-        <span id="backendStatusText">Desconectado</span>
+        <span id="backendStatusText">Conectando...</span>
       </div>
     </div>
 
@@ -1520,24 +1626,9 @@
       </div>
     </div>
 
-    <!-- Configurações do Backend -->
-    <div class="p-3 border-top" style="background: #f8f9fa;">
-      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-          <small class="text-muted">
-            <i class="bi bi-info-circle me-1"></i>
-            Configure a URL do backend para habilitar a integração com Telegram
-          </small>
-        </div>
-        <div class="d-flex gap-2 align-items-center">
-          <input type="text" id="backendUrlInput" class="form-control form-control-sm" placeholder="https://seu-backend.com" style="max-width: 250px;">
-          <button class="telegram-btn telegram-btn-primary" onclick="configurarBackend()">
-            <i class="bi bi-plug"></i> Conectar
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
+
+  </div><!-- Fim tabTelegram -->
 
   <!-- Modal de Detalhes COP Rede Informa -->
   <div class="modal fade" id="modalDetalhesCop" tabindex="-1">
@@ -2685,9 +2776,31 @@ function processarDadosCarregados(dados) {
   if (configAccordion) configAccordion.style.display = isAdmin ? 'block' : 'none';
   // Painel de calendários só aparece para admin
   if (calendarioPanel) calendarioPanel.style.display = isAdmin ? 'block' : 'none';
-  // Painel Telegram só aparece para admin
-  const telegramPanel = document.getElementById('telegramPanel');
-  if (telegramPanel) telegramPanel.style.display = isAdmin ? 'block' : 'none';
+
+  // Navegação de abas só aparece para admin
+  const adminNavTabs = document.getElementById('adminNavTabs');
+  if (adminNavTabs) {
+    if (isAdmin) {
+      adminNavTabs.classList.add('show');
+    } else {
+      adminNavTabs.classList.remove('show');
+    }
+  }
+
+  // Controlar visibilidade das abas de conteúdo
+  const tabDivisao = document.getElementById('tabDivisao');
+  const tabTelegram = document.getElementById('tabTelegram');
+
+  if (isAdmin) {
+    // Admin: mostrar aba divisão por padrão, ocultar telegram
+    if (tabDivisao) tabDivisao.classList.add('active');
+    if (tabTelegram) tabTelegram.classList.remove('active');
+  } else {
+    // Viewer: mostrar divisão sempre, ocultar telegram
+    if (tabDivisao) tabDivisao.classList.add('active');
+    if (tabTelegram) tabTelegram.classList.remove('active');
+  }
+
   if (emptyMessage) emptyMessage.style.display = 'none';
 
   atualizarCalendario();
@@ -4547,38 +4660,46 @@ function showToast(message, type = 'info') {
 // INTEGRAÇÃO TELEGRAM - COP REDE INFORMA
 // ============================================
 
-// Configuração do Backend
-let backendUrl = localStorage.getItem('telegramBackendUrl') || '';
+// Configuração do Backend - URL fixa do Render
+const BACKEND_URL = 'https://cop-rede-informa-api.onrender.com';
+let backendUrl = BACKEND_URL;
 let dadosCopRedeInforma = [];
 let dadosAlertas = [];
 let alertaAtual = null;
+let telegramConectado = false;
 
-// Inicializar painel Telegram
-function inicializarTelegram() {
-  const urlSalva = localStorage.getItem('telegramBackendUrl');
-  const inputUrl = document.getElementById('backendUrlInput');
-  if (urlSalva && inputUrl) {
-    inputUrl.value = urlSalva;
-    backendUrl = urlSalva;
-    verificarConexaoBackend();
+// ============================================
+// NAVEGAÇÃO DE ABAS ADMIN
+// ============================================
+
+function trocarAbaAdmin(abaId) {
+  // Remover active de todas as tabs e conteúdos
+  document.querySelectorAll('.admin-nav-tab').forEach(tab => tab.classList.remove('active'));
+  document.querySelectorAll('.admin-tab-content').forEach(content => content.classList.remove('active'));
+
+  // Ativar tab selecionada
+  const tabBtn = document.querySelector(`[data-admin-tab="${abaId}"]`);
+  if (tabBtn) tabBtn.classList.add('active');
+
+  // Ativar conteúdo correspondente
+  if (abaId === 'divisao') {
+    const tabDivisao = document.getElementById('tabDivisao');
+    if (tabDivisao) tabDivisao.classList.add('active');
+  } else if (abaId === 'telegram') {
+    const tabTelegram = document.getElementById('tabTelegram');
+    if (tabTelegram) tabTelegram.classList.add('active');
+
+    // Conectar ao backend se ainda não conectou
+    if (!telegramConectado) {
+      verificarConexaoBackend();
+    }
   }
 }
 
-// Configurar URL do Backend
-function configurarBackend() {
-  const input = document.getElementById('backendUrlInput');
-  const url = input.value.trim();
-
-  if (!url) {
-    showToast('Por favor, insira a URL do backend', 'warning');
-    return;
-  }
-
-  // Remove trailing slash
-  backendUrl = url.replace(/\/$/, '');
-  localStorage.setItem('telegramBackendUrl', backendUrl);
-
-  verificarConexaoBackend();
+// Inicializar painel Telegram (chamado automaticamente)
+function inicializarTelegram() {
+  // Conexão será feita quando o usuário clicar na aba
+  console.log('[Telegram] Pronto para conectar ao backend:', BACKEND_URL);
 }
 
 // Verificar conexão com o backend
@@ -4587,10 +4708,14 @@ async function verificarConexaoBackend() {
   const statusText = document.getElementById('backendStatusText');
 
   if (!backendUrl) {
-    statusEl.className = 'backend-status offline';
-    statusText.textContent = 'Não configurado';
+    if (statusEl) statusEl.className = 'backend-status offline';
+    if (statusText) statusText.textContent = 'Não configurado';
     return;
   }
+
+  // Mostrar status de conexão
+  if (statusEl) statusEl.className = 'backend-status offline';
+  if (statusText) statusText.textContent = 'Conectando...';
 
   try {
     const response = await fetch(`${backendUrl}/api/health`, {
@@ -4600,21 +4725,34 @@ async function verificarConexaoBackend() {
 
     if (response.ok) {
       const data = await response.json();
-      statusEl.className = 'backend-status online';
-      statusText.textContent = data.telegram?.polling ? 'Online (Polling)' : 'Online';
+      if (statusEl) statusEl.className = 'backend-status online';
+      if (statusText) statusText.textContent = data.telegram?.polling ? 'Online (Polling)' : 'Online';
+
+      telegramConectado = true;
 
       // Carregar dados automaticamente
       carregarCopRedeInforma();
       carregarAlertas();
       carregarEstatisticas();
+
+      // Atualizar badge na navegação
+      atualizarBadgeNavegacao();
     } else {
       throw new Error('Backend não respondeu corretamente');
     }
   } catch (error) {
     console.error('Erro ao conectar backend:', error);
-    statusEl.className = 'backend-status offline';
-    statusText.textContent = 'Desconectado';
+    if (statusEl) statusEl.className = 'backend-status offline';
+    if (statusText) statusText.textContent = 'Erro na conexão';
+    telegramConectado = false;
   }
+}
+
+// Atualizar badge na navegação principal
+function atualizarBadgeNavegacao() {
+  const badgeNav = document.getElementById('badgeTelegramNav');
+  const totalMensagens = dadosCopRedeInforma.length + dadosAlertas.filter(a => a.status === 'novo').length;
+  if (badgeNav) badgeNav.textContent = totalMensagens;
 }
 
 // Trocar abas do painel Telegram
