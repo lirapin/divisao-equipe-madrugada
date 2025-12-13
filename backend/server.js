@@ -134,7 +134,7 @@ app.post('/api/telegram/sincronizar', async (req, res) => {
 
 /**
  * Listar mensagens COP REDE INFORMA
- * Query params: dataInicio, dataFim, areaPainel, grupo, responsavel, tipo
+ * Query params: dataInicio, dataFim, areaPainel, grupo, responsavel, tipo, refresh
  */
 app.get('/api/cop-rede-informa', async (req, res) => {
   try {
@@ -152,12 +152,16 @@ app.get('/api/cop-rede-informa', async (req, res) => {
       if (!filtros[key]) delete filtros[key];
     });
 
-    const mensagens = await storage.obterCopRedeInforma(filtros);
+    // Forçar atualização do cache se refresh=true
+    const forcarAtualizacao = req.query.refresh === 'true';
+
+    const mensagens = await storage.obterCopRedeInforma(filtros, forcarAtualizacao);
 
     res.json({
       sucesso: true,
       total: mensagens.length,
-      dados: mensagens
+      dados: mensagens,
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
     console.error('[API] Erro ao listar COP REDE INFORMA:', error);
