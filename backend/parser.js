@@ -33,11 +33,16 @@ function identificarTipoMensagem(texto) {
 
   const primeiraLinha = texto.split('\n')[0].trim();
 
-  if (primeiraLinha === MESSAGE_TITLES.COP_REDE_INFORMA) {
+  // COP REDE INFORMA
+  if (primeiraLinha === MESSAGE_TITLES.COP_REDE_INFORMA ||
+      primeiraLinha.includes('COP REDE INFORMA')) {
     return 'COP_REDE_INFORMA';
   }
 
-  if (primeiraLinha === MESSAGE_TITLES.NOVO_EVENTO) {
+  // 🚨 Novo Evento Detectado!
+  if (primeiraLinha === MESSAGE_TITLES.NOVO_EVENTO ||
+      primeiraLinha.includes('Novo Evento Detectado') ||
+      primeiraLinha.includes('🚨')) {
     return 'NOVO_EVENTO';
   }
 
@@ -150,50 +155,96 @@ function mapearGrupoParaArea(grupo) {
 }
 
 /**
- * Faz parsing completo de uma mensagem COP REDE INFORMA
+ * Extrai seções do formato de lista do COP REDE INFORMA
+ * Formato: SECAO:\n- item1: valor1\n- item2: valor2
+ * @param {string} texto - Texto completo
+ * @param {string} secao - Nome da seção
+ * @returns {object} Objeto com itens e valores
+ */
+function extrairSecaoLista(texto, secao) {
+  if (!texto || !secao) return null;
+
+  const regex = new RegExp(`${secao}:\\s*\\n([\\s\\S]*?)(?=\\n[A-ZÁÉÍÓÚ]+:|$)`, 'i');
+  const match = texto.match(regex);
+
+  if (!match) return null;
+
+  const linhas = match[1].split('\n').filter(l => l.trim().startsWith('-'));
+  const itens = {};
+  let total = 0;
+
+  for (const linha of linhas) {
+    const itemMatch = linha.match(/^-\s*(.+?):\s*(\d+)/);
+    if (itemMatch) {
+      itens[itemMatch[1].trim()] = parseInt(itemMatch[2]);
+      total += parseInt(itemMatch[2]);
+    }
+  }
+
+  return { itens, total };
+}
+
+/**
+ * Faz parsing completo de uma mensagem COP REDE INFORMA (formato resumo)
  * @param {string} texto - Texto completo da mensagem
  * @param {Date} dataMensagem - Data/hora da mensagem no Telegram
  * @param {number} messageId - ID da mensagem no Telegram
  * @returns {object} Objeto com campos extraídos
  */
 function parseCopRedeInforma(texto, dataMensagem, messageId) {
-  // Campos do formato COP REDE INFORMA
-  const empresa = extrairCampo(texto, 'EMPRESA');
-  const grupo = extrairCampo(texto, 'GRUPO');
-  const sigla = extrairCampo(texto, 'SIGLA');
-  const descricao = extrairCampoMultilinha(texto, 'DESCRIÇÃO') ||
-                    extrairCampoMultilinha(texto, 'DESCRICAO') ||
-                    extrairCampo(texto, 'DESCRIÇÃO') ||
-                    extrairCampo(texto, 'DESCRICAO');
+  // Extrair seções do resumo
+  const mercado = extrairSecaoLista(texto, 'MERCADO');
+  const tipo = extrairSecaoLista(texto, 'TIPO');
+  const natureza = extrairSecaoLista(texto, 'NATUREZA');
+  const sintoma = extrairSecaoLista(texto, 'SINTOMA');
+  const grupo = extrairSecaoLista(texto, 'GRUPO');
 
-  // Campos opcionais do formato antigo (compatibilidade)
-  const tipo = extrairCampo(texto, 'TIPO');
-  const diaTexto = extrairCampo(texto, 'DIA') || extrairCampo(texto, 'DATA');
-  const responsavel = extrairCampo(texto, 'RESPONSAVEL') || extrairCampo(texto, 'RESPONSÁVEL');
-  const volumeTexto = extrairCampo(texto, 'VOLUME');
+  // Calcular total geral
+  const totalGeral = mercado?.total || tipo?.total || 0;
 
-  const dia = extrairData(diaTexto) || formatarData(dataMensagem);
-  const volume = extrairVolume(volumeTexto) || 1;
-  const { areaPainel, status } = mapearGrupoParaArea(grupo);
+  // Identificar áreas afetadas
+  const areasAfetadas = [];
+  if (grupo?.itens) {
+    for (const [grupoNome, quantidade] of Object.entries(grupo.itens)) {
+      const { areaPainel } = mapearGrupoParaArea(grupoNome);
+      if (areaPainel && !areasAfetadas.includes(areaPainel)) {
+        areasAfetadas.push(areaPainel);
+      }
+    }
+  }
+
+  // Criar descrição resumida
+  const descricaoPartes = [];
+  if (tipo?.itens) {
+    descricaoPartes.push('Tipos: ' + Object.entries(tipo.itens).map(([k, v]) => `${k} (${v})`).join(', '));
+  }
+  if (sintoma?.itens) {
+    descricaoPartes.push('Sintomas: ' + Object.entries(sintoma.itens).map(([k, v]) => `${k} (${v})`).join(', '));
+  }
 
   return {
     id: `cop_${messageId}_${Date.now()}`,
     messageId,
     // Campos para o frontend
     dataRecebimento: dataMensagem.toISOString(),
-    empresa: empresa || null,
-    grupo: grupo || null,
-    areaMapeada: areaPainel || null,
-    sigla: sigla || null,
-    descricao: descricao || null,
-    // Campos adicionais
-    dia,
-    tipo: tipo || null,
-    responsavel: responsavel || null,
-    volume,
+    empresa: 'Resumo COP',
+    grupo: grupo?.itens ? Object.keys(grupo.itens).join(', ') : null,
+    areaMapeada: areasAfetadas.length > 0 ? areasAfetadas.join(', ') : null,
+    sigla: null,
+    descricao: descricaoPartes.join('\n') || null,
+    // Dados detalhados do resumo
+    resumo: {
+      mercado: mercado?.itens || {},
+      tipo: tipo?.itens || {},
+      natureza: natureza?.itens || {},
+      sintoma: sintoma?.itens || {},
+      grupo: grupo?.itens || {},
+      totalGeral
+    },
+    areasAfetadas,
+    totalEventos: totalGeral,
     mensagemOriginal: texto,
     origem: 'COP_REDE_INFORMA',
-    status,
     processadoEm: new Date().toISOString()
   };
 }
@@ -236,46 +287,74 @@ function extrairCampoMultilinha(texto, chave) {
 }
 
 /**
+ * Extrai campo com emoji do formato "📌 Campo: valor"
+ * @param {string} texto - Texto completo
+ * @param {string} emoji - Emoji do campo
+ * @param {string} campo - Nome do campo
+ * @returns {string|null} Valor extraído
+ */
+function extrairCampoComEmoji(texto, emoji, campo) {
+  if (!texto) return null;
+
+  // Tenta com emoji primeiro
+  const regexEmoji = new RegExp(`${emoji}\\s*${campo}:\\s*(.+)`, 'i');
+  let match = texto.match(regexEmoji);
+  if (match) return match[1].trim();
+
+  // Tenta sem emoji
+  const regexSemEmoji = new RegExp(`^\\s*${campo}:\\s*(.+)`, 'im');
+  match = texto.match(regexSemEmoji);
+  if (match) return match[1].trim();
+
+  return null;
+}
+
+/**
  * Faz parsing completo de uma mensagem de Novo Evento/Alerta
+ * Formato: 🚨 Novo Evento Detectado! com campos usando emojis
  * @param {string} texto - Texto completo da mensagem
  * @param {Date} dataMensagem - Data/hora da mensagem no Telegram
  * @param {number} messageId - ID da mensagem no Telegram
  * @returns {object} Objeto com campos extraídos
  */
 function parseNovoEvento(texto, dataMensagem, messageId) {
-  const grupo = extrairCampo(texto, 'GRUPO');
-  const diaTexto = extrairCampo(texto, 'DIA') || extrairCampo(texto, 'DATA');
-  const responsavel = extrairCampo(texto, 'RESPONSAVEL') || extrairCampo(texto, 'RESPONSÁVEL');
-  const descricao = extrairCampoMultilinha(texto, 'DETALHES') ||
-                    extrairCampoMultilinha(texto, 'DESCRIÇÃO') ||
-                    extrairCampoMultilinha(texto, 'DESCRICAO') ||
-                    extrairCampo(texto, 'DETALHES') ||
-                    extrairCampo(texto, 'DESCRIÇÃO');
-  const volumeTexto = extrairCampo(texto, 'VOLUME');
+  // Extrair campos do formato com emojis
+  const ticket = extrairCampoComEmoji(texto, '📌', 'Ticket');
+  const dataEvento = extrairCampoComEmoji(texto, '📅', 'Data');
+  const tipo = extrairCampoComEmoji(texto, '🔍', 'Tipo');
+  const mercado = extrairCampoComEmoji(texto, '🌍', 'Mercado');
+  const sintoma = extrairCampoComEmoji(texto, '⚠️', 'Sintoma');
+  const cluster = extrairCampoComEmoji(texto, '📡', 'Cluster');
+  const natureza = extrairCampoComEmoji(texto, '📑', 'Natureza');
 
-  const dia = extrairData(diaTexto) || formatarData(dataMensagem);
-  const volume = extrairVolume(volumeTexto) || 1;
-  const { areaPainel, status } = mapearGrupoParaArea(grupo);
+  // O cluster é usado para mapear para a área
+  const { areaPainel } = mapearGrupoParaArea(cluster);
 
-  // Extrair título da primeira linha
-  const titulo = texto.split('\n')[0].trim();
+  // Criar descrição
+  const descricaoParts = [];
+  if (tipo) descricaoParts.push(`Tipo: ${tipo}`);
+  if (sintoma) descricaoParts.push(`Sintoma: ${sintoma}`);
+  if (mercado) descricaoParts.push(`Mercado: ${mercado}`);
+  if (natureza) descricaoParts.push(`Natureza: ${natureza}`);
 
   return {
     id: `alerta_${messageId}_${Date.now()}`,
     messageId,
     // Campos para o frontend
     dataRecebimento: dataMensagem.toISOString(),
-    grupo: grupo || null,
+    grupo: cluster || null,
     areaMapeada: areaPainel || null,
-    descricao: descricao || extrairDetalhesDoTexto(texto),
-    // Campos adicionais
-    dia,
-    responsavel: responsavel || null,
-    volume,
-    titulo,
+    descricao: descricaoParts.join(' | ') || null,
+    // Campos específicos do alerta
+    ticket,
+    dataEvento,
+    tipo,
+    mercado,
+    sintoma,
+    natureza,
     mensagemOriginal: texto,
     origem: 'NOVO_EVENTO_DETECTADO',
-    status: 'novo', // Status do alerta
+    status: 'novo',
     historicoStatus: [{
       status: 'novo',
       data: new Date().toISOString()
@@ -380,6 +459,8 @@ module.exports = {
   identificarTipoMensagem,
   extrairCampo,
   extrairCampoMultilinha,
+  extrairCampoComEmoji,
+  extrairSecaoLista,
   extrairData,
   extrairVolume,
   mapearGrupoParaArea,

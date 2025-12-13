@@ -24,7 +24,8 @@ const JSONBIN_CONFIG = {
 // Títulos de mensagens que serão processadas
 const MESSAGE_TITLES = {
   COP_REDE_INFORMA: 'COP REDE INFORMA',
-  NOVO_EVENTO: '🚨 Novo Evento Detectado!'
+  NOVO_EVENTO: '🚨 Novo Evento Detectado!',
+  NOVO_EVENTO_ALT: 'Novo Evento Detectado'
 };
 
 // Mapeamento de GRUPO do Telegram para Área do Painel
