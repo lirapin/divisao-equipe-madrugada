@@ -1267,6 +1267,27 @@
       100% { opacity: 1; }
     }
 
+    /* Indicador de Auto-Refresh */
+    .auto-refresh-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      color: #4caf50;
+      background: rgba(76, 175, 80, 0.15);
+      padding: 0.25rem 0.6rem;
+      border-radius: 12px;
+    }
+
+    .auto-refresh-indicator .spinning {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
     @media (max-width: 768px) {
       .telegram-tabs {
         flex-wrap: wrap;
@@ -1524,9 +1545,15 @@
   <div class="telegram-panel" id="telegramPanel">
     <div class="telegram-header">
       <span><i class="bi bi-telegram me-2"></i>COP Rede Informa - Telegram</span>
-      <div class="backend-status offline" id="backendStatus">
-        <span class="dot"></span>
-        <span id="backendStatusText">Conectando...</span>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div class="backend-status offline" id="backendStatus">
+          <span class="dot"></span>
+          <span id="backendStatusText">Conectando...</span>
+        </div>
+        <div class="auto-refresh-indicator" id="autoRefreshIndicator" style="display: none;">
+          <i class="bi bi-arrow-repeat spinning"></i>
+          <span>Auto-refresh ativo</span>
+        </div>
       </div>
     </div>
 
@@ -4788,9 +4815,19 @@ function iniciarAutoRefresh() {
   if (autoRefreshInterval) return; // Já está rodando
 
   console.log('[Telegram] Auto-refresh iniciado (a cada ' + (AUTO_REFRESH_MS/1000) + 's)');
+
+  // Indicador visual
+  const indicador = document.getElementById('autoRefreshIndicator');
+  if (indicador) indicador.style.display = 'inline-flex';
+
+  // Primeira carga imediata
+  carregarCopRedeInforma(true);
+  carregarAlertas();
+
   autoRefreshInterval = setInterval(() => {
     if (telegramConectado) {
-      carregarCopRedeInforma();
+      console.log('[Telegram] Auto-refresh: atualizando dados...');
+      carregarCopRedeInforma(true); // Forçar atualização
       carregarAlertas();
     }
   }, AUTO_REFRESH_MS);
@@ -4801,6 +4838,10 @@ function pararAutoRefresh() {
     clearInterval(autoRefreshInterval);
     autoRefreshInterval = null;
     console.log('[Telegram] Auto-refresh parado');
+
+    // Indicador visual
+    const indicador = document.getElementById('autoRefreshIndicator');
+    if (indicador) indicador.style.display = 'none';
   }
 }
 
@@ -4883,16 +4924,22 @@ function trocarAbasTelegram(abaId) {
 // COP REDE INFORMA - Funções
 // ============================================
 
-async function carregarCopRedeInforma() {
+async function carregarCopRedeInforma(forcarAtualizacao = false) {
   if (!backendUrl) {
     showToast('Configure a URL do backend primeiro', 'warning');
     return;
   }
 
   try {
-    const response = await fetch(`${backendUrl}/api/cop-rede-informa`, {
+    // Adicionar parâmetro para forçar atualização (bypass cache)
+    const url = forcarAtualizacao
+      ? `${backendUrl}/api/cop-rede-informa?refresh=true&t=${Date.now()}`
+      : `${backendUrl}/api/cop-rede-informa`;
+
+    const response = await fetch(url, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store' // Não usar cache do navegador
     });
 
     if (!response.ok) throw new Error('Erro ao carregar dados');
@@ -4902,6 +4949,8 @@ async function carregarCopRedeInforma() {
 
     atualizarTabelaCopRede(dadosCopRedeInforma);
     atualizarBadgeCopRede(dadosCopRedeInforma.length);
+
+    console.log('[Telegram] COP Rede Informa atualizado:', dadosCopRedeInforma.length, 'mensagens');
 
   } catch (error) {
     console.error('Erro ao carregar COP Rede Informa:', error);
@@ -4985,35 +5034,34 @@ function atualizarTabelaCopRede(dados) {
     return;
   }
 
-  // Calcular resumo por área
+  // PEGAR APENAS A ÚLTIMA MENSAGEM (mais recente)
+  // Ordenar por data decrescente e pegar a primeira
+  const dadosOrdenados = [...dados].sort((a, b) =>
+    new Date(b.dataRecebimento) - new Date(a.dataRecebimento)
+  );
+  const ultimaMensagem = dadosOrdenados[0];
+
+  // Calcular resumo por área APENAS da última mensagem
   const resumoPorArea = {};
 
-  dados.forEach(item => {
-    // Processar áreas afetadas da mensagem
-    if (item.resumo && item.resumo.grupo) {
-      for (const [grupoNome, quantidade] of Object.entries(item.resumo.grupo)) {
-        const areaKey = mapearGrupoParaAreaFrontend(grupoNome);
-        if (!resumoPorArea[areaKey]) {
-          resumoPorArea[areaKey] = { volume: 0, responsavel: '-' };
-        }
-        resumoPorArea[areaKey].volume += quantidade;
-        // Buscar responsável
-        if (resumoPorArea[areaKey].responsavel === '-') {
-          resumoPorArea[areaKey].responsavel = obterResponsavelPorArea(areaKey, item.dataRecebimento);
-        }
-      }
-    } else if (item.areaMapeada) {
-      // Mensagem individual
-      const areaKey = item.areaMapeada;
+  if (ultimaMensagem.resumo && ultimaMensagem.resumo.grupo) {
+    for (const [grupoNome, quantidade] of Object.entries(ultimaMensagem.resumo.grupo)) {
+      const areaKey = mapearGrupoParaAreaFrontend(grupoNome);
       if (!resumoPorArea[areaKey]) {
         resumoPorArea[areaKey] = { volume: 0, responsavel: '-' };
       }
-      resumoPorArea[areaKey].volume += extrairVolumeDaMensagem(item);
+      resumoPorArea[areaKey].volume += quantidade;
       if (resumoPorArea[areaKey].responsavel === '-') {
-        resumoPorArea[areaKey].responsavel = obterResponsavelPorArea(areaKey, item.dataRecebimento);
+        resumoPorArea[areaKey].responsavel = obterResponsavelPorArea(areaKey, ultimaMensagem.dataRecebimento);
       }
     }
-  });
+  } else if (ultimaMensagem.areaMapeada) {
+    const areaKey = ultimaMensagem.areaMapeada;
+    resumoPorArea[areaKey] = {
+      volume: extrairVolumeDaMensagem(ultimaMensagem),
+      responsavel: obterResponsavelPorArea(areaKey, ultimaMensagem.dataRecebimento)
+    };
+  }
 
   // Atualizar resumo visual
   if (Object.keys(resumoPorArea).length > 0 && summaryGrid) {
@@ -5029,56 +5077,58 @@ function atualizarTabelaCopRede(dados) {
     resumoDiv.style.display = 'none';
   }
 
-  // Atualizar tabela - mostrar dados expandidos por área quando houver resumo
+  // Atualizar tabela - mostrar dados APENAS da última mensagem
   const linhasTabela = [];
+  const dataFormatada = formatarDataHora(ultimaMensagem.dataRecebimento);
 
-  dados.forEach((item, index) => {
-    const dataFormatada = formatarDataHora(item.dataRecebimento);
-
-    if (item.resumo && item.resumo.grupo && Object.keys(item.resumo.grupo).length > 0) {
-      // Expandir cada área do resumo
-      for (const [grupoNome, quantidade] of Object.entries(item.resumo.grupo)) {
-        const areaKey = mapearGrupoParaAreaFrontend(grupoNome);
-        const responsavel = obterResponsavelPorArea(areaKey, item.dataRecebimento);
-
-        linhasTabela.push(`
-          <tr>
-            <td>${dataFormatada}</td>
-            <td><span class="badge bg-info">${areaKey || '-'}</span></td>
-            <td><strong>${quantidade}</strong></td>
-            <td>${responsavel}</td>
-            <td class="text-truncate" style="max-width: 200px;" title="${grupoNome}">${grupoNome}</td>
-            <td>
-              <button class="telegram-btn telegram-btn-outline" onclick="verDetalhesCopRede(${index})">
-                <i class="bi bi-eye"></i>
-              </button>
-            </td>
-          </tr>
-        `);
-      }
-    } else {
-      // Mensagem sem resumo
-      const volume = extrairVolumeDaMensagem(item);
-      const responsavel = obterResponsavelPorArea(item.areaMapeada, item.dataRecebimento);
+  if (ultimaMensagem.resumo && ultimaMensagem.resumo.grupo && Object.keys(ultimaMensagem.resumo.grupo).length > 0) {
+    // Expandir cada área do resumo da última mensagem
+    for (const [grupoNome, quantidade] of Object.entries(ultimaMensagem.resumo.grupo)) {
+      const areaKey = mapearGrupoParaAreaFrontend(grupoNome);
+      const responsavel = obterResponsavelPorArea(areaKey, ultimaMensagem.dataRecebimento);
 
       linhasTabela.push(`
         <tr>
           <td>${dataFormatada}</td>
-          <td><span class="badge bg-info">${item.areaMapeada || '-'}</span></td>
-          <td><strong>${volume}</strong></td>
+          <td><span class="badge bg-info">${areaKey || '-'}</span></td>
+          <td><strong>${quantidade}</strong></td>
           <td>${responsavel}</td>
-          <td class="text-truncate" style="max-width: 200px;" title="${item.descricao || ''}">${item.descricao || item.grupo || '-'}</td>
+          <td class="text-truncate" style="max-width: 200px;" title="${grupoNome}">${grupoNome}</td>
           <td>
-            <button class="telegram-btn telegram-btn-outline" onclick="verDetalhesCopRede(${index})">
+            <button class="telegram-btn telegram-btn-outline" onclick="verDetalhesCopRede(0)">
               <i class="bi bi-eye"></i>
             </button>
           </td>
         </tr>
       `);
     }
-  });
+  } else {
+    // Mensagem sem resumo
+    const volume = extrairVolumeDaMensagem(ultimaMensagem);
+    const responsavel = obterResponsavelPorArea(ultimaMensagem.areaMapeada, ultimaMensagem.dataRecebimento);
 
-  tbody.innerHTML = linhasTabela.join('');
+    linhasTabela.push(`
+      <tr>
+        <td>${dataFormatada}</td>
+        <td><span class="badge bg-info">${ultimaMensagem.areaMapeada || '-'}</span></td>
+        <td><strong>${volume}</strong></td>
+        <td>${responsavel}</td>
+        <td class="text-truncate" style="max-width: 200px;" title="${ultimaMensagem.descricao || ''}">${ultimaMensagem.descricao || ultimaMensagem.grupo || '-'}</td>
+        <td>
+          <button class="telegram-btn telegram-btn-outline" onclick="verDetalhesCopRede(0)">
+            <i class="bi bi-eye"></i>
+          </button>
+        </td>
+      </tr>
+    `);
+  }
+
+  // Adicionar info da última atualização
+  const ultimaAtualizacao = `<tr class="table-info"><td colspan="6" class="text-center text-muted small">
+    <i class="bi bi-clock me-1"></i>Última mensagem: ${dataFormatada} | Total no banco: ${dados.length} mensagens
+  </td></tr>`;
+
+  tbody.innerHTML = linhasTabela.join('') + ultimaAtualizacao;
 }
 
 // Mapear grupo do Telegram para área do frontend

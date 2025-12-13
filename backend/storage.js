@@ -86,7 +86,7 @@ async function carregarDados(forcarAtualizacao = false) {
   // Usar cache se disponível e não forçar atualização
   if (!forcarAtualizacao && cacheLocal.ultimaAtualizacao) {
     const idadeCache = Date.now() - new Date(cacheLocal.ultimaAtualizacao).getTime();
-    if (idadeCache < 30000) { // Cache válido por 30 segundos
+    if (idadeCache < 5000) { // Cache válido por 5 segundos (antes era 30s)
       return {
         copRedeInforma: cacheLocal.copRedeInforma,
         alertas: cacheLocal.alertas
@@ -283,10 +283,11 @@ async function atualizarStatusAlerta(alertaId, novoStatus) {
 /**
  * Obtém mensagens COP REDE INFORMA com filtros
  * @param {object} filtros - Filtros opcionais
+ * @param {boolean} forcarAtualizacao - Forçar atualização do cache
  * @returns {Promise<array>} Lista de mensagens filtradas
  */
-async function obterCopRedeInforma(filtros = {}) {
-  const dados = await carregarDados();
+async function obterCopRedeInforma(filtros = {}, forcarAtualizacao = false) {
+  const dados = await carregarDados(forcarAtualizacao);
   let mensagens = dados.copRedeInforma;
 
   // Aplicar filtros
