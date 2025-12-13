@@ -2711,22 +2711,49 @@ async function carregarDadosDaNuvem() {
 
       console.log('📦 Dados carregados da nuvem:', {
         temDados: !!dados,
+        versao: dados?.versao,
         temOriginais: !!(dados && dados.dadosOriginais),
         temPlanilha: !!(dados && dados.dadosPlanilha),
+        temCal1: !!(dados && dados.calendario1),
+        temCal2: !!(dados && dados.calendario2),
         mes: dados?.mes,
         ano: dados?.ano,
         ultimaAtualizacao: dados?.ultima_atualizacao
       });
 
-      if (dados && (dados.dadosOriginais || dados.dadosPlanilha)) {
+      // Verificar se há dados válidos (formato v2 OU v3.0)
+      const formatoV2 = dados && (dados.dadosOriginais || dados.dadosPlanilha);
+      const formatoV3 = dados && (dados.versao === '3.0' || dados.calendario1 || dados.calendario2);
+
+      if (formatoV2 || formatoV3) {
         console.log('✅ DADOS VÁLIDOS ENCONTRADOS NA NUVEM!');
+        if (formatoV3) {
+          console.log('   Formato: v3.0 (múltiplos calendários)');
+        } else {
+          console.log('   Formato: v2.0 (legado)');
+        }
+
         processarDadosCarregados(dados);
         hideLoading();
 
-        const info = `Mês: ${dados.mes !== undefined ? MESES[dados.mes] : 'N/A'} ${dados.ano || ''} | Funcionários: ${dados.dadosPlanilha?.length || 0} | Dias: ${Object.keys(dados.dadosOriginais || {}).length}`;
-        console.log('📊 Info:', info);
+        // Mensagem de sucesso adaptada ao formato
+        if (formatoV3) {
+          const cal1 = dados.calendario1;
+          const cal2 = dados.calendario2;
+          let info = '';
+          if (cal1) {
+            info += `Cal1: ${MESES[cal1.mes]}/${cal1.ano}`;
+          }
+          if (cal2) {
+            info += ` | Cal2: ${MESES[cal2.mes]}/${cal2.ano}`;
+          }
+          showToast('✅ Calendários carregados da nuvem! ' + info, 'success');
+        } else {
+          const info = `Mês: ${dados.mes !== undefined ? MESES[dados.mes] : 'N/A'} ${dados.ano || ''} | Funcionários: ${dados.dadosPlanilha?.length || 0} | Dias: ${Object.keys(dados.dadosOriginais || {}).length}`;
+          console.log('📊 Info:', info);
+          showToast('✅ Escala carregada da nuvem! ' + info, 'success');
+        }
 
-        showToast('✅ Escala carregada da nuvem! ' + info, 'success');
         return true;
       } else {
         console.warn('⚠️ Nuvem acessível mas sem dados válidos');
@@ -2782,11 +2809,14 @@ function carregarDoBackupLocal() {
     if (dadosSalvos) {
       const dados = JSON.parse(dadosSalvos);
 
-      // Verificar se há dados válidos
-      if (dados && (dados.dadosOriginais || dados.dadosPlanilha)) {
+      // Verificar se há dados válidos (formato v2 OU v3.0)
+      const formatoV2 = dados && (dados.dadosOriginais || dados.dadosPlanilha);
+      const formatoV3 = dados && (dados.versao === '3.0' || dados.calendario1 || dados.calendario2);
+
+      if (formatoV2 || formatoV3) {
         processarDadosCarregados(dados);
 
-        let mensagem = '📁 Escala carregada do backup local';
+        let mensagem = '📁 Backup local carregado';
         if (ultimoSalvamento) {
           const dataBackup = new Date(ultimoSalvamento);
           mensagem += ` (${dataBackup.toLocaleDateString()} ${dataBackup.toLocaleTimeString()})`;
