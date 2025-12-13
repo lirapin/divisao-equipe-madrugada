@@ -157,8 +157,17 @@ function mapearGrupoParaArea(grupo) {
  * @returns {object} Objeto com campos extraídos
  */
 function parseCopRedeInforma(texto, dataMensagem, messageId) {
-  const tipo = extrairCampo(texto, 'TIPO');
+  // Campos do formato COP REDE INFORMA
+  const empresa = extrairCampo(texto, 'EMPRESA');
   const grupo = extrairCampo(texto, 'GRUPO');
+  const sigla = extrairCampo(texto, 'SIGLA');
+  const descricao = extrairCampoMultilinha(texto, 'DESCRIÇÃO') ||
+                    extrairCampoMultilinha(texto, 'DESCRICAO') ||
+                    extrairCampo(texto, 'DESCRIÇÃO') ||
+                    extrairCampo(texto, 'DESCRICAO');
+
+  // Campos opcionais do formato antigo (compatibilidade)
+  const tipo = extrairCampo(texto, 'TIPO');
   const diaTexto = extrairCampo(texto, 'DIA') || extrairCampo(texto, 'DATA');
   const responsavel = extrairCampo(texto, 'RESPONSAVEL') || extrairCampo(texto, 'RESPONSÁVEL');
   const volumeTexto = extrairCampo(texto, 'VOLUME');
@@ -170,18 +179,60 @@ function parseCopRedeInforma(texto, dataMensagem, messageId) {
   return {
     id: `cop_${messageId}_${Date.now()}`,
     messageId,
-    dataMensagem: dataMensagem.toISOString(),
+    // Campos para o frontend
+    dataRecebimento: dataMensagem.toISOString(),
+    empresa: empresa || null,
+    grupo: grupo || null,
+    areaMapeada: areaPainel || null,
+    sigla: sigla || null,
+    descricao: descricao || null,
+    // Campos adicionais
     dia,
-    tipo: tipo || 'N/A',
-    grupoOriginal: grupo || 'N/A',
-    areaPainel: areaPainel || 'DESCONHECIDO',
-    responsavel: responsavel || 'N/A',
+    tipo: tipo || null,
+    responsavel: responsavel || null,
     volume,
-    textoCompleto: texto,
+    mensagemOriginal: texto,
     origem: 'COP_REDE_INFORMA',
     status,
     processadoEm: new Date().toISOString()
   };
+}
+
+/**
+ * Extrai valor de um campo multilinha (como DESCRIÇÃO)
+ * @param {string} texto - Texto completo da mensagem
+ * @param {string} chave - Nome da chave a buscar
+ * @returns {string|null} Valor encontrado ou null
+ */
+function extrairCampoMultilinha(texto, chave) {
+  if (!texto || !chave) return null;
+
+  const linhas = texto.split('\n');
+  let encontrou = false;
+  let valor = [];
+
+  for (const linha of linhas) {
+    // Verifica se esta linha é o início do campo
+    const regex = new RegExp(`^\\s*${chave}\\s*:`, 'i');
+    if (regex.test(linha)) {
+      encontrou = true;
+      // Pega o resto da linha após o ":"
+      const resto = linha.replace(regex, '').trim();
+      if (resto) valor.push(resto);
+      continue;
+    }
+
+    // Se já encontrou e a linha não é outro campo, adiciona ao valor
+    if (encontrou) {
+      // Verifica se é outro campo (tem formato "CAMPO:")
+      if (/^[A-ZÁÉÍÓÚÂÊÎÔÛÃÕÇ]+\s*:/i.test(linha.trim())) {
+        break; // Chegou em outro campo
+      }
+      valor.push(linha);
+    }
+  }
+
+  return valor.length > 0 ? valor.join('\n').trim() : null;
 }
 
 /**
@@ -192,11 +243,14 @@ function parseCopRedeInforma(texto, dataMensagem, messageId) {
  * @returns {object} Objeto com campos extraídos
  */
 function parseNovoEvento(texto, dataMensagem, messageId) {
-  const tipo = extrairCampo(texto, 'TIPO');
   const grupo = extrairCampo(texto, 'GRUPO');
   const diaTexto = extrairCampo(texto, 'DIA') || extrairCampo(texto, 'DATA');
   const responsavel = extrairCampo(texto, 'RESPONSAVEL') || extrairCampo(texto, 'RESPONSÁVEL');
-  const detalhes = extrairCampo(texto, 'DETALHES') || extrairCampo(texto, 'DESCRICAO') || extrairCampo(texto, 'DESCRIÇÃO');
+  const descricao = extrairCampoMultilinha(texto, 'DETALHES') ||
+                    extrairCampoMultilinha(texto, 'DESCRIÇÃO') ||
+                    extrairCampoMultilinha(texto, 'DESCRICAO') ||
+                    extrairCampo(texto, 'DETALHES') ||
+                    extrairCampo(texto, 'DESCRIÇÃO');
   const volumeTexto = extrairCampo(texto, 'VOLUME');
 
   const dia = extrairData(diaTexto) || formatarData(dataMensagem);
@@ -209,19 +263,23 @@ function parseNovoEvento(texto, dataMensagem, messageId) {
   return {
     id: `alerta_${messageId}_${Date.now()}`,
     messageId,
-    dataMensagem: dataMensagem.toISOString(),
+    // Campos para o frontend
+    dataRecebimento: dataMensagem.toISOString(),
+    grupo: grupo || null,
+    areaMapeada: areaPainel || null,
+    descricao: descricao || extrairDetalhesDoTexto(texto),
+    // Campos adicionais
     dia,
-    tipo: tipo || 'N/A',
-    grupoOriginal: grupo || 'N/A',
-    areaPainel: areaPainel || 'DESCONHECIDO',
-    responsavel: responsavel || 'N/A',
-    detalhes: detalhes || extrairDetalhesDoTexto(texto),
+    responsavel: responsavel || null,
     volume,
     titulo,
-    textoCompleto: texto,
+    mensagemOriginal: texto,
     origem: 'NOVO_EVENTO_DETECTADO',
-    statusAlerta: 'novo',
-    status,
+    status: 'novo', // Status do alerta
+    historicoStatus: [{
+      status: 'novo',
+      data: new Date().toISOString()
+    }],
     processadoEm: new Date().toISOString()
   };
 }
@@ -321,6 +379,7 @@ module.exports = {
   normalizar,
   identificarTipoMensagem,
   extrairCampo,
+  extrairCampoMultilinha,
   extrairData,
   extrairVolume,
   mapearGrupoParaArea,
