@@ -158,7 +158,12 @@ function configurarHandlers() {
       const resultado = processarMensagem(msg);
 
       if (!resultado) {
-        console.log('[Telegram] Mensagem não é relevante (título não reconhecido)');
+        console.log('[Telegram] ⚠️ MENSAGEM NÃO RECONHECIDA - Título não corresponde aos padrões esperados');
+        console.log('[Telegram] Primeira linha:', msg.text.split('\n')[0]);
+        console.log('[Telegram] Texto completo:\n', msg.text);
+        console.log('[Telegram] Padrões esperados:');
+        console.log('  - "COP REDE INFORMA" (ou que contenha essa frase)');
+        console.log('  - "🚨 Novo Evento Detectado!" (ou "Novo Evento Detectado" ou que contenha 🚨)');
         return;
       }
 
