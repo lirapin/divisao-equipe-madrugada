@@ -1573,40 +1573,6 @@
 
     <!-- Conteúdo da aba COP REDE INFORMA -->
     <div class="telegram-content active" id="tabCopRedeInforma">
-      <!-- Estatísticas -->
-      <div class="telegram-stats">
-        <div class="telegram-stat-card">
-          <div class="number" id="statTotalCop">0</div>
-          <div class="label">Total de mensagens</div>
-        </div>
-        <div class="telegram-stat-card">
-          <div class="number" id="statHojeCop">0</div>
-          <div class="label">Hoje</div>
-        </div>
-        <div class="telegram-stat-card">
-          <div class="number" id="statAreasCop">0</div>
-          <div class="label">Áreas afetadas</div>
-        </div>
-      </div>
-
-      <!-- Filtros -->
-      <div class="telegram-filters">
-        <select id="filtroCopArea" onchange="filtrarCopRedeInforma()">
-          <option value="">Todas as áreas</option>
-          <option value="RIO A / RIO B">Rio A / Rio B</option>
-          <option value="NE/BA">NE/BA</option>
-          <option value="CO/NO">CO/NO</option>
-          <option value="MG">MG</option>
-          <option value="SP">SP</option>
-          <option value="PR/SC/RS">PR/SC/RS</option>
-        </select>
-        <input type="date" id="filtroCopData" onchange="filtrarCopRedeInforma()">
-        <input type="text" id="filtroCopBusca" placeholder="Buscar por empresa ou descrição..." oninput="filtrarCopRedeInforma()">
-        <button class="telegram-btn telegram-btn-primary" onclick="carregarCopRedeInforma()">
-          <i class="bi bi-arrow-clockwise"></i> Atualizar
-        </button>
-      </div>
-
       <!-- Resumo por Área -->
       <div id="resumoAreasCop" class="telegram-area-summary" style="display:none;">
         <h6><i class="bi bi-bar-chart me-2"></i>Volume por Área</h6>
@@ -1647,56 +1613,12 @@
 
     <!-- Conteúdo da aba NOVOS ALERTAS -->
     <div class="telegram-content" id="tabNovosAlertas">
-      <!-- Estatísticas -->
-      <div class="telegram-stats">
-        <div class="telegram-stat-card">
-          <div class="number" id="statTotalAlertas">0</div>
-          <div class="label">Total de alertas</div>
-        </div>
-        <div class="telegram-stat-card">
-          <div class="number" id="statNovosAlertas">0</div>
-          <div class="label">Novos</div>
-        </div>
-        <div class="telegram-stat-card">
-          <div class="number" id="statEmAndamentoAlertas">0</div>
-          <div class="label">Em andamento</div>
-        </div>
-        <div class="telegram-stat-card">
-          <div class="number" id="statResolvidosAlertas">0</div>
-          <div class="label">Resolvidos</div>
-        </div>
-      </div>
-
       <!-- Resumo por Área (Volumetria) -->
       <div id="resumoVolumePorArea" class="telegram-area-summary" style="margin-bottom: 1rem;">
         <h6><i class="bi bi-graph-up me-2"></i>Volumetria por Área</h6>
         <div class="area-volume-grid" id="areaVolumeGrid">
           <!-- Preenchido via JavaScript -->
         </div>
-      </div>
-
-      <!-- Filtros -->
-      <div class="telegram-filters">
-        <select id="filtroAlertaStatus" onchange="filtrarAlertas()">
-          <option value="">Todos os status</option>
-          <option value="novo">Novos</option>
-          <option value="em_andamento">Em andamento</option>
-          <option value="resolvido">Resolvidos</option>
-          <option value="arquivado">Arquivados</option>
-        </select>
-        <select id="filtroAlertaArea" onchange="filtrarAlertas()">
-          <option value="">Todas as áreas</option>
-          <option value="RIO A / RIO B">Rio A / Rio B</option>
-          <option value="NE/BA">NE/BA</option>
-          <option value="CO/NO">CO/NO</option>
-          <option value="MG">MG</option>
-          <option value="SP">SP</option>
-          <option value="PR/SC/RS">PR/SC/RS</option>
-        </select>
-        <input type="text" id="filtroAlertaBusca" placeholder="Buscar alertas..." oninput="filtrarAlertas()">
-        <button class="telegram-btn telegram-btn-primary" onclick="carregarAlertas()">
-          <i class="bi bi-arrow-clockwise"></i> Atualizar
-        </button>
       </div>
 
       <!-- Tabela de alertas -->
@@ -1762,14 +1684,6 @@
           <!-- Conteúdo dinâmico -->
         </div>
         <div class="modal-footer">
-          <div class="me-auto">
-            <button class="telegram-btn telegram-btn-warning" onclick="alterarStatusAlerta(alertaAtual, 'em_andamento')">
-              <i class="bi bi-hourglass-split"></i> Em Andamento
-            </button>
-            <button class="telegram-btn telegram-btn-success" onclick="alterarStatusAlerta(alertaAtual, 'resolvido')">
-              <i class="bi bi-check-circle"></i> Resolvido
-            </button>
-          </div>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
         </div>
       </div>
@@ -4846,6 +4760,58 @@ let alertaAtual = null;
 let telegramConectado = false;
 let autoRefreshInterval = null;
 const AUTO_REFRESH_MS = 10000; // 10 segundos
+let alertasAnteriores = []; // Para detectar novos alertas
+
+// Função para tocar alarme sonoro
+function tocarAlarme() {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.value = 800; // Frequência do beep
+    oscillator.type = 'sine';
+
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+
+    // Tocar 3 beeps
+    setTimeout(() => {
+      const osc2 = audioContext.createOscillator();
+      const gain2 = audioContext.createGain();
+      osc2.connect(gain2);
+      gain2.connect(audioContext.destination);
+      osc2.frequency.value = 800;
+      osc2.type = 'sine';
+      gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      osc2.start(audioContext.currentTime);
+      osc2.stop(audioContext.currentTime + 0.5);
+    }, 600);
+
+    setTimeout(() => {
+      const osc3 = audioContext.createOscillator();
+      const gain3 = audioContext.createGain();
+      osc3.connect(gain3);
+      gain3.connect(audioContext.destination);
+      osc3.frequency.value = 800;
+      osc3.type = 'sine';
+      gain3.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gain3.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      osc3.start(audioContext.currentTime);
+      osc3.stop(audioContext.currentTime + 0.5);
+    }, 1200);
+
+  } catch (error) {
+    console.error('Erro ao tocar alarme:', error);
+  }
+}
 
 // ============================================
 // NAVEGAÇÃO DE ABAS ADMIN
@@ -4860,15 +4826,40 @@ function trocarAbaAdmin(abaId) {
   const tabBtn = document.querySelector(`[data-admin-tab="${abaId}"]`);
   if (tabBtn) tabBtn.classList.add('active');
 
+  // Obter elementos das abas
+  const tabDivisao = document.getElementById('tabDivisao');
+  const tabTelegram = document.getElementById('tabTelegram');
+  const calendarSection = document.getElementById('calendarSection');
+  const configAccordion = document.getElementById('configAccordion');
+  const calendarioPanel = document.getElementById('calendarioPanel');
+  const telegramPanel = document.getElementById('telegramPanel');
+
   // Ativar conteúdo correspondente
   if (abaId === 'divisao') {
-    const tabDivisao = document.getElementById('tabDivisao');
+    // Mostrar aba Divisão
     if (tabDivisao) tabDivisao.classList.add('active');
+
+    // Mostrar conteúdo de divisão de tarefas
+    if (calendarSection) calendarSection.style.display = 'block';
+    if (configAccordion) configAccordion.style.display = 'block';
+    if (calendarioPanel) calendarioPanel.style.display = 'block';
+
+    // Ocultar conteúdo do Telegram
+    if (telegramPanel) telegramPanel.style.display = 'none';
+
     // Parar auto-refresh quando sair da aba Telegram
     pararAutoRefresh();
   } else if (abaId === 'telegram') {
-    const tabTelegram = document.getElementById('tabTelegram');
+    // Mostrar aba Telegram
     if (tabTelegram) tabTelegram.classList.add('active');
+
+    // Ocultar conteúdo de divisão de tarefas
+    if (calendarSection) calendarSection.style.display = 'none';
+    if (configAccordion) configAccordion.style.display = 'none';
+    if (calendarioPanel) calendarioPanel.style.display = 'none';
+
+    // Mostrar conteúdo do Telegram
+    if (telegramPanel) telegramPanel.style.display = 'block';
 
     // Conectar ao backend e iniciar auto-refresh
     if (!telegramConectado) {
@@ -5327,7 +5318,25 @@ async function carregarAlertas() {
     if (!response.ok) throw new Error('Erro ao carregar alertas');
 
     const data = await response.json();
-    dadosAlertas = data.dados || [];
+    const novosAlertasRecebidos = data.dados || [];
+
+    // Detectar novos alertas (status 'novo' que não existiam antes)
+    if (alertasAnteriores.length > 0) {
+      const idsAnteriores = new Set(alertasAnteriores.map(a => a.id));
+      const alertasNovos = novosAlertasRecebidos.filter(a =>
+        a.status === 'novo' && !idsAnteriores.has(a.id)
+      );
+
+      if (alertasNovos.length > 0) {
+        console.log(`🔔 ${alertasNovos.length} novo(s) alerta(s) detectado(s)!`);
+        tocarAlarme();
+        showToast(`🔔 ${alertasNovos.length} novo(s) alerta(s)!`, 'warning');
+      }
+    }
+
+    // Atualizar lista de alertas
+    alertasAnteriores = [...novosAlertasRecebidos];
+    dadosAlertas = novosAlertasRecebidos;
 
     atualizarTabelaAlertas(dadosAlertas);
     atualizarBadgeAlertas();
@@ -5424,6 +5433,17 @@ function verDetalhesAlerta(index) {
   const statusClass = obterClasseStatus(item.status);
   const statusTexto = obterTextoStatus(item.status);
 
+  // Extrair número do ticket da mensagem original
+  let ticketNumero = null;
+  let ticketLink = '';
+  if (item.mensagemOriginal) {
+    const matchTicket = item.mensagemOriginal.match(/Ticket:\s*(\d+)/i);
+    if (matchTicket) {
+      ticketNumero = matchTicket[1];
+      ticketLink = `https://outage.claro.com.br/inc/edit/INM0000${ticketNumero}`;
+    }
+  }
+
   const body = document.getElementById('modalDetalhesAlertaBody');
   body.innerHTML = `
     <div class="telegram-detail-card" style="border-left-color: #ff9800;">
@@ -5432,6 +5452,16 @@ function verDetalhesAlerta(index) {
         <span class="telegram-detail-label">Data/Hora:</span>
         <span class="telegram-detail-value">${formatarDataHora(item.dataRecebimento)}</span>
       </div>
+      ${ticketNumero ? `
+      <div class="telegram-detail-row">
+        <span class="telegram-detail-label">Ticket:</span>
+        <span class="telegram-detail-value">
+          <a href="${ticketLink}" target="_blank" rel="noopener noreferrer" style="color: #0088cc; font-weight: 600; text-decoration: none;">
+            <i class="bi bi-box-arrow-up-right me-1"></i>${ticketNumero}
+          </a>
+        </span>
+      </div>
+      ` : ''}
       <div class="telegram-detail-row">
         <span class="telegram-detail-label">Grupo:</span>
         <span class="telegram-detail-value">${item.grupo || '-'}</span>
@@ -5457,20 +5487,6 @@ function verDetalhesAlerta(index) {
     <div class="telegram-detail-card" style="border-left-color: #666;">
       <h5><i class="bi bi-chat-quote me-2"></i>Mensagem Original</h5>
       <pre style="white-space: pre-wrap; font-size: 0.85rem; background: #f5f5f5; padding: 1rem; border-radius: 6px; max-height: 300px; overflow-y: auto;">${item.mensagemOriginal}</pre>
-    </div>
-    ` : ''}
-
-    ${item.historicoStatus && item.historicoStatus.length > 0 ? `
-    <div class="telegram-detail-card" style="border-left-color: #2196f3;">
-      <h5><i class="bi bi-clock-history me-2"></i>Histórico de Status</h5>
-      <ul class="list-unstyled mb-0">
-        ${item.historicoStatus.map(h => `
-          <li class="mb-2">
-            <small class="text-muted">${formatarDataHora(h.data)}</small><br>
-            <span class="alerta-status ${obterClasseStatus(h.status)}">${obterTextoStatus(h.status)}</span>
-          </li>
-        `).join('')}
-      </ul>
     </div>
     ` : ''}
   `;
