@@ -19,6 +19,30 @@ let estatisticas = {
 };
 
 /**
+ * Limpa webhooks e conexões anteriores do bot
+ * Isso resolve o erro 409 Conflict
+ */
+async function limparConexoesAnteriores() {
+  console.log('[Telegram] Limpando conexões anteriores...');
+
+  try {
+    const tempBot = new TelegramBot(TELEGRAM_CONFIG.BOT_TOKEN, { polling: false });
+
+    // Remove webhook se houver
+    await tempBot.deleteWebHook({ drop_pending_updates: true });
+    console.log('[Telegram] Webhook removido e updates pendentes descartados');
+
+    // Aguardar um momento para o Telegram liberar
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    return true;
+  } catch (error) {
+    console.error('[Telegram] Erro ao limpar conexões:', error.message);
+    return false;
+  }
+}
+
+/**
  * Inicializa o bot do Telegram
  * @param {boolean} polling - Se deve usar polling (true) ou apenas API (false)
  * @returns {Promise<object>} Instância do bot
@@ -33,13 +57,16 @@ async function inicializar(polling = true) {
   console.log('[Telegram] Group ID:', TELEGRAM_CONFIG.GROUP_ID);
 
   try {
+    // Limpar conexões anteriores antes de iniciar
+    await limparConexoesAnteriores();
+
     // Criar instância do bot
     bot = new TelegramBot(TELEGRAM_CONFIG.BOT_TOKEN, {
       polling: polling ? {
-        interval: TELEGRAM_CONFIG.POLLING_INTERVAL,
+        interval: TELEGRAM_CONFIG.POLLING_INTERVAL || 3000,
         autoStart: false,
         params: {
-          timeout: 10,
+          timeout: 30,
           allowed_updates: ['message']
         }
       } : false
@@ -52,10 +79,36 @@ async function inicializar(polling = true) {
     // Configurar handlers
     if (polling) {
       configurarHandlers();
-      await bot.startPolling();
-      isRunning = true;
-      estatisticas.iniciadoEm = new Date().toISOString();
-      console.log('[Telegram] Polling iniciado');
+
+      // Tentar iniciar polling com retry
+      let tentativas = 0;
+      const maxTentativas = 3;
+
+      while (tentativas < maxTentativas) {
+        try {
+          await bot.startPolling();
+          isRunning = true;
+          estatisticas.iniciadoEm = new Date().toISOString();
+          console.log('[Telegram] Polling iniciado com sucesso!');
+          break;
+        } catch (pollingError) {
+          tentativas++;
+          console.error(`[Telegram] Tentativa ${tentativas}/${maxTentativas} falhou:`, pollingError.message);
+
+          if (tentativas < maxTentativas) {
+            // Esperar antes de tentar novamente
+            const espera = tentativas * 2000;
+            console.log(`[Telegram] Aguardando ${espera}ms antes de tentar novamente...`);
+            await new Promise(resolve => setTimeout(resolve, espera));
+
+            // Limpar novamente
+            await limparConexoesAnteriores();
+          } else {
+            console.error('[Telegram] Todas as tentativas falharam. Polling não iniciado.');
+            isRunning = false;
+          }
+        }
+      }
     }
 
     return bot;
@@ -128,9 +181,35 @@ function configurarHandlers() {
   });
 
   // Handler para erros de polling
-  bot.on('polling_error', (error) => {
+  bot.on('polling_error', async (error) => {
     estatisticas.erros++;
     console.error('[Telegram] Erro de polling:', error.message);
+
+    // Se for erro 409 Conflict, tentar recuperar
+    if (error.message && error.message.includes('409')) {
+      console.log('[Telegram] Detectado conflito 409, tentando recuperar...');
+
+      try {
+        // Parar polling atual
+        await bot.stopPolling();
+        isRunning = false;
+
+        // Aguardar
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        // Limpar e reiniciar
+        await limparConexoesAnteriores();
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Reiniciar polling
+        await bot.startPolling();
+        isRunning = true;
+        console.log('[Telegram] Polling reiniciado após recuperação');
+
+      } catch (recoverError) {
+        console.error('[Telegram] Falha na recuperação:', recoverError.message);
+      }
+    }
   });
 
   // Handler para erros gerais
