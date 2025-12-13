@@ -1177,6 +1177,64 @@
       color: var(--text-muted);
     }
 
+    /* Resumo de Áreas */
+    .telegram-area-summary {
+      background: #f0f7ff;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid #0088cc;
+    }
+
+    .telegram-area-summary h6 {
+      color: #0088cc;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+
+    .area-summary-grid,
+    .area-volume-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .area-summary-item,
+    .area-volume-item {
+      background: white;
+      border-radius: 6px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .area-summary-item .area-name,
+    .area-volume-item .area-name {
+      font-weight: 600;
+      color: #333;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .area-summary-item .area-volume,
+    .area-volume-item .area-volume {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #0088cc;
+    }
+
+    .area-summary-item .area-responsible,
+    .area-volume-item .area-count {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 0.25rem;
+    }
+
+    .area-volume-item .area-count {
+      color: #888;
+    }
+
     .backend-status {
       display: inline-flex;
       align-items: center;
@@ -1522,21 +1580,30 @@
         </button>
       </div>
 
+      <!-- Resumo por Área -->
+      <div id="resumoAreasCop" class="telegram-area-summary" style="display:none;">
+        <h6><i class="bi bi-bar-chart me-2"></i>Volume por Área</h6>
+        <div class="area-summary-grid" id="areaSummaryGrid">
+          <!-- Preenchido via JavaScript -->
+        </div>
+      </div>
+
       <!-- Tabela de mensagens -->
       <div class="table-responsive">
         <table class="telegram-table" id="tabelaCopRede">
           <thead>
             <tr>
               <th>Data/Hora</th>
-              <th>Empresa</th>
               <th>Área</th>
-              <th>Grupo</th>
+              <th>Volume</th>
+              <th>Responsável</th>
+              <th>Descrição</th>
               <th>Ações</th>
             </tr>
           </thead>
           <tbody id="tbodyCopRede">
             <tr>
-              <td colspan="5">
+              <td colspan="6">
                 <div class="telegram-empty">
                   <i class="bi bi-inbox"></i>
                   <p>Nenhuma mensagem COP Rede Informa encontrada</p>
@@ -1570,6 +1637,14 @@
         <div class="telegram-stat-card">
           <div class="number" id="statResolvidosAlertas">0</div>
           <div class="label">Resolvidos</div>
+        </div>
+      </div>
+
+      <!-- Resumo por Área (Volumetria) -->
+      <div id="resumoVolumePorArea" class="telegram-area-summary" style="margin-bottom: 1rem;">
+        <h6><i class="bi bi-graph-up me-2"></i>Volumetria por Área</h6>
+        <div class="area-volume-grid" id="areaVolumeGrid">
+          <!-- Preenchido via JavaScript -->
         </div>
       </div>
 
@@ -4667,6 +4742,8 @@ let dadosCopRedeInforma = [];
 let dadosAlertas = [];
 let alertaAtual = null;
 let telegramConectado = false;
+let autoRefreshInterval = null;
+const AUTO_REFRESH_MS = 10000; // 10 segundos
 
 // ============================================
 // NAVEGAÇÃO DE ABAS ADMIN
@@ -4685,14 +4762,45 @@ function trocarAbaAdmin(abaId) {
   if (abaId === 'divisao') {
     const tabDivisao = document.getElementById('tabDivisao');
     if (tabDivisao) tabDivisao.classList.add('active');
+    // Parar auto-refresh quando sair da aba Telegram
+    pararAutoRefresh();
   } else if (abaId === 'telegram') {
     const tabTelegram = document.getElementById('tabTelegram');
     if (tabTelegram) tabTelegram.classList.add('active');
 
-    // Conectar ao backend se ainda não conectou
+    // Conectar ao backend e iniciar auto-refresh
     if (!telegramConectado) {
       verificarConexaoBackend();
+    } else {
+      // Se já conectado, apenas atualizar dados
+      carregarCopRedeInforma();
+      carregarAlertas();
     }
+    iniciarAutoRefresh();
+  }
+}
+
+// ============================================
+// AUTO-REFRESH
+// ============================================
+
+function iniciarAutoRefresh() {
+  if (autoRefreshInterval) return; // Já está rodando
+
+  console.log('[Telegram] Auto-refresh iniciado (a cada ' + (AUTO_REFRESH_MS/1000) + 's)');
+  autoRefreshInterval = setInterval(() => {
+    if (telegramConectado) {
+      carregarCopRedeInforma();
+      carregarAlertas();
+    }
+  }, AUTO_REFRESH_MS);
+}
+
+function pararAutoRefresh() {
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval);
+    autoRefreshInterval = null;
+    console.log('[Telegram] Auto-refresh parado');
   }
 }
 
@@ -4801,13 +4909,68 @@ async function carregarCopRedeInforma() {
   }
 }
 
+// Mapeamento de áreas do Telegram para áreas da escala
+const MAPEAMENTO_AREAS_TELEGRAM = {
+  'RIO A / RIO B': ['RIO A', 'RIO B', 'RIO'],
+  'NE/BA': ['NE/BA', 'BA/MG/ES'],
+  'CO/NO': ['CO/NO', 'CO/NO/NE'],
+  'MG': ['MG', 'MG/ES', 'BA/MG/ES']
+};
+
+// Função para obter o responsável por uma área em uma data específica
+function obterResponsavelPorArea(areaTelegram, dataMensagem) {
+  try {
+    const data = new Date(dataMensagem);
+    const dia = data.getDate();
+
+    // Verificar se temos dados para este dia
+    if (!dadosOriginais || !dadosOriginais[dia] || !dadosOriginais[dia].divisao) {
+      return '-';
+    }
+
+    const divisao = dadosOriginais[dia].divisao;
+
+    // Mapear área do Telegram para área da escala
+    const areasEscala = MAPEAMENTO_AREAS_TELEGRAM[areaTelegram] || [areaTelegram];
+
+    for (const areaEscala of areasEscala) {
+      if (divisao[areaEscala]) {
+        // Retornar apenas primeiro nome para economizar espaço
+        const nomeCompleto = divisao[areaEscala];
+        const partes = nomeCompleto.split(' ');
+        return partes.length > 1 ? `${partes[0]} ${partes[partes.length - 1]}` : partes[0];
+      }
+    }
+
+    return '-';
+  } catch (error) {
+    console.error('Erro ao obter responsável:', error);
+    return '-';
+  }
+}
+
+// Função para extrair volume do resumo da mensagem
+function extrairVolumeDaMensagem(item) {
+  // Se o item tem resumo com grupo, somar volumes
+  if (item.resumo && item.resumo.grupo) {
+    return Object.values(item.resumo.grupo).reduce((a, b) => a + b, 0);
+  }
+  // Se tem totalEventos, usar esse valor
+  if (item.totalEventos) {
+    return item.totalEventos;
+  }
+  return 1;
+}
+
 function atualizarTabelaCopRede(dados) {
   const tbody = document.getElementById('tbodyCopRede');
+  const resumoDiv = document.getElementById('resumoAreasCop');
+  const summaryGrid = document.getElementById('areaSummaryGrid');
 
   if (!dados || dados.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="5">
+        <td colspan="6">
           <div class="telegram-empty">
             <i class="bi bi-inbox"></i>
             <p>Nenhuma mensagem COP Rede Informa encontrada</p>
@@ -4818,25 +4981,126 @@ function atualizarTabelaCopRede(dados) {
         </td>
       </tr>
     `;
+    if (resumoDiv) resumoDiv.style.display = 'none';
     return;
   }
 
-  tbody.innerHTML = dados.map((item, index) => {
+  // Calcular resumo por área
+  const resumoPorArea = {};
+
+  dados.forEach(item => {
+    // Processar áreas afetadas da mensagem
+    if (item.resumo && item.resumo.grupo) {
+      for (const [grupoNome, quantidade] of Object.entries(item.resumo.grupo)) {
+        const areaKey = mapearGrupoParaAreaFrontend(grupoNome);
+        if (!resumoPorArea[areaKey]) {
+          resumoPorArea[areaKey] = { volume: 0, responsavel: '-' };
+        }
+        resumoPorArea[areaKey].volume += quantidade;
+        // Buscar responsável
+        if (resumoPorArea[areaKey].responsavel === '-') {
+          resumoPorArea[areaKey].responsavel = obterResponsavelPorArea(areaKey, item.dataRecebimento);
+        }
+      }
+    } else if (item.areaMapeada) {
+      // Mensagem individual
+      const areaKey = item.areaMapeada;
+      if (!resumoPorArea[areaKey]) {
+        resumoPorArea[areaKey] = { volume: 0, responsavel: '-' };
+      }
+      resumoPorArea[areaKey].volume += extrairVolumeDaMensagem(item);
+      if (resumoPorArea[areaKey].responsavel === '-') {
+        resumoPorArea[areaKey].responsavel = obterResponsavelPorArea(areaKey, item.dataRecebimento);
+      }
+    }
+  });
+
+  // Atualizar resumo visual
+  if (Object.keys(resumoPorArea).length > 0 && summaryGrid) {
+    resumoDiv.style.display = 'block';
+    summaryGrid.innerHTML = Object.entries(resumoPorArea).map(([area, info]) => `
+      <div class="area-summary-item">
+        <span class="area-name">${area || 'Não mapeada'}</span>
+        <span class="area-volume">${info.volume}</span>
+        <span class="area-responsible"><i class="bi bi-person me-1"></i>${info.responsavel}</span>
+      </div>
+    `).join('');
+  } else if (resumoDiv) {
+    resumoDiv.style.display = 'none';
+  }
+
+  // Atualizar tabela - mostrar dados expandidos por área quando houver resumo
+  const linhasTabela = [];
+
+  dados.forEach((item, index) => {
     const dataFormatada = formatarDataHora(item.dataRecebimento);
-    return `
-      <tr>
-        <td>${dataFormatada}</td>
-        <td><strong>${item.empresa || '-'}</strong></td>
-        <td><span class="badge bg-info">${item.areaMapeada || '-'}</span></td>
-        <td>${item.grupo || '-'}</td>
-        <td>
-          <button class="telegram-btn telegram-btn-outline" onclick="verDetalhesCopRede(${index})">
-            <i class="bi bi-eye"></i> Ver
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join('');
+
+    if (item.resumo && item.resumo.grupo && Object.keys(item.resumo.grupo).length > 0) {
+      // Expandir cada área do resumo
+      for (const [grupoNome, quantidade] of Object.entries(item.resumo.grupo)) {
+        const areaKey = mapearGrupoParaAreaFrontend(grupoNome);
+        const responsavel = obterResponsavelPorArea(areaKey, item.dataRecebimento);
+
+        linhasTabela.push(`
+          <tr>
+            <td>${dataFormatada}</td>
+            <td><span class="badge bg-info">${areaKey || '-'}</span></td>
+            <td><strong>${quantidade}</strong></td>
+            <td>${responsavel}</td>
+            <td class="text-truncate" style="max-width: 200px;" title="${grupoNome}">${grupoNome}</td>
+            <td>
+              <button class="telegram-btn telegram-btn-outline" onclick="verDetalhesCopRede(${index})">
+                <i class="bi bi-eye"></i>
+              </button>
+            </td>
+          </tr>
+        `);
+      }
+    } else {
+      // Mensagem sem resumo
+      const volume = extrairVolumeDaMensagem(item);
+      const responsavel = obterResponsavelPorArea(item.areaMapeada, item.dataRecebimento);
+
+      linhasTabela.push(`
+        <tr>
+          <td>${dataFormatada}</td>
+          <td><span class="badge bg-info">${item.areaMapeada || '-'}</span></td>
+          <td><strong>${volume}</strong></td>
+          <td>${responsavel}</td>
+          <td class="text-truncate" style="max-width: 200px;" title="${item.descricao || ''}">${item.descricao || item.grupo || '-'}</td>
+          <td>
+            <button class="telegram-btn telegram-btn-outline" onclick="verDetalhesCopRede(${index})">
+              <i class="bi bi-eye"></i>
+            </button>
+          </td>
+        </tr>
+      `);
+    }
+  });
+
+  tbody.innerHTML = linhasTabela.join('');
+}
+
+// Mapear grupo do Telegram para área do frontend
+function mapearGrupoParaAreaFrontend(grupo) {
+  if (!grupo) return null;
+
+  const grupoLower = grupo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  if (grupoLower.includes('rio') || grupoLower.includes('espirito santo') || grupoLower.includes('espírito santo')) {
+    return 'RIO A / RIO B';
+  }
+  if (grupoLower.includes('bahia') || grupoLower.includes('sergipe')) {
+    return 'NE/BA';
+  }
+  if (grupoLower.includes('centro') || grupoLower.includes('norte') || grupoLower.includes('nordeste')) {
+    return 'CO/NO';
+  }
+  if (grupoLower.includes('minas') || grupoLower.includes('mg')) {
+    return 'MG';
+  }
+
+  return grupo; // Retornar original se não encontrar mapeamento
 }
 
 function filtrarCopRedeInforma() {
@@ -5141,6 +5405,42 @@ function atualizarEstatisticasAlertas() {
   if (statNovos) statNovos.textContent = novos;
   if (statEmAndamento) statEmAndamento.textContent = emAndamento;
   if (statResolvidos) statResolvidos.textContent = resolvidos;
+
+  // Atualizar resumo de volumetria por área
+  atualizarVolumePorArea();
+}
+
+// Atualizar resumo de volume por área para Novos Alertas
+function atualizarVolumePorArea() {
+  const volumeGrid = document.getElementById('areaVolumeGrid');
+  if (!volumeGrid) return;
+
+  // Agrupar alertas por área
+  const volumePorArea = {};
+
+  dadosAlertas.forEach(alerta => {
+    const area = alerta.areaMapeada || 'Não mapeada';
+    if (!volumePorArea[area]) {
+      volumePorArea[area] = { quantidade: 0, novos: 0 };
+    }
+    volumePorArea[area].quantidade++;
+    if (alerta.status === 'novo') {
+      volumePorArea[area].novos++;
+    }
+  });
+
+  // Renderizar cards de volume
+  if (Object.keys(volumePorArea).length > 0) {
+    volumeGrid.innerHTML = Object.entries(volumePorArea).map(([area, info]) => `
+      <div class="area-volume-item">
+        <span class="area-name">${area}</span>
+        <span class="area-volume">${info.quantidade}</span>
+        <span class="area-count">${info.novos} novos</span>
+      </div>
+    `).join('');
+  } else {
+    volumeGrid.innerHTML = '<p class="text-muted">Nenhum dado disponível</p>';
+  }
 }
 
 // ============================================
