@@ -908,6 +908,335 @@
       border-radius: 6px;
       display: none;
     }
+
+    /* ============================================
+       ESTILOS PARA ABAS TELEGRAM (COP REDE INFORMA)
+       ============================================ */
+    .telegram-panel {
+      background: white;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border: 1px solid var(--border-color);
+    }
+
+    .telegram-header {
+      padding: 0.75rem 1rem;
+      background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .telegram-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      background: #f8f9fa;
+    }
+
+    .telegram-tab {
+      padding: 0.75rem 1.25rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .telegram-tab:hover {
+      background: rgba(0,136,204,0.05);
+      color: #0088cc;
+    }
+
+    .telegram-tab.active {
+      background: white;
+      color: #0088cc;
+      border-bottom-color: #0088cc;
+      font-weight: 500;
+    }
+
+    .telegram-tab .badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+    }
+
+    .telegram-content {
+      padding: 1rem;
+      display: none;
+    }
+
+    .telegram-content.active {
+      display: block;
+    }
+
+    .telegram-filters {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .telegram-filters select,
+    .telegram-filters input {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      background: white;
+    }
+
+    .telegram-filters input {
+      min-width: 200px;
+    }
+
+    .telegram-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .telegram-table th {
+      background: #f8f9fa;
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 2px solid var(--border-color);
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .telegram-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+
+    .telegram-table tr:hover {
+      background: rgba(0,136,204,0.03);
+    }
+
+    .telegram-table .badge {
+      font-size: 0.75rem;
+    }
+
+    .telegram-detail-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid #0088cc;
+    }
+
+    .telegram-detail-card h5 {
+      color: #0088cc;
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+
+    .telegram-detail-row {
+      display: flex;
+      margin-bottom: 0.5rem;
+    }
+
+    .telegram-detail-label {
+      width: 120px;
+      font-weight: 600;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .telegram-detail-value {
+      flex: 1;
+      color: var(--text-dark);
+    }
+
+    .alerta-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .alerta-status.novo {
+      background: #fff3e0;
+      color: #e65100;
+    }
+
+    .alerta-status.em-andamento {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+
+    .alerta-status.resolvido {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .alerta-status.arquivado {
+      background: #f5f5f5;
+      color: #757575;
+    }
+
+    .telegram-btn {
+      padding: 0.4rem 0.75rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .telegram-btn-primary {
+      background: #0088cc;
+      color: white;
+    }
+
+    .telegram-btn-primary:hover {
+      background: #006699;
+    }
+
+    .telegram-btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .telegram-btn-success:hover {
+      background: #388e3c;
+    }
+
+    .telegram-btn-warning {
+      background: var(--warning);
+      color: white;
+    }
+
+    .telegram-btn-warning:hover {
+      background: #f57c00;
+    }
+
+    .telegram-btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .telegram-btn-outline:hover {
+      background: #f8f9fa;
+      color: var(--text-dark);
+    }
+
+    .telegram-empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .telegram-empty i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .telegram-stats {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .telegram-stat-card {
+      flex: 1;
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .telegram-stat-card .number {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #0088cc;
+    }
+
+    .telegram-stat-card .label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .backend-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.2);
+    }
+
+    .backend-status .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .backend-status.online .dot {
+      background: #4caf50;
+    }
+
+    .backend-status.offline .dot {
+      background: #f44336;
+      animation: none;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+      .telegram-tabs {
+        flex-wrap: wrap;
+      }
+
+      .telegram-tab {
+        flex: 1;
+        justify-content: center;
+      }
+
+      .telegram-filters {
+        flex-direction: column;
+      }
+
+      .telegram-filters select,
+      .telegram-filters input {
+        width: 100%;
+      }
+
+      .telegram-table {
+        display: block;
+        overflow-x: auto;
+      }
+
+      .telegram-stats {
+        flex-direction: column;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1022,6 +1351,233 @@
           <button class="btn btn-success btn-sm mt-2" onclick="salvarConfiguracaoCalendarios()">
             <i class="bi bi-cloud-arrow-up me-1"></i>Salvar e publicar
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Painel Telegram COP REDE INFORMA (somente Admin) -->
+  <div class="telegram-panel" id="telegramPanel" style="display: none;">
+    <div class="telegram-header">
+      <span><i class="bi bi-telegram me-2"></i>COP Rede Informa - Telegram</span>
+      <div class="backend-status offline" id="backendStatus">
+        <span class="dot"></span>
+        <span id="backendStatusText">Desconectado</span>
+      </div>
+    </div>
+
+    <!-- Tabs de navegação -->
+    <div class="telegram-tabs">
+      <button class="telegram-tab active" data-tab="cop-rede-informa" onclick="trocarAbasTelegram('cop-rede-informa')">
+        <i class="bi bi-megaphone"></i>
+        COP Rede Informa
+        <span class="badge bg-primary" id="badgeCopRede">0</span>
+      </button>
+      <button class="telegram-tab" data-tab="novos-alertas" onclick="trocarAbasTelegram('novos-alertas')">
+        <i class="bi bi-bell"></i>
+        Novos Alertas
+        <span class="badge bg-warning text-dark" id="badgeAlertas">0</span>
+      </button>
+    </div>
+
+    <!-- Conteúdo da aba COP REDE INFORMA -->
+    <div class="telegram-content active" id="tabCopRedeInforma">
+      <!-- Estatísticas -->
+      <div class="telegram-stats">
+        <div class="telegram-stat-card">
+          <div class="number" id="statTotalCop">0</div>
+          <div class="label">Total de mensagens</div>
+        </div>
+        <div class="telegram-stat-card">
+          <div class="number" id="statHojeCop">0</div>
+          <div class="label">Hoje</div>
+        </div>
+        <div class="telegram-stat-card">
+          <div class="number" id="statAreasCop">0</div>
+          <div class="label">Áreas afetadas</div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="telegram-filters">
+        <select id="filtroCopArea" onchange="filtrarCopRedeInforma()">
+          <option value="">Todas as áreas</option>
+          <option value="RIO A / RIO B">Rio A / Rio B</option>
+          <option value="NE/BA">NE/BA</option>
+          <option value="CO/NO">CO/NO</option>
+          <option value="MG">MG</option>
+          <option value="SP">SP</option>
+          <option value="PR/SC/RS">PR/SC/RS</option>
+        </select>
+        <input type="date" id="filtroCopData" onchange="filtrarCopRedeInforma()">
+        <input type="text" id="filtroCopBusca" placeholder="Buscar por empresa ou descrição..." oninput="filtrarCopRedeInforma()">
+        <button class="telegram-btn telegram-btn-primary" onclick="carregarCopRedeInforma()">
+          <i class="bi bi-arrow-clockwise"></i> Atualizar
+        </button>
+      </div>
+
+      <!-- Tabela de mensagens -->
+      <div class="table-responsive">
+        <table class="telegram-table" id="tabelaCopRede">
+          <thead>
+            <tr>
+              <th>Data/Hora</th>
+              <th>Empresa</th>
+              <th>Área</th>
+              <th>Grupo</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyCopRede">
+            <tr>
+              <td colspan="5">
+                <div class="telegram-empty">
+                  <i class="bi bi-inbox"></i>
+                  <p>Nenhuma mensagem COP Rede Informa encontrada</p>
+                  <button class="telegram-btn telegram-btn-primary" onclick="carregarCopRedeInforma()">
+                    <i class="bi bi-arrow-clockwise"></i> Carregar mensagens
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Conteúdo da aba NOVOS ALERTAS -->
+    <div class="telegram-content" id="tabNovosAlertas">
+      <!-- Estatísticas -->
+      <div class="telegram-stats">
+        <div class="telegram-stat-card">
+          <div class="number" id="statTotalAlertas">0</div>
+          <div class="label">Total de alertas</div>
+        </div>
+        <div class="telegram-stat-card">
+          <div class="number" id="statNovosAlertas">0</div>
+          <div class="label">Novos</div>
+        </div>
+        <div class="telegram-stat-card">
+          <div class="number" id="statEmAndamentoAlertas">0</div>
+          <div class="label">Em andamento</div>
+        </div>
+        <div class="telegram-stat-card">
+          <div class="number" id="statResolvidosAlertas">0</div>
+          <div class="label">Resolvidos</div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="telegram-filters">
+        <select id="filtroAlertaStatus" onchange="filtrarAlertas()">
+          <option value="">Todos os status</option>
+          <option value="novo">Novos</option>
+          <option value="em_andamento">Em andamento</option>
+          <option value="resolvido">Resolvidos</option>
+          <option value="arquivado">Arquivados</option>
+        </select>
+        <select id="filtroAlertaArea" onchange="filtrarAlertas()">
+          <option value="">Todas as áreas</option>
+          <option value="RIO A / RIO B">Rio A / Rio B</option>
+          <option value="NE/BA">NE/BA</option>
+          <option value="CO/NO">CO/NO</option>
+          <option value="MG">MG</option>
+          <option value="SP">SP</option>
+          <option value="PR/SC/RS">PR/SC/RS</option>
+        </select>
+        <input type="text" id="filtroAlertaBusca" placeholder="Buscar alertas..." oninput="filtrarAlertas()">
+        <button class="telegram-btn telegram-btn-primary" onclick="carregarAlertas()">
+          <i class="bi bi-arrow-clockwise"></i> Atualizar
+        </button>
+      </div>
+
+      <!-- Tabela de alertas -->
+      <div class="table-responsive">
+        <table class="telegram-table" id="tabelaAlertas">
+          <thead>
+            <tr>
+              <th>Data/Hora</th>
+              <th>Grupo</th>
+              <th>Área</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyAlertas">
+            <tr>
+              <td colspan="5">
+                <div class="telegram-empty">
+                  <i class="bi bi-bell-slash"></i>
+                  <p>Nenhum alerta encontrado</p>
+                  <button class="telegram-btn telegram-btn-primary" onclick="carregarAlertas()">
+                    <i class="bi bi-arrow-clockwise"></i> Carregar alertas
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Configurações do Backend -->
+    <div class="p-3 border-top" style="background: #f8f9fa;">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <small class="text-muted">
+            <i class="bi bi-info-circle me-1"></i>
+            Configure a URL do backend para habilitar a integração com Telegram
+          </small>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <input type="text" id="backendUrlInput" class="form-control form-control-sm" placeholder="https://seu-backend.com" style="max-width: 250px;">
+          <button class="telegram-btn telegram-btn-primary" onclick="configurarBackend()">
+            <i class="bi bi-plug"></i> Conectar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Detalhes COP Rede Informa -->
+  <div class="modal fade" id="modalDetalhesCop" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header" style="background: linear-gradient(135deg, #0088cc 0%, #006699 100%); color: white;">
+          <h5 class="modal-title"><i class="bi bi-megaphone me-2"></i>Detalhes da Mensagem</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="modalDetalhesCopBody">
+          <!-- Conteúdo dinâmico -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Detalhes Alerta -->
+  <div class="modal fade" id="modalDetalhesAlerta" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header" style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white;">
+          <h5 class="modal-title"><i class="bi bi-bell me-2"></i>Detalhes do Alerta</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="modalDetalhesAlertaBody">
+          <!-- Conteúdo dinâmico -->
+        </div>
+        <div class="modal-footer">
+          <div class="me-auto">
+            <button class="telegram-btn telegram-btn-warning" onclick="alterarStatusAlerta(alertaAtual, 'em_andamento')">
+              <i class="bi bi-hourglass-split"></i> Em Andamento
+            </button>
+            <button class="telegram-btn telegram-btn-success" onclick="alterarStatusAlerta(alertaAtual, 'resolvido')">
+              <i class="bi bi-check-circle"></i> Resolvido
+            </button>
+          </div>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
         </div>
       </div>
     </div>
@@ -2129,6 +2685,9 @@ function processarDadosCarregados(dados) {
   if (configAccordion) configAccordion.style.display = isAdmin ? 'block' : 'none';
   // Painel de calendários só aparece para admin
   if (calendarioPanel) calendarioPanel.style.display = isAdmin ? 'block' : 'none';
+  // Painel Telegram só aparece para admin
+  const telegramPanel = document.getElementById('telegramPanel');
+  if (telegramPanel) telegramPanel.style.display = isAdmin ? 'block' : 'none';
   if (emptyMessage) emptyMessage.style.display = 'none';
 
   atualizarCalendario();
@@ -3983,6 +4542,544 @@ function showToast(message, type = 'info') {
   const bsToast = new bootstrap.Toast(toast, { delay: 2000 });
   bsToast.show();
 }
+
+// ============================================
+// INTEGRAÇÃO TELEGRAM - COP REDE INFORMA
+// ============================================
+
+// Configuração do Backend
+let backendUrl = localStorage.getItem('telegramBackendUrl') || '';
+let dadosCopRedeInforma = [];
+let dadosAlertas = [];
+let alertaAtual = null;
+
+// Inicializar painel Telegram
+function inicializarTelegram() {
+  const urlSalva = localStorage.getItem('telegramBackendUrl');
+  const inputUrl = document.getElementById('backendUrlInput');
+  if (urlSalva && inputUrl) {
+    inputUrl.value = urlSalva;
+    backendUrl = urlSalva;
+    verificarConexaoBackend();
+  }
+}
+
+// Configurar URL do Backend
+function configurarBackend() {
+  const input = document.getElementById('backendUrlInput');
+  const url = input.value.trim();
+
+  if (!url) {
+    showToast('Por favor, insira a URL do backend', 'warning');
+    return;
+  }
+
+  // Remove trailing slash
+  backendUrl = url.replace(/\/$/, '');
+  localStorage.setItem('telegramBackendUrl', backendUrl);
+
+  verificarConexaoBackend();
+}
+
+// Verificar conexão com o backend
+async function verificarConexaoBackend() {
+  const statusEl = document.getElementById('backendStatus');
+  const statusText = document.getElementById('backendStatusText');
+
+  if (!backendUrl) {
+    statusEl.className = 'backend-status offline';
+    statusText.textContent = 'Não configurado';
+    return;
+  }
+
+  try {
+    const response = await fetch(`${backendUrl}/api/health`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      statusEl.className = 'backend-status online';
+      statusText.textContent = data.telegram?.polling ? 'Online (Polling)' : 'Online';
+
+      // Carregar dados automaticamente
+      carregarCopRedeInforma();
+      carregarAlertas();
+      carregarEstatisticas();
+    } else {
+      throw new Error('Backend não respondeu corretamente');
+    }
+  } catch (error) {
+    console.error('Erro ao conectar backend:', error);
+    statusEl.className = 'backend-status offline';
+    statusText.textContent = 'Desconectado';
+  }
+}
+
+// Trocar abas do painel Telegram
+function trocarAbasTelegram(abaId) {
+  // Remover active de todas as tabs e conteúdos
+  document.querySelectorAll('.telegram-tab').forEach(tab => tab.classList.remove('active'));
+  document.querySelectorAll('.telegram-content').forEach(content => content.classList.remove('active'));
+
+  // Ativar tab e conteúdo selecionado
+  document.querySelector(`[data-tab="${abaId}"]`).classList.add('active');
+
+  if (abaId === 'cop-rede-informa') {
+    document.getElementById('tabCopRedeInforma').classList.add('active');
+  } else if (abaId === 'novos-alertas') {
+    document.getElementById('tabNovosAlertas').classList.add('active');
+  }
+}
+
+// ============================================
+// COP REDE INFORMA - Funções
+// ============================================
+
+async function carregarCopRedeInforma() {
+  if (!backendUrl) {
+    showToast('Configure a URL do backend primeiro', 'warning');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${backendUrl}/api/cop-rede-informa`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!response.ok) throw new Error('Erro ao carregar dados');
+
+    const data = await response.json();
+    dadosCopRedeInforma = data.dados || [];
+
+    atualizarTabelaCopRede(dadosCopRedeInforma);
+    atualizarBadgeCopRede(dadosCopRedeInforma.length);
+
+  } catch (error) {
+    console.error('Erro ao carregar COP Rede Informa:', error);
+    showToast('Erro ao carregar mensagens', 'danger');
+  }
+}
+
+function atualizarTabelaCopRede(dados) {
+  const tbody = document.getElementById('tbodyCopRede');
+
+  if (!dados || dados.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5">
+          <div class="telegram-empty">
+            <i class="bi bi-inbox"></i>
+            <p>Nenhuma mensagem COP Rede Informa encontrada</p>
+            <button class="telegram-btn telegram-btn-primary" onclick="carregarCopRedeInforma()">
+              <i class="bi bi-arrow-clockwise"></i> Carregar mensagens
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = dados.map((item, index) => {
+    const dataFormatada = formatarDataHora(item.dataRecebimento);
+    return `
+      <tr>
+        <td>${dataFormatada}</td>
+        <td><strong>${item.empresa || '-'}</strong></td>
+        <td><span class="badge bg-info">${item.areaMapeada || '-'}</span></td>
+        <td>${item.grupo || '-'}</td>
+        <td>
+          <button class="telegram-btn telegram-btn-outline" onclick="verDetalhesCopRede(${index})">
+            <i class="bi bi-eye"></i> Ver
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filtrarCopRedeInforma() {
+  const area = document.getElementById('filtroCopArea').value;
+  const data = document.getElementById('filtroCopData').value;
+  const busca = document.getElementById('filtroCopBusca').value.toLowerCase();
+
+  let dadosFiltrados = [...dadosCopRedeInforma];
+
+  if (area) {
+    dadosFiltrados = dadosFiltrados.filter(d => d.areaMapeada === area);
+  }
+
+  if (data) {
+    dadosFiltrados = dadosFiltrados.filter(d => {
+      const dataItem = new Date(d.dataRecebimento).toISOString().split('T')[0];
+      return dataItem === data;
+    });
+  }
+
+  if (busca) {
+    dadosFiltrados = dadosFiltrados.filter(d =>
+      (d.empresa && d.empresa.toLowerCase().includes(busca)) ||
+      (d.descricao && d.descricao.toLowerCase().includes(busca)) ||
+      (d.grupo && d.grupo.toLowerCase().includes(busca))
+    );
+  }
+
+  atualizarTabelaCopRede(dadosFiltrados);
+}
+
+function verDetalhesCopRede(index) {
+  const item = dadosCopRedeInforma[index];
+  if (!item) return;
+
+  const body = document.getElementById('modalDetalhesCopBody');
+  body.innerHTML = `
+    <div class="telegram-detail-card">
+      <h5><i class="bi bi-building me-2"></i>${item.empresa || 'Empresa não informada'}</h5>
+      <div class="telegram-detail-row">
+        <span class="telegram-detail-label">Data/Hora:</span>
+        <span class="telegram-detail-value">${formatarDataHora(item.dataRecebimento)}</span>
+      </div>
+      <div class="telegram-detail-row">
+        <span class="telegram-detail-label">Grupo:</span>
+        <span class="telegram-detail-value">${item.grupo || '-'}</span>
+      </div>
+      <div class="telegram-detail-row">
+        <span class="telegram-detail-label">Área:</span>
+        <span class="telegram-detail-value"><span class="badge bg-info">${item.areaMapeada || '-'}</span></span>
+      </div>
+      <div class="telegram-detail-row">
+        <span class="telegram-detail-label">Sigla:</span>
+        <span class="telegram-detail-value">${item.sigla || '-'}</span>
+      </div>
+    </div>
+
+    <div class="telegram-detail-card">
+      <h5><i class="bi bi-file-text me-2"></i>Descrição</h5>
+      <p style="white-space: pre-wrap;">${item.descricao || 'Sem descrição'}</p>
+    </div>
+
+    ${item.mensagemOriginal ? `
+    <div class="telegram-detail-card" style="border-left-color: #666;">
+      <h5><i class="bi bi-chat-quote me-2"></i>Mensagem Original</h5>
+      <pre style="white-space: pre-wrap; font-size: 0.85rem; background: #f5f5f5; padding: 1rem; border-radius: 6px; max-height: 300px; overflow-y: auto;">${item.mensagemOriginal}</pre>
+    </div>
+    ` : ''}
+  `;
+
+  const modal = new bootstrap.Modal(document.getElementById('modalDetalhesCop'));
+  modal.show();
+}
+
+function atualizarBadgeCopRede(total) {
+  const badge = document.getElementById('badgeCopRede');
+  if (badge) badge.textContent = total;
+
+  const statTotal = document.getElementById('statTotalCop');
+  if (statTotal) statTotal.textContent = total;
+}
+
+// ============================================
+// NOVOS ALERTAS - Funções
+// ============================================
+
+async function carregarAlertas() {
+  if (!backendUrl) {
+    showToast('Configure a URL do backend primeiro', 'warning');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${backendUrl}/api/alertas`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!response.ok) throw new Error('Erro ao carregar alertas');
+
+    const data = await response.json();
+    dadosAlertas = data.dados || [];
+
+    atualizarTabelaAlertas(dadosAlertas);
+    atualizarBadgeAlertas();
+    atualizarEstatisticasAlertas();
+
+  } catch (error) {
+    console.error('Erro ao carregar alertas:', error);
+    showToast('Erro ao carregar alertas', 'danger');
+  }
+}
+
+function atualizarTabelaAlertas(dados) {
+  const tbody = document.getElementById('tbodyAlertas');
+
+  if (!dados || dados.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5">
+          <div class="telegram-empty">
+            <i class="bi bi-bell-slash"></i>
+            <p>Nenhum alerta encontrado</p>
+            <button class="telegram-btn telegram-btn-primary" onclick="carregarAlertas()">
+              <i class="bi bi-arrow-clockwise"></i> Carregar alertas
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = dados.map((item, index) => {
+    const dataFormatada = formatarDataHora(item.dataRecebimento);
+    const statusClass = obterClasseStatus(item.status);
+    const statusTexto = obterTextoStatus(item.status);
+
+    return `
+      <tr>
+        <td>${dataFormatada}</td>
+        <td><strong>${item.grupo || '-'}</strong></td>
+        <td><span class="badge bg-info">${item.areaMapeada || '-'}</span></td>
+        <td><span class="alerta-status ${statusClass}">${statusTexto}</span></td>
+        <td>
+          <button class="telegram-btn telegram-btn-outline" onclick="verDetalhesAlerta(${index})">
+            <i class="bi bi-eye"></i> Ver
+          </button>
+          ${item.status === 'novo' ? `
+            <button class="telegram-btn telegram-btn-warning" onclick="alterarStatusAlerta('${item.id}', 'em_andamento')" title="Marcar como em andamento">
+              <i class="bi bi-hourglass-split"></i>
+            </button>
+          ` : ''}
+          ${item.status === 'em_andamento' ? `
+            <button class="telegram-btn telegram-btn-success" onclick="alterarStatusAlerta('${item.id}', 'resolvido')" title="Marcar como resolvido">
+              <i class="bi bi-check-circle"></i>
+            </button>
+          ` : ''}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filtrarAlertas() {
+  const status = document.getElementById('filtroAlertaStatus').value;
+  const area = document.getElementById('filtroAlertaArea').value;
+  const busca = document.getElementById('filtroAlertaBusca').value.toLowerCase();
+
+  let dadosFiltrados = [...dadosAlertas];
+
+  if (status) {
+    dadosFiltrados = dadosFiltrados.filter(d => d.status === status);
+  }
+
+  if (area) {
+    dadosFiltrados = dadosFiltrados.filter(d => d.areaMapeada === area);
+  }
+
+  if (busca) {
+    dadosFiltrados = dadosFiltrados.filter(d =>
+      (d.grupo && d.grupo.toLowerCase().includes(busca)) ||
+      (d.descricao && d.descricao.toLowerCase().includes(busca))
+    );
+  }
+
+  atualizarTabelaAlertas(dadosFiltrados);
+}
+
+function verDetalhesAlerta(index) {
+  const item = dadosAlertas[index];
+  if (!item) return;
+
+  alertaAtual = item.id;
+
+  const statusClass = obterClasseStatus(item.status);
+  const statusTexto = obterTextoStatus(item.status);
+
+  const body = document.getElementById('modalDetalhesAlertaBody');
+  body.innerHTML = `
+    <div class="telegram-detail-card" style="border-left-color: #ff9800;">
+      <h5><i class="bi bi-exclamation-triangle me-2"></i>Informações do Alerta</h5>
+      <div class="telegram-detail-row">
+        <span class="telegram-detail-label">Data/Hora:</span>
+        <span class="telegram-detail-value">${formatarDataHora(item.dataRecebimento)}</span>
+      </div>
+      <div class="telegram-detail-row">
+        <span class="telegram-detail-label">Grupo:</span>
+        <span class="telegram-detail-value">${item.grupo || '-'}</span>
+      </div>
+      <div class="telegram-detail-row">
+        <span class="telegram-detail-label">Área:</span>
+        <span class="telegram-detail-value"><span class="badge bg-info">${item.areaMapeada || '-'}</span></span>
+      </div>
+      <div class="telegram-detail-row">
+        <span class="telegram-detail-label">Status:</span>
+        <span class="telegram-detail-value"><span class="alerta-status ${statusClass}">${statusTexto}</span></span>
+      </div>
+    </div>
+
+    ${item.descricao ? `
+    <div class="telegram-detail-card">
+      <h5><i class="bi bi-file-text me-2"></i>Descrição</h5>
+      <p style="white-space: pre-wrap;">${item.descricao}</p>
+    </div>
+    ` : ''}
+
+    ${item.mensagemOriginal ? `
+    <div class="telegram-detail-card" style="border-left-color: #666;">
+      <h5><i class="bi bi-chat-quote me-2"></i>Mensagem Original</h5>
+      <pre style="white-space: pre-wrap; font-size: 0.85rem; background: #f5f5f5; padding: 1rem; border-radius: 6px; max-height: 300px; overflow-y: auto;">${item.mensagemOriginal}</pre>
+    </div>
+    ` : ''}
+
+    ${item.historicoStatus && item.historicoStatus.length > 0 ? `
+    <div class="telegram-detail-card" style="border-left-color: #2196f3;">
+      <h5><i class="bi bi-clock-history me-2"></i>Histórico de Status</h5>
+      <ul class="list-unstyled mb-0">
+        ${item.historicoStatus.map(h => `
+          <li class="mb-2">
+            <small class="text-muted">${formatarDataHora(h.data)}</small><br>
+            <span class="alerta-status ${obterClasseStatus(h.status)}">${obterTextoStatus(h.status)}</span>
+          </li>
+        `).join('')}
+      </ul>
+    </div>
+    ` : ''}
+  `;
+
+  const modal = new bootstrap.Modal(document.getElementById('modalDetalhesAlerta'));
+  modal.show();
+}
+
+async function alterarStatusAlerta(alertaId, novoStatus) {
+  if (!backendUrl) {
+    showToast('Configure a URL do backend primeiro', 'warning');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${backendUrl}/api/alertas/${alertaId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: novoStatus })
+    });
+
+    if (!response.ok) throw new Error('Erro ao atualizar status');
+
+    showToast('Status atualizado com sucesso!', 'success');
+
+    // Fechar modal se estiver aberto
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalDetalhesAlerta'));
+    if (modal) modal.hide();
+
+    // Recarregar dados
+    await carregarAlertas();
+
+  } catch (error) {
+    console.error('Erro ao alterar status:', error);
+    showToast('Erro ao atualizar status', 'danger');
+  }
+}
+
+function atualizarBadgeAlertas() {
+  const novos = dadosAlertas.filter(a => a.status === 'novo').length;
+  const badge = document.getElementById('badgeAlertas');
+  if (badge) badge.textContent = novos;
+}
+
+function atualizarEstatisticasAlertas() {
+  const total = dadosAlertas.length;
+  const novos = dadosAlertas.filter(a => a.status === 'novo').length;
+  const emAndamento = dadosAlertas.filter(a => a.status === 'em_andamento').length;
+  const resolvidos = dadosAlertas.filter(a => a.status === 'resolvido').length;
+
+  const statTotal = document.getElementById('statTotalAlertas');
+  const statNovos = document.getElementById('statNovosAlertas');
+  const statEmAndamento = document.getElementById('statEmAndamentoAlertas');
+  const statResolvidos = document.getElementById('statResolvidosAlertas');
+
+  if (statTotal) statTotal.textContent = total;
+  if (statNovos) statNovos.textContent = novos;
+  if (statEmAndamento) statEmAndamento.textContent = emAndamento;
+  if (statResolvidos) statResolvidos.textContent = resolvidos;
+}
+
+// ============================================
+// ESTATÍSTICAS GERAIS
+// ============================================
+
+async function carregarEstatisticas() {
+  if (!backendUrl) return;
+
+  try {
+    const response = await fetch(`${backendUrl}/api/estatisticas`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!response.ok) return;
+
+    const stats = await response.json();
+
+    // COP Rede Informa
+    const statTotalCop = document.getElementById('statTotalCop');
+    const statHojeCop = document.getElementById('statHojeCop');
+    const statAreasCop = document.getElementById('statAreasCop');
+
+    if (statTotalCop) statTotalCop.textContent = stats.copRedeInforma?.total || 0;
+    if (statHojeCop) statHojeCop.textContent = stats.copRedeInforma?.hoje || 0;
+    if (statAreasCop) statAreasCop.textContent = stats.copRedeInforma?.areas || 0;
+
+  } catch (error) {
+    console.error('Erro ao carregar estatísticas:', error);
+  }
+}
+
+// ============================================
+// FUNÇÕES AUXILIARES
+// ============================================
+
+function formatarDataHora(dataString) {
+  if (!dataString) return '-';
+  try {
+    const data = new Date(dataString);
+    return data.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch {
+    return dataString;
+  }
+}
+
+function obterClasseStatus(status) {
+  const classes = {
+    'novo': 'novo',
+    'em_andamento': 'em-andamento',
+    'resolvido': 'resolvido',
+    'arquivado': 'arquivado'
+  };
+  return classes[status] || 'novo';
+}
+
+function obterTextoStatus(status) {
+  const textos = {
+    'novo': 'Novo',
+    'em_andamento': 'Em andamento',
+    'resolvido': 'Resolvido',
+    'arquivado': 'Arquivado'
+  };
+  return textos[status] || 'Novo';
+}
+
+// Inicializar Telegram quando página carregar
+document.addEventListener('DOMContentLoaded', function() {
+  inicializarTelegram();
+});
 </script>
 </body>
 </html>
