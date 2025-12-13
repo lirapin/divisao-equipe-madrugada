@@ -42,6 +42,15 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Alias para /api/health
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    telegram: telegram.obterEstatisticas()
+  });
+});
+
 /**
  * Estatísticas gerais
  */
