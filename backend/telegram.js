@@ -26,16 +26,22 @@ let estatisticas = {
 /**
  * Limpa webhooks e conexões anteriores do bot
  * Isso resolve o erro 409 Conflict
+ * @param {boolean} manterMensagens - Se true, NÃO descarta mensagens pendentes
  */
-async function limparConexoesAnteriores() {
+async function limparConexoesAnteriores(manterMensagens = true) {
   console.log('[Telegram] Limpando conexões anteriores...');
 
   try {
     const tempBot = new TelegramBot(TELEGRAM_CONFIG.BOT_TOKEN, { polling: false });
 
-    // Remove webhook se houver
-    await tempBot.deleteWebHook({ drop_pending_updates: true });
-    console.log('[Telegram] Webhook removido e updates pendentes descartados');
+    // Remove webhook - NÃO descarta mensagens pendentes por padrão
+    await tempBot.deleteWebHook({ drop_pending_updates: !manterMensagens });
+
+    if (manterMensagens) {
+      console.log('[Telegram] Webhook removido (mensagens pendentes MANTIDAS)');
+    } else {
+      console.log('[Telegram] Webhook removido e updates pendentes descartados');
+    }
 
     // Aguardar um momento para o Telegram liberar
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -44,6 +50,92 @@ async function limparConexoesAnteriores() {
   } catch (error) {
     console.error('[Telegram] Erro ao limpar conexões:', error.message);
     return false;
+  }
+}
+
+/**
+ * Processa mensagens pendentes (updates não lidos)
+ * Chamado automaticamente ao iniciar o bot
+ * @returns {Promise<number>} Número de mensagens processadas
+ */
+async function processarMensagensPendentes() {
+  console.log('[Telegram] 📥 Buscando mensagens pendentes...');
+
+  try {
+    const tempBot = new TelegramBot(TELEGRAM_CONFIG.BOT_TOKEN, { polling: false });
+
+    // Buscar updates pendentes (mensagens não lidas)
+    const updates = await tempBot.getUpdates({
+      offset: 0,
+      limit: 100,
+      timeout: 0,
+      allowed_updates: ['message']
+    });
+
+    console.log(`[Telegram] 📥 ${updates.length} updates pendentes encontrados`);
+
+    if (updates.length === 0) {
+      console.log('[Telegram] 📥 Nenhuma mensagem pendente para processar');
+      return 0;
+    }
+
+    let processadas = 0;
+    let ultimoUpdateId = 0;
+
+    for (const update of updates) {
+      ultimoUpdateId = Math.max(ultimoUpdateId, update.update_id);
+
+      if (!update.message || !update.message.text) continue;
+
+      const msg = update.message;
+      const chatId = String(msg.chat.id);
+      const groupId = TELEGRAM_CONFIG.GROUP_ID;
+
+      // Verificar se é do grupo correto
+      if (chatId !== groupId && chatId !== groupId.replace('-100', '-') && `-100${chatId.replace('-', '')}` !== groupId) {
+        continue;
+      }
+
+      // Log do remetente
+      const remetente = msg.from || {};
+      const isBot = remetente.is_bot === true;
+      const username = remetente.username || 'desconhecido';
+
+      console.log(`[Telegram] 📥 Processando pendente de: ${username} ${isBot ? '(BOT)' : '(USUÁRIO)'}`);
+      console.log(`[Telegram] 📥 Texto: ${msg.text.substring(0, 80)}...`);
+
+      // Processar mensagem
+      const resultado = processarMensagem(msg);
+
+      if (resultado) {
+        if (resultado.tipo === 'COP_REDE_INFORMA') {
+          const sucesso = await adicionarCopRedeInforma(resultado.dados);
+          if (sucesso) {
+            processadas++;
+            console.log(`[Telegram] 📥 ✅ COP REDE INFORMA pendente salvo!`);
+          }
+        } else if (resultado.tipo === 'NOVO_EVENTO') {
+          const sucesso = await adicionarAlerta(resultado.dados);
+          if (sucesso) {
+            processadas++;
+            console.log(`[Telegram] 📥 ✅ Alerta pendente salvo!`);
+          }
+        }
+      }
+    }
+
+    // Marcar updates como lidos para não processar novamente
+    if (ultimoUpdateId > 0) {
+      await tempBot.getUpdates({ offset: ultimoUpdateId + 1, limit: 1, timeout: 0 });
+      console.log(`[Telegram] 📥 Updates marcados como lidos (offset: ${ultimoUpdateId + 1})`);
+    }
+
+    console.log(`[Telegram] 📥 ${processadas} mensagens pendentes processadas com sucesso!`);
+    return processadas;
+
+  } catch (error) {
+    console.error('[Telegram] ❌ Erro ao processar mensagens pendentes:', error.message);
+    return 0;
   }
 }
 
@@ -65,16 +157,23 @@ async function inicializar(polling = true) {
   console.log('[Telegram] Polling interval:', TELEGRAM_CONFIG.POLLING_INTERVAL, 'ms');
 
   try {
-    // ETAPA 1: Limpar conexões anteriores AGRESSIVAMENTE
-    console.log('[Telegram] Etapa 1/4: Limpando conexões anteriores...');
-    await limparConexoesAnteriores();
+    // ETAPA 1: Processar mensagens pendentes ANTES de limpar
+    console.log('[Telegram] Etapa 1/5: Processando mensagens pendentes...');
+    const msgPendentes = await processarMensagensPendentes();
+    if (msgPendentes > 0) {
+      console.log(`[Telegram] ✅ ${msgPendentes} mensagens pendentes foram processadas!`);
+    }
+
+    // ETAPA 2: Limpar conexões anteriores (mantendo mensagens que não foram processadas)
+    console.log('[Telegram] Etapa 2/5: Limpando conexões anteriores...');
+    await limparConexoesAnteriores(true); // true = manter mensagens
 
     // Aguardar mais tempo para garantir que tudo foi limpo
     console.log('[Telegram] Aguardando 3s para garantir limpeza completa...');
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    // ETAPA 2: Criar instância do bot
-    console.log('[Telegram] Etapa 2/4: Criando instância do bot...');
+    // ETAPA 3: Criar instância do bot
+    console.log('[Telegram] Etapa 3/5: Criando instância do bot...');
     bot = new TelegramBot(TELEGRAM_CONFIG.BOT_TOKEN, {
       polling: polling ? {
         interval: TELEGRAM_CONFIG.POLLING_INTERVAL || 3000,
@@ -86,15 +185,15 @@ async function inicializar(polling = true) {
       } : false
     });
 
-    // ETAPA 3: Verificar conexão
-    console.log('[Telegram] Etapa 3/4: Verificando conexão com Telegram...');
+    // ETAPA 4: Verificar conexão
+    console.log('[Telegram] Etapa 4/5: Verificando conexão com Telegram...');
     const me = await bot.getMe();
     console.log('[Telegram] ✅ Conectado como:', me.username);
     console.log('[Telegram] Bot ID:', me.id);
 
-    // ETAPA 4: Configurar handlers e iniciar polling
+    // ETAPA 5: Configurar handlers e iniciar polling
     if (polling) {
-      console.log('[Telegram] Etapa 4/4: Configurando handlers...');
+      console.log('[Telegram] Etapa 5/5: Configurando handlers...');
       configurarHandlers();
 
       // Tentar iniciar polling com retry AGRESSIVO
