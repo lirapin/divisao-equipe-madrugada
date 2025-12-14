@@ -154,6 +154,18 @@ app.post('/api/telegram/sincronizar', async (req, res) => {
   }
 });
 
+/**
+ * Diagnóstico do bot - Verifica configurações e problemas de Privacy Mode
+ */
+app.get('/api/telegram/diagnostico', async (req, res) => {
+  try {
+    const resultado = await telegram.diagnosticar();
+    res.json(resultado);
+  } catch (error) {
+    res.status(500).json({ sucesso: false, erro: error.message });
+  }
+});
+
 // ============================================
 // ROTAS COP REDE INFORMA
 // ============================================
@@ -437,8 +449,10 @@ app.listen(SERVER_CONFIG.PORT, async () => {
   console.log('  GET  /health');
   console.log('  GET  /api/estatisticas');
   console.log('  GET  /api/telegram/status');
+  console.log('  GET  /api/telegram/diagnostico   <- NOVO: Verifica Privacy Mode');
   console.log('  POST /api/telegram/iniciar');
   console.log('  POST /api/telegram/parar');
+  console.log('  POST /api/telegram/reiniciar');
   console.log('  POST /api/telegram/sincronizar');
   console.log('  GET  /api/cop-rede-informa');
   console.log('  GET  /api/cop-rede-informa/:id');
@@ -446,6 +460,7 @@ app.listen(SERVER_CONFIG.PORT, async () => {
   console.log('  GET  /api/alertas');
   console.log('  GET  /api/alertas/:id');
   console.log('  PUT  /api/alertas/:id/status');
+  console.log('  DELETE /api/alertas/:id');
   console.log('  GET  /api/alertas/resumo/status');
   console.log('============================================');
 });
