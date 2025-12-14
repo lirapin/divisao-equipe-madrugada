@@ -173,60 +173,83 @@ function configurarHandlers() {
     estatisticas.mensagensRecebidas++;
 
     try {
+      // === DEBUG: Log detalhado do remetente ===
+      const remetente = msg.from || {};
+      const isBot = remetente.is_bot === true;
+      const username = remetente.username || 'desconhecido';
+      const userId = remetente.id || 'N/A';
+
+      console.log('[Telegram] =====================================');
+      console.log('[Telegram] 📨 NOVA MENSAGEM RECEBIDA');
+      console.log('[Telegram] De:', username, `(ID: ${userId})`);
+      console.log('[Telegram] É bot?:', isBot ? '🤖 SIM' : '👤 NÃO');
+      console.log('[Telegram] Chat ID:', msg.chat.id);
+      console.log('[Telegram] Message ID:', msg.message_id);
+
+      // Log especial para mensagens de bots
+      if (isBot) {
+        console.log('[Telegram] ✅ MENSAGEM DE BOT DETECTADA - Processando normalmente');
+        console.log('[Telegram] Bot username:', username);
+      }
+      // === FIM DEBUG ===
+
       // Verificar se é do grupo correto
       const chatId = String(msg.chat.id);
       const groupId = TELEGRAM_CONFIG.GROUP_ID;
 
-      console.log('[Telegram] Mensagem recebida do chat:', chatId);
-
       // Aceitar tanto o ID com ou sem prefixo -100
       if (chatId !== groupId && chatId !== groupId.replace('-100', '-') && `-100${chatId.replace('-', '')}` !== groupId) {
-        console.log('[Telegram] Ignorando mensagem de outro chat');
+        console.log('[Telegram] ⚠️ Ignorando mensagem de outro chat');
         return;
       }
 
       // Ignorar mensagens sem texto
       if (!msg.text) {
-        console.log('[Telegram] Ignorando mensagem sem texto');
+        console.log('[Telegram] ⚠️ Ignorando mensagem sem texto (pode ser foto, sticker, etc)');
         return;
       }
 
-      console.log('[Telegram] Processando mensagem:', msg.message_id);
-      console.log('[Telegram] Texto (primeiros 100 chars):', msg.text.substring(0, 100));
+      console.log('[Telegram] Texto (primeiros 150 chars):', msg.text.substring(0, 150));
 
       // Processar mensagem
       const resultado = processarMensagem(msg);
 
       if (!resultado) {
         console.log('[Telegram] ⚠️ MENSAGEM NÃO RECONHECIDA - Título não corresponde aos padrões esperados');
+        console.log('[Telegram] Remetente:', username, isBot ? '(BOT)' : '(USUÁRIO)');
         console.log('[Telegram] Primeira linha:', msg.text.split('\n')[0]);
-        console.log('[Telegram] Texto completo:\n', msg.text);
+        console.log('[Telegram] Primeira linha (hex):', Buffer.from(msg.text.split('\n')[0]).toString('hex'));
         console.log('[Telegram] Padrões esperados:');
         console.log('  - "COP REDE INFORMA" (ou que contenha essa frase)');
         console.log('  - "🚨 Novo Evento Detectado!" (ou "Novo Evento Detectado" ou que contenha 🚨)');
+        console.log('[Telegram] =====================================');
         return;
       }
 
-      console.log('[Telegram] Tipo de mensagem:', resultado.tipo);
+      console.log('[Telegram] ✅ Tipo de mensagem identificado:', resultado.tipo);
+      console.log('[Telegram] Remetente:', username, isBot ? '(BOT)' : '(USUÁRIO)');
 
       // Salvar no storage
       if (resultado.tipo === 'COP_REDE_INFORMA') {
         const sucesso = await adicionarCopRedeInforma(resultado.dados);
         if (sucesso) {
           estatisticas.mensagensProcessadas++;
-          console.log('[Telegram] COP REDE INFORMA salvo com sucesso');
+          console.log('[Telegram] 💾 COP REDE INFORMA salvo com sucesso');
+          console.log('[Telegram] =====================================');
         }
       } else if (resultado.tipo === 'NOVO_EVENTO') {
         const sucesso = await adicionarAlerta(resultado.dados);
         if (sucesso) {
           estatisticas.mensagensProcessadas++;
-          console.log('[Telegram] Alerta salvo com sucesso');
+          console.log('[Telegram] 💾 Alerta NOVO_EVENTO salvo com sucesso');
+          console.log('[Telegram] =====================================');
         }
       }
 
     } catch (error) {
       estatisticas.erros++;
-      console.error('[Telegram] Erro ao processar mensagem:', error);
+      console.error('[Telegram] ❌ Erro ao processar mensagem:', error);
+      console.log('[Telegram] =====================================');
     }
   });
 
@@ -446,6 +469,74 @@ async function testarConexao() {
 }
 
 /**
+ * Verifica informações de diagnóstico do bot
+ * Útil para identificar problemas de Privacy Mode
+ * @returns {Promise<object>} Informações de diagnóstico
+ */
+async function diagnosticar() {
+  try {
+    if (!bot) {
+      bot = new TelegramBot(TELEGRAM_CONFIG.BOT_TOKEN, { polling: false });
+    }
+
+    const me = await bot.getMe();
+    console.log('[Telegram] 🔍 DIAGNÓSTICO DO BOT');
+    console.log('[Telegram] Bot:', me.username);
+    console.log('[Telegram] Bot ID:', me.id);
+
+    // Tentar verificar se é admin do grupo
+    let isAdmin = false;
+    let adminError = null;
+
+    try {
+      const chatMember = await bot.getChatMember(TELEGRAM_CONFIG.GROUP_ID, me.id);
+      isAdmin = ['administrator', 'creator'].includes(chatMember.status);
+      console.log('[Telegram] Status no grupo:', chatMember.status);
+      console.log('[Telegram] É admin?:', isAdmin ? '✅ SIM' : '❌ NÃO');
+
+      if (!isAdmin) {
+        console.log('[Telegram] ⚠️ ATENÇÃO: Bot NÃO é admin do grupo!');
+        console.log('[Telegram] ⚠️ Isso pode impedir de ver mensagens de outros bots.');
+        console.log('[Telegram] ⚠️ Soluções:');
+        console.log('[Telegram]    1. Tornar o bot admin do grupo');
+        console.log('[Telegram]    2. Desabilitar Privacy Mode no BotFather');
+      }
+    } catch (e) {
+      adminError = e.message;
+      console.log('[Telegram] ⚠️ Não foi possível verificar status de admin:', e.message);
+    }
+
+    return {
+      sucesso: true,
+      bot: {
+        id: me.id,
+        username: me.username,
+        first_name: me.first_name,
+        can_join_groups: me.can_join_groups,
+        can_read_all_group_messages: me.can_read_all_group_messages,
+        supports_inline_queries: me.supports_inline_queries
+      },
+      grupo: {
+        id: TELEGRAM_CONFIG.GROUP_ID,
+        botIsAdmin: isAdmin,
+        adminCheckError: adminError
+      },
+      recomendacoes: isAdmin ? [] : [
+        'Tornar o bot administrador do grupo para ver mensagens de outros bots',
+        'Ou desabilitar Privacy Mode via /setprivacy no BotFather'
+      ]
+    };
+
+  } catch (error) {
+    console.error('[Telegram] Erro no diagnóstico:', error.message);
+    return {
+      sucesso: false,
+      erro: error.message
+    };
+  }
+}
+
+/**
  * Envia uma mensagem de teste para o grupo
  * @param {string} texto - Texto da mensagem
  * @returns {Promise<object>} Resultado do envio
@@ -479,5 +570,6 @@ module.exports = {
   buscarMensagensRecentes,
   obterEstatisticas,
   testarConexao,
+  diagnosticar,
   enviarMensagemTeste
 };
