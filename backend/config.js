@@ -7,7 +7,7 @@ require('dotenv').config();
 
 // Configurações do Telegram
 const TELEGRAM_CONFIG = {
-  BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '8382189628:AAEIe3ol_Z_yHep_dOVRgkk4IaLHQx8KCo4',
+  BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '8450919829:AAFbu6mgwWSj_SCSryS0e-6FHRGQvkHrVRM',
   GROUP_ID: process.env.TELEGRAM_GROUP_ID || '-1003217044000', // Grupos têm ID negativo
   POLLING_INTERVAL: parseInt(process.env.POLLING_INTERVAL) || 5000
 };
