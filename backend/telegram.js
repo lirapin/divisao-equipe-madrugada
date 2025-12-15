@@ -52,7 +52,8 @@ async function inicializar(polling = true) {
         autoStart: true,
         params: {
           timeout: 30,
-          allowed_updates: ['message']
+          // Aceitar TODOS os tipos de updates para debug
+          allowed_updates: ['message', 'channel_post', 'edited_message', 'edited_channel_post']
         }
       } : false
     });
@@ -141,6 +142,30 @@ function configurarHandlers() {
     } catch (error) {
       estatisticas.erros++;
       console.error('[Telegram] Erro:', error.message);
+    }
+  });
+
+  // Handler para mensagens de CANAL (channel_post)
+  bot.on('channel_post', async (msg) => {
+    console.log('[Telegram] =====================================');
+    console.log('[Telegram] 📢 CHANNEL_POST RECEBIDO!');
+    console.log('[Telegram] Chat:', msg.chat.title || msg.chat.id);
+    console.log('[Telegram] Texto:', msg.text?.substring(0, 80) || '(sem texto)');
+    console.log('[Telegram] =====================================');
+
+    // Processar como mensagem normal
+    if (msg.text) {
+      const resultado = processarMensagem(msg);
+      if (resultado) {
+        console.log('[Telegram] ✅ Tipo:', resultado.tipo);
+        if (resultado.tipo === 'COP_REDE_INFORMA') {
+          await adicionarCopRedeInforma(resultado.dados);
+          console.log('[Telegram] 💾 Salvo de channel_post!');
+        } else if (resultado.tipo === 'NOVO_EVENTO') {
+          await adicionarAlerta(resultado.dados);
+          console.log('[Telegram] 💾 Salvo de channel_post!');
+        }
+      }
     }
   });
 
