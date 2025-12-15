@@ -43,6 +43,9 @@ async function inicializar(polling = true) {
 
     // Passo 2: Criar bot COM polling
     console.log('[Telegram] Criando bot com polling...');
+    console.log('[Telegram] Token (últimos 10):', TELEGRAM_CONFIG.BOT_TOKEN.slice(-10));
+    console.log('[Telegram] Group ID:', TELEGRAM_CONFIG.GROUP_ID);
+
     bot = new TelegramBot(TELEGRAM_CONFIG.BOT_TOKEN, {
       polling: polling ? {
         interval: 3000,
@@ -57,6 +60,8 @@ async function inicializar(polling = true) {
     // Verificar conexão
     const me = await bot.getMe();
     console.log('[Telegram] ✅ Conectado:', me.username);
+    console.log('[Telegram] Bot ID:', me.id);
+    console.log('[Telegram] can_read_all_group_messages:', me.can_read_all_group_messages);
 
     // Configurar handlers
     configurarHandlers();
@@ -65,7 +70,7 @@ async function inicializar(polling = true) {
     estatisticas.iniciadoEm = new Date().toISOString();
 
     console.log('[Telegram] ====================================');
-    console.log('[Telegram] ✅ BOT ATIVO!');
+    console.log('[Telegram] ✅ BOT ATIVO! Aguardando mensagens...');
     console.log('[Telegram] ====================================');
 
     return bot;
@@ -80,6 +85,8 @@ async function inicializar(polling = true) {
  * Handlers de mensagens
  */
 function configurarHandlers() {
+  console.log('[Telegram] Configurando handlers de mensagens...');
+
   bot.on('message', async (msg) => {
     estatisticas.mensagensRecebidas++;
 
@@ -89,9 +96,10 @@ function configurarHandlers() {
       const username = remetente.username || 'desconhecido';
 
       console.log('[Telegram] =====================================');
-      console.log('[Telegram] 📨 MENSAGEM RECEBIDA');
+      console.log('[Telegram] 📨 MENSAGEM RECEBIDA!');
       console.log('[Telegram] De:', username, isBot ? '(BOT)' : '(USER)');
-      console.log('[Telegram] Chat:', msg.chat.id);
+      console.log('[Telegram] Chat ID:', msg.chat.id);
+      console.log('[Telegram] Message ID:', msg.message_id);
 
       // Verificar grupo
       const chatId = String(msg.chat.id);
