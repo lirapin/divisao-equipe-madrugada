@@ -425,23 +425,13 @@ app.listen(SERVER_CONFIG.PORT, async () => {
   console.log(`CORS permitido: ${SERVER_CONFIG.CORS_ORIGIN}`);
   console.log('');
 
-  // Testar conexão com Telegram
-  console.log('Testando conexão com Telegram...');
-  const telegramStatus = await telegram.testarConexao();
-
-  if (telegramStatus.sucesso) {
-    console.log(`✅ Telegram conectado: @${telegramStatus.bot.username}`);
-
-    // Iniciar polling automaticamente
-    console.log('Iniciando polling do Telegram...');
-    try {
-      await telegram.inicializar(true);
-      console.log('✅ Polling ativo');
-    } catch (error) {
-      console.error('❌ Erro ao iniciar polling:', error.message);
-    }
-  } else {
-    console.error('❌ Erro ao conectar com Telegram:', telegramStatus.erro);
+  // Iniciar bot do Telegram diretamente (sem testar antes para evitar conflito)
+  console.log('Iniciando bot do Telegram...');
+  try {
+    await telegram.inicializar(true);
+    console.log('✅ Bot Telegram ativo e recebendo mensagens');
+  } catch (error) {
+    console.error('❌ Erro ao iniciar bot:', error.message);
   }
 
   console.log('');
@@ -449,19 +439,13 @@ app.listen(SERVER_CONFIG.PORT, async () => {
   console.log('  GET  /health');
   console.log('  GET  /api/estatisticas');
   console.log('  GET  /api/telegram/status');
-  console.log('  GET  /api/telegram/diagnostico   <- NOVO: Verifica Privacy Mode');
+  console.log('  GET  /api/telegram/diagnostico');
   console.log('  POST /api/telegram/iniciar');
   console.log('  POST /api/telegram/parar');
   console.log('  POST /api/telegram/reiniciar');
   console.log('  POST /api/telegram/sincronizar');
   console.log('  GET  /api/cop-rede-informa');
-  console.log('  GET  /api/cop-rede-informa/:id');
-  console.log('  GET  /api/cop-rede-informa/resumo/areas');
   console.log('  GET  /api/alertas');
-  console.log('  GET  /api/alertas/:id');
-  console.log('  PUT  /api/alertas/:id/status');
-  console.log('  DELETE /api/alertas/:id');
-  console.log('  GET  /api/alertas/resumo/status');
   console.log('============================================');
 });
 
