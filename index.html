@@ -5060,8 +5060,7 @@ async function carregarCopRedeInforma(forcarAtualizacao = false) {
 
 // Mapeamento de áreas do Telegram para áreas da escala
 const MAPEAMENTO_AREAS_TELEGRAM = {
-  'RIO': ['RIO', 'RIO A', 'RIO B'],
-  'RIO A / RIO B': ['RIO', 'RIO A', 'RIO B'], // Mantido para compatibilidade
+  'RIO': ['RIO'],
   'NE/BA': ['NE/BA', 'BA/MG/ES'],
   'CO/NO': ['CO/NO', 'CO/NO/NE'],
   'MG': ['MG', 'MG/ES', 'BA/MG/ES']
@@ -5259,7 +5258,7 @@ function mapearGrupoParaAreaFrontend(grupo) {
   const grupoLower = grupo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
   if (grupoLower.includes('rio') || grupoLower.includes('espirito santo') || grupoLower.includes('espírito santo')) {
-    return 'RIO A / RIO B';
+    return 'RIO';
   }
   if (grupoLower.includes('bahia') || grupoLower.includes('sergipe')) {
     return 'NE/BA';
