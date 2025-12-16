@@ -39,25 +39,80 @@ const MESSAGE_TITLES = {
 
 // Mapeamento de GRUPO do Telegram para Área do Painel
 // Chaves normalizadas (lowercase, sem acentos)
+// IMPORTANTE: Inclui todas as variações possíveis dos clusters
 const GRUPO_PARA_AREA = {
+  // RIO - Cluster Rio de Janeiro / Espírito Santo
   'rio / espirito santo': 'RIO',
   'rio/espirito santo': 'RIO',
   'rio / espírito santo': 'RIO',
   'rio/espírito santo': 'RIO',
+  'rio de janeiro / espirito santo': 'RIO',
+  'rio de janeiro/espirito santo': 'RIO',
+  'rio de janeiro': 'RIO',
+  'espirito santo': 'RIO',
+  'espírito santo': 'RIO',
   'rio': 'RIO',
+  'rj': 'RIO',
+  'es': 'RIO',
+
+  // NE/BA - Cluster Bahia / Sergipe / Nordeste
   'bahia / sergipe': 'NE/BA',
   'bahia/sergipe': 'NE/BA',
   'bahia': 'NE/BA',
   'sergipe': 'NE/BA',
+  'nordeste': 'NE/BA',
+  'ne': 'NE/BA',
+  'ba': 'NE/BA',
+  'se': 'NE/BA',
+  'pernambuco': 'NE/BA',
+  'pe': 'NE/BA',
+  'alagoas': 'NE/BA',
+  'al': 'NE/BA',
+  'paraiba': 'NE/BA',
+  'pb': 'NE/BA',
+  'rio grande do norte': 'NE/BA',
+  'rn': 'NE/BA',
+  'ceara': 'NE/BA',
+  'ce': 'NE/BA',
+  'piaui': 'NE/BA',
+  'pi': 'NE/BA',
+  'maranhao': 'NE/BA',
+  'ma': 'NE/BA',
+
+  // CO/NO - Cluster Centro-Oeste / Norte
   'centro oeste': 'CO/NO',
   'centro-oeste': 'CO/NO',
   'centrooeste': 'CO/NO',
   'norte': 'CO/NO',
+  'co': 'CO/NO',
+  'no': 'CO/NO',
+  'goias': 'CO/NO',
+  'go': 'CO/NO',
+  'mato grosso': 'CO/NO',
+  'mt': 'CO/NO',
+  'mato grosso do sul': 'CO/NO',
+  'ms': 'CO/NO',
+  'distrito federal': 'CO/NO',
+  'df': 'CO/NO',
+  'tocantins': 'CO/NO',
+  'to': 'CO/NO',
+  'amazonas': 'CO/NO',
+  'am': 'CO/NO',
+  'para': 'CO/NO',
+  'pa': 'CO/NO',
+  'acre': 'CO/NO',
+  'ac': 'CO/NO',
+  'rondonia': 'CO/NO',
+  'ro': 'CO/NO',
+  'roraima': 'CO/NO',
+  'rr': 'CO/NO',
+  'amapa': 'CO/NO',
+  'ap': 'CO/NO',
+
+  // MG - Cluster Minas Gerais
   'minas gerais': 'MG',
   'minas': 'MG',
-  'mg': 'MG',
-  'nordeste': 'NE/BA',
-  'ne': 'NE/BA'
+  'mg': 'MG'
 };
 
 // Campos esperados nas mensagens

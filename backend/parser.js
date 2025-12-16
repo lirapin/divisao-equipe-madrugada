@@ -170,30 +170,69 @@ function mapearGrupoParaArea(grupo) {
 function extrairSecaoLista(texto, secao) {
   if (!texto || !secao) return null;
 
-  // Tentar primeiro com formato markdown **SECAO:**
-  let regex = new RegExp(`\\*\\*${secao}:\\*\\*\\s*\\n([\\s\\S]*?)(?=\\n\\*\\*[A-ZÁÉÍÓÚÂÊÎÔÛÃÕÇ]+:|$)`, 'i');
-  let match = texto.match(regex);
+  console.log(`[Parser] Buscando seção: ${secao}`);
 
-  // Se não encontrou, tentar formato sem markdown
-  if (!match) {
-    regex = new RegExp(`${secao}:\\s*\\n([\\s\\S]*?)(?=\\n[A-ZÁÉÍÓÚ]+:|$)`, 'i');
-    match = texto.match(regex);
+  let conteudo = null;
+
+  // Método 1: Busca por seção markdown **SECAO:**
+  // Encontra a posição inicial da seção
+  const regexInicio = new RegExp(`\\*\\*${secao}:\\*\\*`, 'i');
+  const matchInicio = texto.match(regexInicio);
+
+  if (matchInicio) {
+    const posInicio = texto.indexOf(matchInicio[0]) + matchInicio[0].length;
+
+    // Encontra a próxima seção markdown ou usa o fim do texto
+    const restoTexto = texto.substring(posInicio);
+    const regexProximaSecao = /\n\*\*[A-ZÁÉÍÓÚÂÊÎÔÛÃÕÇ][A-ZÁÉÍÓÚÂÊÎÔÛÃÕÇA-Z\s/]*:\*\*/i;
+    const matchProxima = restoTexto.match(regexProximaSecao);
+
+    if (matchProxima) {
+      conteudo = restoTexto.substring(0, matchProxima.index);
+    } else {
+      // GRUPO é a última seção - pega todo o resto
+      conteudo = restoTexto;
+    }
+    console.log(`[Parser] Encontrado com markdown, conteúdo tem ${conteudo?.length || 0} chars`);
   }
 
-  if (!match) return null;
+  // Método 2: Busca sem markdown
+  if (!conteudo) {
+    const regexSemMd = new RegExp(`${secao}:\\s*\\n([\\s\\S]*?)(?=\\n[A-ZÁÉÍÓÚ]+:|$)`, 'i');
+    const match = texto.match(regexSemMd);
+    if (match) {
+      conteudo = match[1];
+      console.log(`[Parser] Encontrado sem markdown, conteúdo tem ${conteudo?.length || 0} chars`);
+    }
+  }
 
-  const linhas = match[1].split('\n').filter(l => l.trim().startsWith('-'));
+  if (!conteudo) {
+    console.log(`[Parser] Seção ${secao} não encontrada no texto`);
+    return null;
+  }
+
+  // Processa linhas que começam com "-"
+  const linhas = conteudo.split('\n').filter(l => l.trim().startsWith('-'));
+  console.log(`[Parser] Seção ${secao}: encontradas ${linhas.length} linhas com "-"`);
+
   const itens = {};
   let total = 0;
 
   for (const linha of linhas) {
-    const itemMatch = linha.match(/^-\s*(.+?):\s*(\d+)/);
+    // Captura "- Nome do Item: 123" (aceita espaços extras e variações)
+    const itemMatch = linha.match(/^-\s*(.+?):\s*(\d+)\s*$/);
     if (itemMatch) {
-      itens[itemMatch[1].trim()] = parseInt(itemMatch[2]);
-      total += parseInt(itemMatch[2]);
+      const nomeItem = itemMatch[1].trim();
+      const valor = parseInt(itemMatch[2]);
+      itens[nomeItem] = valor;
+      total += valor;
+      console.log(`[Parser]   -> ${nomeItem}: ${valor}`);
+    } else {
+      console.log(`[Parser]   -> Linha não parseada: "${linha.trim()}"`);
     }
   }
 
+  console.log(`[Parser] Seção ${secao}: ${Object.keys(itens).length} itens extraídos, total: ${total}`);
   return { itens, total };
 }
 
