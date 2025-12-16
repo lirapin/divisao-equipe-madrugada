@@ -7,9 +7,10 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-const { SERVER_CONFIG } = require('./config');
+const { SERVER_CONFIG, USERBOT_CONFIG } = require('./config');
 const telegram = require('./telegram');
 const storage = require('./storage');
+const userbot = require('./userbot');
 
 const app = express();
 
@@ -162,6 +163,77 @@ app.get('/api/telegram/diagnostico', async (req, res) => {
     const resultado = await telegram.diagnosticar();
     res.json(resultado);
   } catch (error) {
+    res.status(500).json({ sucesso: false, erro: error.message });
+  }
+});
+
+// ============================================
+// WEBHOOK PARA RECEBER MENSAGENS DIRETAMENTE
+// (Alternativa ao polling do Telegram)
+// ============================================
+
+/**
+ * Recebe mensagens diretamente via HTTP POST
+ * Use isso quando bots não conseguem ver mensagens de outros bots
+ *
+ * Exemplo de payload:
+ * {
+ *   "texto": "COP REDE INFORMA\n...",
+ *   "remetente": "mrpralonbot"
+ * }
+ */
+app.post('/api/webhook/mensagem', async (req, res) => {
+  try {
+    const { texto, remetente } = req.body;
+
+    if (!texto) {
+      return res.status(400).json({ sucesso: false, erro: 'Campo "texto" é obrigatório' });
+    }
+
+    console.log('[Webhook] =====================================');
+    console.log('[Webhook] 📨 MENSAGEM RECEBIDA VIA WEBHOOK');
+    console.log('[Webhook] Remetente:', remetente || 'desconhecido');
+    console.log('[Webhook] Texto:', texto.substring(0, 80));
+
+    // Criar objeto de mensagem fake para o parser
+    const msgFake = {
+      message_id: Date.now(),
+      date: Math.floor(Date.now() / 1000),
+      text: texto,
+      from: { username: remetente || 'webhook', is_bot: true }
+    };
+
+    const { processarMensagem } = require('./parser');
+    const resultado = processarMensagem(msgFake);
+
+    if (!resultado) {
+      console.log('[Webhook] ⚠️ Mensagem não reconhecida');
+      return res.status(400).json({
+        sucesso: false,
+        erro: 'Mensagem não reconhecida. Deve começar com "COP REDE INFORMA" ou "🚨 Novo Evento Detectado!"'
+      });
+    }
+
+    console.log('[Webhook] ✅ Tipo:', resultado.tipo);
+
+    if (resultado.tipo === 'COP_REDE_INFORMA') {
+      await storage.adicionarCopRedeInforma(resultado.dados);
+      console.log('[Webhook] 💾 COP REDE INFORMA salvo!');
+    } else if (resultado.tipo === 'NOVO_EVENTO') {
+      await storage.adicionarAlerta(resultado.dados);
+      console.log('[Webhook] 💾 Alerta salvo!');
+    }
+
+    console.log('[Webhook] =====================================');
+
+    res.json({
+      sucesso: true,
+      tipo: resultado.tipo,
+      mensagem: 'Mensagem processada com sucesso'
+    });
+
+  } catch (error) {
+    console.error('[Webhook] Erro:', error.message);
     res.status(500).json({ sucesso: false, erro: error.message });
   }
 });
@@ -425,13 +497,34 @@ app.listen(SERVER_CONFIG.PORT, async () => {
   console.log(`CORS permitido: ${SERVER_CONFIG.CORS_ORIGIN}`);
   console.log('');
 
-  // Iniciar bot do Telegram diretamente (sem testar antes para evitar conflito)
-  console.log('Iniciando bot do Telegram...');
-  try {
-    await telegram.inicializar(true);
-    console.log('✅ Bot Telegram ativo e recebendo mensagens');
-  } catch (error) {
-    console.error('❌ Erro ao iniciar bot:', error.message);
+  // Verificar se temos session do UserBot configurada
+  if (USERBOT_CONFIG.SESSION) {
+    console.log('📱 Iniciando UserBot (conta pessoal)...');
+    console.log('   Isso permite ler mensagens de outros bots!');
+    try {
+      await userbot.inicializarUserBot();
+      console.log('✅ UserBot ativo e monitorando grupo');
+    } catch (error) {
+      console.error('❌ Erro ao iniciar UserBot:', error.message);
+      console.log('   Tentando iniciar Bot API como fallback...');
+      try {
+        await telegram.inicializar(true);
+        console.log('✅ Bot Telegram (fallback) ativo');
+      } catch (err) {
+        console.error('❌ Erro no fallback:', err.message);
+      }
+    }
+  } else {
+    // Sem session, usar bot normal (não vai receber msgs de bots)
+    console.log('⚠️  UserBot não configurado (sem TELEGRAM_SESSION)');
+    console.log('   Iniciando Bot API normal...');
+    try {
+      await telegram.inicializar(true);
+      console.log('✅ Bot Telegram ativo');
+      console.log('   ⚠️  AVISO: Não vai receber mensagens de outros bots!');
+    } catch (error) {
+      console.error('❌ Erro ao iniciar bot:', error.message);
+    }
   }
 
   console.log('');
