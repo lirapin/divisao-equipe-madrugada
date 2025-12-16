@@ -167,6 +167,77 @@ app.get('/api/telegram/diagnostico', async (req, res) => {
 });
 
 // ============================================
+// WEBHOOK PARA RECEBER MENSAGENS DIRETAMENTE
+// (Alternativa ao polling do Telegram)
+// ============================================
+
+/**
+ * Recebe mensagens diretamente via HTTP POST
+ * Use isso quando bots não conseguem ver mensagens de outros bots
+ *
+ * Exemplo de payload:
+ * {
+ *   "texto": "COP REDE INFORMA\n...",
+ *   "remetente": "mrpralonbot"
+ * }
+ */
+app.post('/api/webhook/mensagem', async (req, res) => {
+  try {
+    const { texto, remetente } = req.body;
+
+    if (!texto) {
+      return res.status(400).json({ sucesso: false, erro: 'Campo "texto" é obrigatório' });
+    }
+
+    console.log('[Webhook] =====================================');
+    console.log('[Webhook] 📨 MENSAGEM RECEBIDA VIA WEBHOOK');
+    console.log('[Webhook] Remetente:', remetente || 'desconhecido');
+    console.log('[Webhook] Texto:', texto.substring(0, 80));
+
+    // Criar objeto de mensagem fake para o parser
+    const msgFake = {
+      message_id: Date.now(),
+      date: Math.floor(Date.now() / 1000),
+      text: texto,
+      from: { username: remetente || 'webhook', is_bot: true }
+    };
+
+    const { processarMensagem } = require('./parser');
+    const resultado = processarMensagem(msgFake);
+
+    if (!resultado) {
+      console.log('[Webhook] ⚠️ Mensagem não reconhecida');
+      return res.status(400).json({
+        sucesso: false,
+        erro: 'Mensagem não reconhecida. Deve começar com "COP REDE INFORMA" ou "🚨 Novo Evento Detectado!"'
+      });
+    }
+
+    console.log('[Webhook] ✅ Tipo:', resultado.tipo);
+
+    if (resultado.tipo === 'COP_REDE_INFORMA') {
+      await storage.adicionarCopRedeInforma(resultado.dados);
+      console.log('[Webhook] 💾 COP REDE INFORMA salvo!');
+    } else if (resultado.tipo === 'NOVO_EVENTO') {
+      await storage.adicionarAlerta(resultado.dados);
+      console.log('[Webhook] 💾 Alerta salvo!');
+    }
+
+    console.log('[Webhook] =====================================');
+
+    res.json({
+      sucesso: true,
+      tipo: resultado.tipo,
+      mensagem: 'Mensagem processada com sucesso'
+    });
+
+  } catch (error) {
+    console.error('[Webhook] Erro:', error.message);
+    res.status(500).json({ sucesso: false, erro: error.message });
+  }
+});
+
+// ============================================
 // ROTAS COP REDE INFORMA
 // ============================================
 
