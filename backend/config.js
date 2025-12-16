@@ -5,11 +5,20 @@
 
 require('dotenv').config();
 
-// Configurações do Telegram
+// Configurações do Telegram Bot API
 const TELEGRAM_CONFIG = {
   BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '8450919829:AAFbu6mgwWSj_SCSryS0e-6FHRGQvkHrVRM',
   GROUP_ID: process.env.TELEGRAM_GROUP_ID || '-1003217044000', // Grupos têm ID negativo
   POLLING_INTERVAL: parseInt(process.env.POLLING_INTERVAL) || 5000
+};
+
+// Configurações do UserBot (Client API / MTProto)
+// Necessário para ler mensagens de outros bots
+const USERBOT_CONFIG = {
+  API_ID: parseInt(process.env.TELEGRAM_API_ID) || 35737560,
+  API_HASH: process.env.TELEGRAM_API_HASH || 'dedafbc981acacf5a555e8f3af0fae1f',
+  SESSION: process.env.TELEGRAM_SESSION || '', // Obtido após primeiro login
+  GROUP_ID: TELEGRAM_CONFIG.GROUP_ID
 };
 
 // Configurações do JSONBin.io (mesmas do projeto principal)
@@ -76,6 +85,7 @@ const SERVER_CONFIG = {
 
 module.exports = {
   TELEGRAM_CONFIG,
+  USERBOT_CONFIG,
   JSONBIN_CONFIG,
   MESSAGE_TITLES,
   GRUPO_PARA_AREA,

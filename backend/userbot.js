@@ -11,20 +11,9 @@ const { TelegramClient } = require('telegram');
 const { StringSession } = require('telegram/sessions');
 const { NewMessage } = require('telegram/events');
 const input = require('input');
-const { TELEGRAM_CONFIG } = require('./config');
+const { USERBOT_CONFIG } = require('./config');
 const { processarMensagem } = require('./parser');
 const { adicionarCopRedeInforma, adicionarAlerta } = require('./storage');
-
-// Configurações do UserBot
-const USERBOT_CONFIG = {
-  // Obtenha em https://my.telegram.org/apps
-  API_ID: parseInt(process.env.TELEGRAM_API_ID) || 0,
-  API_HASH: process.env.TELEGRAM_API_HASH || '',
-  // Session string (salva após primeiro login)
-  SESSION: process.env.TELEGRAM_SESSION || '',
-  // ID do grupo a monitorar
-  GROUP_ID: TELEGRAM_CONFIG.GROUP_ID
-};
 
 let client = null;
 let isRunning = false;
