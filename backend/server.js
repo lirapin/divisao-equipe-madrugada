@@ -7,9 +7,10 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-const { SERVER_CONFIG } = require('./config');
+const { SERVER_CONFIG, USERBOT_CONFIG } = require('./config');
 const telegram = require('./telegram');
 const storage = require('./storage');
+const userbot = require('./userbot');
 
 const app = express();
 
@@ -496,13 +497,34 @@ app.listen(SERVER_CONFIG.PORT, async () => {
   console.log(`CORS permitido: ${SERVER_CONFIG.CORS_ORIGIN}`);
   console.log('');
 
-  // Iniciar bot do Telegram diretamente (sem testar antes para evitar conflito)
-  console.log('Iniciando bot do Telegram...');
-  try {
-    await telegram.inicializar(true);
-    console.log('✅ Bot Telegram ativo e recebendo mensagens');
-  } catch (error) {
-    console.error('❌ Erro ao iniciar bot:', error.message);
+  // Verificar se temos session do UserBot configurada
+  if (USERBOT_CONFIG.SESSION) {
+    console.log('📱 Iniciando UserBot (conta pessoal)...');
+    console.log('   Isso permite ler mensagens de outros bots!');
+    try {
+      await userbot.inicializarUserBot();
+      console.log('✅ UserBot ativo e monitorando grupo');
+    } catch (error) {
+      console.error('❌ Erro ao iniciar UserBot:', error.message);
+      console.log('   Tentando iniciar Bot API como fallback...');
+      try {
+        await telegram.inicializar(true);
+        console.log('✅ Bot Telegram (fallback) ativo');
+      } catch (err) {
+        console.error('❌ Erro no fallback:', err.message);
+      }
+    }
+  } else {
+    // Sem session, usar bot normal (não vai receber msgs de bots)
+    console.log('⚠️  UserBot não configurado (sem TELEGRAM_SESSION)');
+    console.log('   Iniciando Bot API normal...');
+    try {
+      await telegram.inicializar(true);
+      console.log('✅ Bot Telegram ativo');
+      console.log('   ⚠️  AVISO: Não vai receber mensagens de outros bots!');
+    } catch (error) {
+      console.error('❌ Erro ao iniciar bot:', error.message);
+    }
   }
 
   console.log('');
