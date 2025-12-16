@@ -4771,55 +4771,80 @@ let autoRefreshInterval = null;
 const AUTO_REFRESH_MS = 10000; // 10 segundos
 let alertasAnteriores = []; // Para detectar novos alertas
 
-// Função para tocar alarme sonoro
+// AudioContext persistente para evitar bloqueio do navegador
+let audioContextGlobal = null;
+
+// Função para inicializar/ativar o AudioContext (chamada ao interagir com a página)
+function ativarAudio() {
+  if (!audioContextGlobal) {
+    audioContextGlobal = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioContextGlobal.state === 'suspended') {
+    audioContextGlobal.resume();
+  }
+}
+
+// Adiciona listener para ativar áudio ao primeiro clique
+document.addEventListener('click', ativarAudio, { once: true });
+document.addEventListener('keydown', ativarAudio, { once: true });
+
+// Função para tocar alarme sonoro (melhorada)
 function tocarAlarme() {
   try {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    // Criar ou reutilizar AudioContext
+    if (!audioContextGlobal) {
+      audioContextGlobal = new (window.AudioContext || window.webkitAudioContext)();
+    }
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+    // Tentar resumir se estiver suspenso
+    if (audioContextGlobal.state === 'suspended') {
+      audioContextGlobal.resume();
+    }
 
-    oscillator.frequency.value = 800; // Frequência do beep
-    oscillator.type = 'sine';
+    const ctx = audioContextGlobal;
 
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    // Função para criar um beep
+    function beep(startTime, frequency, duration, volume) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
 
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.5);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
 
-    // Tocar 3 beeps
-    setTimeout(() => {
-      const osc2 = audioContext.createOscillator();
-      const gain2 = audioContext.createGain();
-      osc2.connect(gain2);
-      gain2.connect(audioContext.destination);
-      osc2.frequency.value = 800;
-      osc2.type = 'sine';
-      gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-      osc2.start(audioContext.currentTime);
-      osc2.stop(audioContext.currentTime + 0.5);
-    }, 600);
+      osc.frequency.value = frequency;
+      osc.type = 'square'; // Som mais alto e perceptível
 
-    setTimeout(() => {
-      const osc3 = audioContext.createOscillator();
-      const gain3 = audioContext.createGain();
-      osc3.connect(gain3);
-      gain3.connect(audioContext.destination);
-      osc3.frequency.value = 800;
-      osc3.type = 'sine';
-      gain3.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gain3.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-      osc3.start(audioContext.currentTime);
-      osc3.stop(audioContext.currentTime + 0.5);
-    }, 1200);
+      gain.gain.setValueAtTime(volume, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    }
+
+    const now = ctx.currentTime;
+
+    // Sequência de 3 beeps de alerta (som mais alto)
+    beep(now, 880, 0.3, 0.5);        // Beep 1
+    beep(now + 0.4, 880, 0.3, 0.5);  // Beep 2
+    beep(now + 0.8, 1100, 0.5, 0.6); // Beep 3 (mais agudo e longo)
+
+    console.log('🔊 Alarme sonoro tocado!');
 
   } catch (error) {
     console.error('Erro ao tocar alarme:', error);
+    // Fallback: tentar usar notificação do navegador
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('🚨 Novo Alerta!', {
+        body: 'Um novo alerta foi detectado no sistema.',
+        icon: '🔔'
+      });
+    }
   }
+}
+
+// Solicitar permissão para notificações (backup do som)
+if ('Notification' in window && Notification.permission === 'default') {
+  Notification.requestPermission();
 }
 
 // ============================================
@@ -5035,17 +5060,38 @@ async function carregarCopRedeInforma(forcarAtualizacao = false) {
 
 // Mapeamento de áreas do Telegram para áreas da escala
 const MAPEAMENTO_AREAS_TELEGRAM = {
-  'RIO A / RIO B': ['RIO A', 'RIO B', 'RIO'],
+  'RIO': ['RIO', 'RIO A', 'RIO B'],
+  'RIO A / RIO B': ['RIO', 'RIO A', 'RIO B'], // Mantido para compatibilidade
   'NE/BA': ['NE/BA', 'BA/MG/ES'],
   'CO/NO': ['CO/NO', 'CO/NO/NE'],
   'MG': ['MG', 'MG/ES', 'BA/MG/ES']
 };
 
+// Função para obter o dia da escala considerando que a madrugada só vira às 07h
+// Se for antes das 07h, considera o dia anterior
+function obterDiaEscalaMadrugada(data) {
+  const hora = data.getHours();
+  let dia = data.getDate();
+
+  // Se for antes das 07h, a escala ainda é do dia anterior
+  if (hora < 7) {
+    dia = dia - 1;
+    // Se for dia 0 (virou o mês), pegar último dia do mês anterior
+    if (dia === 0) {
+      const mesAnterior = new Date(data.getFullYear(), data.getMonth(), 0);
+      dia = mesAnterior.getDate();
+    }
+  }
+
+  return dia;
+}
+
 // Função para obter o responsável por uma área em uma data específica
 function obterResponsavelPorArea(areaTelegram, dataMensagem) {
   try {
     const data = new Date(dataMensagem);
-    const dia = data.getDate();
+    // Usar o dia ajustado para a escala da madrugada (vira às 07h)
+    const dia = obterDiaEscalaMadrugada(data);
 
     // Verificar se temos dados para este dia
     if (!dadosOriginais || !dadosOriginais[dia] || !dadosOriginais[dia].divisao) {
