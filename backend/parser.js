@@ -162,6 +162,7 @@ function mapearGrupoParaArea(grupo) {
 /**
  * Extrai seções do formato de lista do COP REDE INFORMA
  * Formato: SECAO:\n- item1: valor1\n- item2: valor2
+ * Também suporta formato markdown: **SECAO:**\n- item1: valor1
  * @param {string} texto - Texto completo
  * @param {string} secao - Nome da seção
  * @returns {object} Objeto com itens e valores
@@ -169,8 +170,15 @@ function mapearGrupoParaArea(grupo) {
 function extrairSecaoLista(texto, secao) {
   if (!texto || !secao) return null;
 
-  const regex = new RegExp(`${secao}:\\s*\\n([\\s\\S]*?)(?=\\n[A-ZÁÉÍÓÚ]+:|$)`, 'i');
-  const match = texto.match(regex);
+  // Tentar primeiro com formato markdown **SECAO:**
+  let regex = new RegExp(`\\*\\*${secao}:\\*\\*\\s*\\n([\\s\\S]*?)(?=\\n\\*\\*[A-ZÁÉÍÓÚÂÊÎÔÛÃÕÇ]+:|$)`, 'i');
+  let match = texto.match(regex);
+
+  // Se não encontrou, tentar formato sem markdown
+  if (!match) {
+    regex = new RegExp(`${secao}:\\s*\\n([\\s\\S]*?)(?=\\n[A-ZÁÉÍÓÚ]+:|$)`, 'i');
+    match = texto.match(regex);
+  }
 
   if (!match) return null;
 
