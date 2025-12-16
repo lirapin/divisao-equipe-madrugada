@@ -32,17 +32,22 @@ function identificarTipoMensagem(texto) {
   if (!texto) return null;
 
   const primeiraLinha = texto.split('\n')[0].trim();
+  // Remove markdown bold markers para comparação
+  const primeiraLinhaSemMarkdown = primeiraLinha.replace(/\*\*/g, '');
 
   // COP REDE INFORMA
   if (primeiraLinha === MESSAGE_TITLES.COP_REDE_INFORMA ||
-      primeiraLinha.includes('COP REDE INFORMA')) {
+      primeiraLinha.includes('COP REDE INFORMA') ||
+      primeiraLinhaSemMarkdown.includes('COP REDE INFORMA')) {
     return 'COP_REDE_INFORMA';
   }
 
-  // 🚨 Novo Evento Detectado!
+  // 🚨 Novo Evento Detectado! (suporta com e sem emoji, com e sem markdown)
   if (primeiraLinha === MESSAGE_TITLES.NOVO_EVENTO ||
       primeiraLinha.includes('Novo Evento Detectado') ||
-      primeiraLinha.includes('🚨')) {
+      primeiraLinhaSemMarkdown.includes('Novo Evento Detectado') ||
+      primeiraLinha.includes('🚨') ||
+      primeiraLinha.includes('🚧')) {
     return 'NOVO_EVENTO';
   }
 
@@ -287,21 +292,36 @@ function extrairCampoMultilinha(texto, chave) {
 }
 
 /**
- * Extrai campo com emoji do formato "📌 Campo: valor"
+ * Extrai campo com emoji do formato "📌 Campo: valor" ou "📌 **Campo:** valor"
+ * Suporta múltiplos emojis para o mesmo campo
  * @param {string} texto - Texto completo
- * @param {string} emoji - Emoji do campo
+ * @param {string|string[]} emojis - Emoji(s) possíveis do campo
  * @param {string} campo - Nome do campo
  * @returns {string|null} Valor extraído
  */
-function extrairCampoComEmoji(texto, emoji, campo) {
+function extrairCampoComEmoji(texto, emojis, campo) {
   if (!texto) return null;
 
-  // Tenta com emoji primeiro
-  const regexEmoji = new RegExp(`${emoji}\\s*${campo}:\\s*(.+)`, 'i');
-  let match = texto.match(regexEmoji);
+  // Normaliza emojis para array
+  const emojiList = Array.isArray(emojis) ? emojis : [emojis];
+
+  for (const emoji of emojiList) {
+    // Tenta com emoji e markdown bold
+    const regexEmojiBold = new RegExp(`${emoji}\\s*\\*\\*${campo}:\\*\\*\\s*(.+)`, 'i');
+    let match = texto.match(regexEmojiBold);
+    if (match) return match[1].trim();
+
+    // Tenta com emoji sem bold
+    const regexEmoji = new RegExp(`${emoji}\\s*${campo}:\\s*(.+)`, 'i');
+    match = texto.match(regexEmoji);
+    if (match) return match[1].trim();
+  }
+
+  // Tenta sem emoji (com e sem bold)
+  const regexBold = new RegExp(`\\*\\*${campo}:\\*\\*\\s*(.+)`, 'im');
+  let match = texto.match(regexBold);
   if (match) return match[1].trim();
 
-  // Tenta sem emoji
   const regexSemEmoji = new RegExp(`^\\s*${campo}:\\s*(.+)`, 'im');
   match = texto.match(regexSemEmoji);
   if (match) return match[1].trim();
@@ -318,14 +338,14 @@ function extrairCampoComEmoji(texto, emoji, campo) {
  * @returns {object} Objeto com campos extraídos
  */
 function parseNovoEvento(texto, dataMensagem, messageId) {
-  // Extrair campos do formato com emojis
-  const ticket = extrairCampoComEmoji(texto, '📌', 'Ticket');
-  const dataEvento = extrairCampoComEmoji(texto, '📅', 'Data');
-  const tipo = extrairCampoComEmoji(texto, '🔍', 'Tipo');
-  const mercado = extrairCampoComEmoji(texto, '🌍', 'Mercado');
-  const sintoma = extrairCampoComEmoji(texto, '⚠️', 'Sintoma');
-  const cluster = extrairCampoComEmoji(texto, '📡', 'Cluster');
-  const natureza = extrairCampoComEmoji(texto, '📑', 'Natureza');
+  // Extrair campos do formato com emojis (suporta múltiplos emojis por campo)
+  const ticket = extrairCampoComEmoji(texto, ['📌', '🎫'], 'Ticket');
+  const dataEvento = extrairCampoComEmoji(texto, ['📅', '🗓️', '📆'], 'Data');
+  const tipo = extrairCampoComEmoji(texto, ['🔍', '🔎'], 'Tipo');
+  const mercado = extrairCampoComEmoji(texto, ['🌍', '🟢', '🟡', '🔴', '⚪', '🏢'], 'Mercado');
+  const sintoma = extrairCampoComEmoji(texto, ['⚠️', '⚡', '🔔'], 'Sintoma');
+  const cluster = extrairCampoComEmoji(texto, ['📡', '📍', '🗺️', '📌'], 'Cluster');
+  const natureza = extrairCampoComEmoji(texto, ['📑', '📄', '📋', '📝'], 'Natureza');
 
   // O cluster é usado para mapear para a área
   const { areaPainel } = mapearGrupoParaArea(cluster);
@@ -343,6 +363,7 @@ function parseNovoEvento(texto, dataMensagem, messageId) {
     // Campos para o frontend
     dataRecebimento: dataMensagem.toISOString(),
     grupo: cluster || null,
+    areaPainel: areaPainel || null,
     areaMapeada: areaPainel || null,
     descricao: descricaoParts.join(' | ') || null,
     // Campos específicos do alerta
@@ -354,6 +375,7 @@ function parseNovoEvento(texto, dataMensagem, messageId) {
     natureza,
     mensagemOriginal: texto,
     origem: 'NOVO_EVENTO_DETECTADO',
+    statusAlerta: 'novo',
     status: 'novo',
     historicoStatus: [{
       status: 'novo',
