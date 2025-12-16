@@ -40,12 +40,15 @@ const MESSAGE_TITLES = {
 // Mapeamento de GRUPO do Telegram para Área do Painel
 // Chaves normalizadas (lowercase, sem acentos)
 const GRUPO_PARA_AREA = {
-  'rio / espirito santo': 'RIO A / RIO B',
-  'rio/espirito santo': 'RIO A / RIO B',
-  'rio / espírito santo': 'RIO A / RIO B',
-  'rio/espírito santo': 'RIO A / RIO B',
+  'rio / espirito santo': 'RIO',
+  'rio/espirito santo': 'RIO',
+  'rio / espírito santo': 'RIO',
+  'rio/espírito santo': 'RIO',
+  'rio': 'RIO',
   'bahia / sergipe': 'NE/BA',
   'bahia/sergipe': 'NE/BA',
+  'bahia': 'NE/BA',
+  'sergipe': 'NE/BA',
   'centro oeste': 'CO/NO',
   'centro-oeste': 'CO/NO',
   'centrooeste': 'CO/NO',
@@ -53,8 +56,8 @@ const GRUPO_PARA_AREA = {
   'minas gerais': 'MG',
   'minas': 'MG',
   'mg': 'MG',
-  'nordeste': 'CO/NO',
-  'ne': 'CO/NO'
+  'nordeste': 'NE/BA',
+  'ne': 'NE/BA'
 };
 
 // Campos esperados nas mensagens
