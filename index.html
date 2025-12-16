@@ -3761,24 +3761,25 @@ function processarDadosPlanilha() {
 
 function calcularDivisaoPorNumero(num, trabalhandoHoje) {
   let numPessoas = num;
-  if (num < 3) numPessoas = 3;
-  if (num > 5) numPessoas = 5;
-  
+  // Ajustar para os limites das regras disponíveis (2 a 6 pessoas)
+  if (num < 2) numPessoas = 2;
+  if (num > 6) numPessoas = 6;
+
   const regras = PRIORIDADES[numPessoas];
   if (!regras) return {};
-  
+
   const divisao = {};
   const pessoasAlocadas = new Set();
   const pessoasDisponiveis = [...trabalhandoHoje];
-  
+
   Object.keys(regras).forEach(area => {
     const prioridade = regras[area];
-    
+
     for (let pessoa of prioridade) {
       if (pessoasDisponiveis.includes(pessoa) && !pessoasAlocadas.has(pessoa)) {
         divisao[area] = pessoa;
         pessoasAlocadas.add(pessoa);
-        
+
         const index = pessoasDisponiveis.indexOf(pessoa);
         if (index > -1) {
           pessoasDisponiveis.splice(index, 1);
@@ -3786,7 +3787,7 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
         break;
       }
     }
-    
+
     if (!divisao[area] && pessoasDisponiveis.length > 0) {
       const pessoaRestante = pessoasDisponiveis[0];
       divisao[area] = pessoaRestante;
@@ -3794,7 +3795,7 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
       pessoasDisponiveis.splice(0, 1);
     }
   });
-  
+
   return divisao;
 }
 
@@ -5060,8 +5061,7 @@ async function carregarCopRedeInforma(forcarAtualizacao = false) {
 
 // Mapeamento de áreas do Telegram para áreas da escala
 const MAPEAMENTO_AREAS_TELEGRAM = {
-  'RIO': ['RIO', 'RIO A', 'RIO B'],
-  'RIO A / RIO B': ['RIO', 'RIO A', 'RIO B'], // Mantido para compatibilidade
+  'RIO': ['RIO'],
   'NE/BA': ['NE/BA', 'BA/MG/ES'],
   'CO/NO': ['CO/NO', 'CO/NO/NE'],
   'MG': ['MG', 'MG/ES', 'BA/MG/ES']
@@ -5259,7 +5259,7 @@ function mapearGrupoParaAreaFrontend(grupo) {
   const grupoLower = grupo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
   if (grupoLower.includes('rio') || grupoLower.includes('espirito santo') || grupoLower.includes('espírito santo')) {
-    return 'RIO A / RIO B';
+    return 'RIO';
   }
   if (grupoLower.includes('bahia') || grupoLower.includes('sergipe')) {
     return 'NE/BA';
@@ -5307,37 +5307,26 @@ function verDetalhesCopRede(index) {
   const item = dadosCopRedeInforma[index];
   if (!item) return;
 
+  const mensagemFormatada = formatarMensagemOriginal(item.mensagemOriginal);
+
   const body = document.getElementById('modalDetalhesCopBody');
   body.innerHTML = `
     <div class="telegram-detail-card">
-      <h5><i class="bi bi-building me-2"></i>${item.empresa || 'Empresa não informada'}</h5>
+      <h5><i class="bi bi-clipboard-data me-2"></i>Resumo COP</h5>
       <div class="telegram-detail-row">
         <span class="telegram-detail-label">Data/Hora:</span>
         <span class="telegram-detail-value">${formatarDataHora(item.dataRecebimento)}</span>
       </div>
       <div class="telegram-detail-row">
-        <span class="telegram-detail-label">Grupo:</span>
-        <span class="telegram-detail-value">${item.grupo || '-'}</span>
-      </div>
-      <div class="telegram-detail-row">
-        <span class="telegram-detail-label">Área:</span>
-        <span class="telegram-detail-value"><span class="badge bg-info">${item.areaMapeada || '-'}</span></span>
-      </div>
-      <div class="telegram-detail-row">
-        <span class="telegram-detail-label">Sigla:</span>
-        <span class="telegram-detail-value">${item.sigla || '-'}</span>
+        <span class="telegram-detail-label">Total Eventos:</span>
+        <span class="telegram-detail-value"><strong>${item.totalEventos || 0}</strong></span>
       </div>
     </div>
 
-    <div class="telegram-detail-card">
-      <h5><i class="bi bi-file-text me-2"></i>Descrição</h5>
-      <p style="white-space: pre-wrap;">${item.descricao || 'Sem descrição'}</p>
-    </div>
-
-    ${item.mensagemOriginal ? `
+    ${mensagemFormatada ? `
     <div class="telegram-detail-card" style="border-left-color: #666;">
       <h5><i class="bi bi-chat-quote me-2"></i>Mensagem Original</h5>
-      <pre style="white-space: pre-wrap; font-size: 0.85rem; background: #f5f5f5; padding: 1rem; border-radius: 6px; max-height: 300px; overflow-y: auto;">${item.mensagemOriginal}</pre>
+      <pre style="white-space: pre-wrap; font-size: 0.85rem; background: #f5f5f5; padding: 1rem; border-radius: 6px; max-height: 300px; overflow-y: auto;">${mensagemFormatada}</pre>
     </div>
     ` : ''}
   `;
@@ -5482,6 +5471,12 @@ function filtrarAlertas() {
   atualizarTabelaAlertas(dadosFiltrados);
 }
 
+// Função para formatar mensagem original removendo markdown **
+function formatarMensagemOriginal(texto) {
+  if (!texto) return '';
+  return texto.replace(/\*\*/g, '');
+}
+
 function verDetalhesAlerta(index) {
   const item = dadosAlertas[index];
   if (!item) return;
@@ -5491,16 +5486,21 @@ function verDetalhesAlerta(index) {
   const statusClass = obterClasseStatus(item.status);
   const statusTexto = obterTextoStatus(item.status);
 
-  // Extrair número do ticket da mensagem original
+  // Extrair número do ticket da mensagem original (formato INM...)
   let ticketNumero = null;
   let ticketLink = '';
-  if (item.mensagemOriginal) {
-    const matchTicket = item.mensagemOriginal.match(/Ticket:\s*(\d+)/i);
+  if (item.ticket) {
+    ticketNumero = item.ticket;
+    ticketLink = `https://outage.claro.com.br/inc/view/${ticketNumero}`;
+  } else if (item.mensagemOriginal) {
+    const matchTicket = item.mensagemOriginal.match(/Ticket:\*?\*?\s*(INM\d+)/i);
     if (matchTicket) {
       ticketNumero = matchTicket[1];
-      ticketLink = `https://outage.claro.com.br/inc/edit/INM0000${ticketNumero}`;
+      ticketLink = `https://outage.claro.com.br/inc/view/${ticketNumero}`;
     }
   }
+
+  const mensagemFormatada = formatarMensagemOriginal(item.mensagemOriginal);
 
   const body = document.getElementById('modalDetalhesAlertaBody');
   body.innerHTML = `
@@ -5534,17 +5534,10 @@ function verDetalhesAlerta(index) {
       </div>
     </div>
 
-    ${item.descricao ? `
-    <div class="telegram-detail-card">
-      <h5><i class="bi bi-file-text me-2"></i>Descrição</h5>
-      <p style="white-space: pre-wrap;">${item.descricao}</p>
-    </div>
-    ` : ''}
-
-    ${item.mensagemOriginal ? `
+    ${mensagemFormatada ? `
     <div class="telegram-detail-card" style="border-left-color: #666;">
       <h5><i class="bi bi-chat-quote me-2"></i>Mensagem Original</h5>
-      <pre style="white-space: pre-wrap; font-size: 0.85rem; background: #f5f5f5; padding: 1rem; border-radius: 6px; max-height: 300px; overflow-y: auto;">${item.mensagemOriginal}</pre>
+      <pre style="white-space: pre-wrap; font-size: 0.85rem; background: #f5f5f5; padding: 1rem; border-radius: 6px; max-height: 300px; overflow-y: auto;">${mensagemFormatada}</pre>
     </div>
     ` : ''}
   `;
