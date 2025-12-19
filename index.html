@@ -1539,31 +1539,13 @@
             <span class="badge bg-secondary" id="cal1Status">Vazio</span>
           </div>
           <div class="d-flex gap-2 align-items-center flex-wrap">
-            <select id="mesCal1" class="form-select form-select-sm" style="width: auto;">
-              <option value="0">Janeiro</option>
-              <option value="1">Fevereiro</option>
-              <option value="2">Março</option>
-              <option value="3">Abril</option>
-              <option value="4">Maio</option>
-              <option value="5">Junho</option>
-              <option value="6">Julho</option>
-              <option value="7">Agosto</option>
-              <option value="8">Setembro</option>
-              <option value="9">Outubro</option>
-              <option value="10">Novembro</option>
-              <option value="11">Dezembro</option>
-            </select>
-            <select id="anoCal1" class="form-select form-select-sm" style="width: auto;">
-              <option value="2024">2024</option>
-              <option value="2025" selected>2025</option>
-              <option value="2026">2026</option>
-            </select>
             <button class="btn btn-sm btn-outline-primary" onclick="document.getElementById('fileInputCal1').click()">
               <i class="bi bi-upload me-1"></i>Upload planilha
             </button>
             <input type="file" id="fileInputCal1" accept=".xlsx,.xls,.csv" style="display: none;" onchange="uploadCalendario(1, this)">
           </div>
           <span class="text-muted small d-block mt-2" id="cal1Info">Nenhuma planilha carregada</span>
+          <small class="text-muted">Nome do arquivo define o mês (ex: Janeiro 2025.xlsx)</small>
         </div>
 
         <!-- Calendário 2 -->
@@ -1573,31 +1555,13 @@
             <span class="badge bg-secondary" id="cal2Status">Vazio</span>
           </div>
           <div class="d-flex gap-2 align-items-center flex-wrap">
-            <select id="mesCal2" class="form-select form-select-sm" style="width: auto;">
-              <option value="0">Janeiro</option>
-              <option value="1">Fevereiro</option>
-              <option value="2">Março</option>
-              <option value="3">Abril</option>
-              <option value="4">Maio</option>
-              <option value="5">Junho</option>
-              <option value="6">Julho</option>
-              <option value="7">Agosto</option>
-              <option value="8">Setembro</option>
-              <option value="9">Outubro</option>
-              <option value="10">Novembro</option>
-              <option value="11">Dezembro</option>
-            </select>
-            <select id="anoCal2" class="form-select form-select-sm" style="width: auto;">
-              <option value="2024">2024</option>
-              <option value="2025" selected>2025</option>
-              <option value="2026">2026</option>
-            </select>
             <button class="btn btn-sm btn-outline-primary" onclick="document.getElementById('fileInputCal2').click()">
               <i class="bi bi-upload me-1"></i>Upload planilha
             </button>
             <input type="file" id="fileInputCal2" accept=".xlsx,.xls,.csv" style="display: none;" onchange="uploadCalendario(2, this)">
           </div>
           <span class="text-muted small d-block mt-2" id="cal2Info">Nenhuma planilha carregada</span>
+          <small class="text-muted">Nome do arquivo define o mês (ex: Fevereiro 2025.xlsx)</small>
         </div>
 
         <!-- Seleção do Calendário Ativo -->
@@ -1647,12 +1611,10 @@
       <button class="telegram-tab active" data-tab="cop-rede-informa" onclick="trocarAbasTelegram('cop-rede-informa')">
         <i class="bi bi-megaphone"></i>
         COP Rede Informa
-        <span class="badge bg-primary" id="badgeCopRede">0</span>
       </button>
       <button class="telegram-tab" data-tab="novos-alertas" onclick="trocarAbasTelegram('novos-alertas')">
         <i class="bi bi-bell"></i>
         Novos Alertas
-        <span class="badge bg-warning text-dark" id="badgeAlertas">0</span>
       </button>
     </div>
 
@@ -1694,6 +1656,11 @@
         <h6><i class="bi bi-graph-up me-2"></i>Volumetria por Área</h6>
         <div class="area-volume-grid" id="areaVolumeGrid">
           <!-- Preenchido via JavaScript -->
+        </div>
+        <div class="text-center mt-3">
+          <button class="telegram-btn telegram-btn-danger" onclick="excluirTodosAlertas()">
+            <i class="bi bi-trash me-1"></i>Excluir todos os alertas
+          </button>
         </div>
       </div>
 
@@ -2042,6 +2009,62 @@ function ordenarNomesAlfabeticamente(nomes) {
 // SISTEMA DE MÚLTIPLOS CALENDÁRIOS
 // ============================================
 
+// Função para extrair mês e ano do nome do arquivo
+function extrairMesAnoDoNomeArquivo(nomeArquivo) {
+  // Remover extensão do arquivo
+  const nomeSemExtensao = nomeArquivo.replace(/\.(xlsx|xls|csv)$/i, '');
+
+  // Mapeamento de nomes de meses (português)
+  const mesesNomes = {
+    'janeiro': 0, 'jan': 0,
+    'fevereiro': 1, 'fev': 1,
+    'marco': 2, 'março': 2, 'mar': 2,
+    'abril': 3, 'abr': 3,
+    'maio': 4, 'mai': 4,
+    'junho': 5, 'jun': 5,
+    'julho': 6, 'jul': 6,
+    'agosto': 7, 'ago': 7,
+    'setembro': 8, 'set': 8,
+    'outubro': 9, 'out': 9,
+    'novembro': 10, 'nov': 10,
+    'dezembro': 11, 'dez': 11
+  };
+
+  // Valores padrão (mês e ano atual)
+  const dataAtual = new Date();
+  let mes = dataAtual.getMonth();
+  let ano = dataAtual.getFullYear();
+
+  // Tentar extrair o ano (4 dígitos)
+  const matchAno = nomeSemExtensao.match(/20\d{2}/);
+  if (matchAno) {
+    ano = parseInt(matchAno[0]);
+  }
+
+  // Tentar extrair o mês por nome
+  const nomeNormalizado = nomeSemExtensao.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // Remove acentos
+
+  for (const [nomeMes, indiceMes] of Object.entries(mesesNomes)) {
+    const nomeMesNormalizado = nomeMes.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (nomeNormalizado.includes(nomeMesNormalizado)) {
+      mes = indiceMes;
+      break;
+    }
+  }
+
+  // Se não encontrou por nome, tentar por número (01-12)
+  if (!nomeSemExtensao.toLowerCase().match(/janeiro|fevereiro|marco|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez/i)) {
+    const matchMesNumero = nomeSemExtensao.match(/\b(0?[1-9]|1[0-2])\b/);
+    if (matchMesNumero) {
+      mes = parseInt(matchMesNumero[1]) - 1; // Converter para índice (0-11)
+    }
+  }
+
+  console.log(`📝 Extraído do arquivo "${nomeArquivo}": Mês=${mes} (${MESES[mes]}), Ano=${ano}`);
+  return { mes, ano };
+}
+
 // Upload de planilha para um calendário específico
 function uploadCalendario(numCalendario, inputElement) {
   const file = inputElement.files?.[0];
@@ -2091,13 +2114,12 @@ function uploadCalendario(numCalendario, inputElement) {
       const dadosPlanilhaTemp = dados;
       const dadosOriginaisTemp = processarPlanilhaParaCalendario(dadosPlanilhaTemp);
 
-      // Obter mês e ano do calendário específico
-      const mesSelect = document.getElementById(`mesCal${numCalendario}`);
-      const anoSelect = document.getElementById(`anoCal${numCalendario}`);
-      const mesCalendario = mesSelect ? parseInt(mesSelect.value) : mesSelecionado;
-      const anoCalendario = anoSelect ? parseInt(anoSelect.value) : anoSelecionado;
+      // Extrair mês e ano do nome do arquivo
+      const mesAnoExtraido = extrairMesAnoDoNomeArquivo(file.name);
+      const mesCalendario = mesAnoExtraido.mes;
+      const anoCalendario = mesAnoExtraido.ano;
 
-      console.log(`📅 Calendário ${numCalendario}: ${MESES[mesCalendario]}/${anoCalendario}`);
+      console.log(`📅 Calendário ${numCalendario}: ${MESES[mesCalendario]}/${anoCalendario} (extraído de: ${file.name})`);
 
       // Salvar no calendário apropriado
       const calKey = `calendario${numCalendario}`;
@@ -4084,10 +4106,45 @@ function getDadosDiaComTrocas(dia) {
   return dadosProcessados[dia] || null;
 }
 
+// Função para normalizar divisão - mesclar RIO 2/_RIO_2 com RIO
+function normalizarDivisaoRIO(divisao) {
+  if (!divisao) return {};
+
+  const novosDados = {};
+  const rioResponsaveis = [];
+
+  Object.entries(divisao).forEach(([area, pessoa]) => {
+    if (area === 'RIO' || area === 'RIO 2' || area === '_RIO_2') {
+      // Pode ter múltiplos responsáveis já concatenados (ex: "THIAGO / MARISTELLA")
+      if (pessoa) {
+        const pessoas = pessoa.split(' / ').map(p => p.trim()).filter(p => p);
+        rioResponsaveis.push(...pessoas);
+      }
+    } else {
+      novosDados[area] = pessoa;
+    }
+  });
+
+  if (rioResponsaveis.length > 0) {
+    // Remover duplicatas e juntar
+    const uniqueResponsaveis = [...new Set(rioResponsaveis)];
+    novosDados['RIO'] = uniqueResponsaveis.join(' / ');
+  }
+
+  return novosDados;
+}
+
 function aplicarTrocasAosDados() {
   // Restaurar dados originais
   dadosProcessados = JSON.parse(JSON.stringify(dadosOriginais));
-  
+
+  // Normalizar divisão para mesclar RIO/RIO 2/_RIO_2 em uma única entrada RIO
+  Object.keys(dadosProcessados).forEach(dia => {
+    if (dadosProcessados[dia] && dadosProcessados[dia].divisao) {
+      dadosProcessados[dia].divisao = normalizarDivisaoRIO(dadosProcessados[dia].divisao);
+    }
+  });
+
   // Aplicar cada troca ativa (agora podem ser múltiplas por dia)
   trocasRegistradas
     .filter(troca => troca.status === 'ativa')
@@ -4181,24 +4238,78 @@ function aplicarConfiguracao() {
 }
 
 function mudarMes(delta) {
-  mesSelecionado += delta;
-  
-  if (mesSelecionado < 0) {
-    mesSelecionado = 11;
-    anoSelecionado--;
-  } else if (mesSelecionado > 11) {
-    mesSelecionado = 0;
-    anoSelecionado++;
+  // Obter lista de meses disponíveis (com dados carregados)
+  const mesesDisponiveis = obterMesesDisponiveis();
+
+  if (mesesDisponiveis.length === 0) {
+    showToast('Nenhum calendário com dados disponível', 'info');
+    return;
   }
-  
+
+  // Encontrar posição atual na lista de meses disponíveis
+  const chaveAtual = `${anoSelecionado}-${mesSelecionado}`;
+  let indiceAtual = mesesDisponiveis.findIndex(m => m.chave === chaveAtual);
+
+  // Se não encontrar o mês atual, ir para o primeiro disponível
+  if (indiceAtual === -1) {
+    indiceAtual = 0;
+  } else {
+    // Navegar para próximo ou anterior
+    indiceAtual += delta;
+
+    // Verificar limites
+    if (indiceAtual < 0) {
+      showToast('Este é o primeiro mês disponível', 'info');
+      return;
+    }
+    if (indiceAtual >= mesesDisponiveis.length) {
+      showToast('Este é o último mês disponível', 'info');
+      return;
+    }
+  }
+
+  // Definir novo mês/ano
+  const novoMes = mesesDisponiveis[indiceAtual];
+  mesSelecionado = novoMes.mes;
+  anoSelecionado = novoMes.ano;
+
   // Atualizar selects
   const mesSelect = document.getElementById('mesSelect');
   const anoSelect = document.getElementById('anoSelect');
-  
+
   if (mesSelect) mesSelect.value = mesSelecionado;
   if (anoSelect) anoSelect.value = anoSelecionado;
-  
+
   atualizarCalendario();
+}
+
+// Obter lista de meses que têm dados carregados nos calendários
+function obterMesesDisponiveis() {
+  const mesesDisponiveis = [];
+  const adicionados = new Set();
+
+  // Verificar calendários que têm dados
+  Object.values(calendarios).forEach(cal => {
+    if (cal && cal.dadosOriginais && Object.keys(cal.dadosOriginais).length > 0) {
+      const chave = `${cal.ano}-${cal.mes}`;
+      if (!adicionados.has(chave)) {
+        mesesDisponiveis.push({
+          mes: cal.mes,
+          ano: cal.ano,
+          chave: chave
+        });
+        adicionados.add(chave);
+      }
+    }
+  });
+
+  // Ordenar por ano e mês
+  mesesDisponiveis.sort((a, b) => {
+    if (a.ano !== b.ano) return a.ano - b.ano;
+    return a.mes - b.mes;
+  });
+
+  return mesesDisponiveis;
 }
 
 function atualizarCalendario() {
@@ -5566,9 +5677,6 @@ function atualizarTabelaAlertas(dados) {
           <button class="telegram-btn telegram-btn-outline" onclick="verDetalhesAlerta(${index})">
             <i class="bi bi-eye"></i> Ver
           </button>
-          <button class="telegram-btn telegram-btn-danger" onclick="excluirAlerta('${item.id}')" title="Excluir alerta">
-            <i class="bi bi-trash"></i>
-          </button>
         </td>
       </tr>
     `;
@@ -5740,6 +5848,45 @@ async function excluirAlerta(alertaId) {
   } catch (error) {
     console.error('Erro ao excluir alerta:', error);
     showToast('❌ Erro ao excluir alerta: ' + error.message, 'danger');
+  }
+}
+
+async function excluirTodosAlertas() {
+  if (!dadosAlertas || dadosAlertas.length === 0) {
+    showToast('Não há alertas para excluir', 'info');
+    return;
+  }
+
+  if (!confirm(`Tem certeza que deseja excluir TODOS os ${dadosAlertas.length} alertas?`)) {
+    return;
+  }
+
+  if (!backendUrl) {
+    showToast('Configure a URL do backend primeiro', 'warning');
+    return;
+  }
+
+  showLoading();
+
+  try {
+    // Excluir todos os alertas via API
+    const response = await fetch(`${backendUrl}/api/alertas`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!response.ok) throw new Error('Erro ao excluir alertas');
+
+    showToast('✅ Todos os alertas foram excluídos!', 'success');
+
+    // Recarregar dados
+    await carregarAlertas();
+
+  } catch (error) {
+    console.error('Erro ao excluir todos os alertas:', error);
+    showToast('❌ Erro ao excluir alertas: ' + error.message, 'danger');
+  } finally {
+    hideLoading();
   }
 }
 
