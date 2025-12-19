@@ -308,6 +308,27 @@ async function excluirAlerta(alertaId) {
 }
 
 /**
+ * Excluir todos os alertas
+ * @returns {Promise<boolean>} True se excluídos com sucesso
+ */
+async function excluirTodosAlertas() {
+  try {
+    const dados = await carregarDados(true);
+    const totalAntes = dados.alertas.length;
+
+    dados.alertas = [];
+
+    await salvarDados(dados);
+    console.log('[Storage] Todos os alertas excluídos. Total:', totalAntes);
+    return true;
+
+  } catch (error) {
+    console.error('[Storage] Erro ao excluir todos os alertas:', error);
+    return false;
+  }
+}
+
+/**
  * Obtém mensagens COP REDE INFORMA com filtros
  * @param {object} filtros - Filtros opcionais
  * @param {boolean} forcarAtualizacao - Forçar atualização do cache
@@ -469,6 +490,7 @@ module.exports = {
   adicionarAlerta,
   atualizarStatusAlerta,
   excluirAlerta,
+  excluirTodosAlertas,
   obterCopRedeInforma,
   obterAlertas,
   obterEstatisticas,

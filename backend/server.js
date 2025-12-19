@@ -431,6 +431,19 @@ app.delete('/api/alertas/:id', async (req, res) => {
 });
 
 /**
+ * Excluir todos os alertas
+ */
+app.delete('/api/alertas/todos', async (req, res) => {
+  try {
+    const sucesso = await storage.excluirTodosAlertas();
+    res.json({ sucesso: true, mensagem: 'Todos os alertas foram excluídos' });
+  } catch (error) {
+    console.error('[API] Erro ao excluir todos os alertas:', error);
+    res.status(500).json({ sucesso: false, erro: error.message });
+  }
+});
+
+/**
  * Resumo de alertas por status
  */
 app.get('/api/alertas/resumo/status', async (req, res) => {

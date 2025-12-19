@@ -1664,6 +1664,16 @@
         </div>
       </div>
 
+      <!-- Barra de ações dos alertas -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <button class="telegram-btn telegram-btn-primary" onclick="carregarAlertas()">
+          <i class="bi bi-arrow-clockwise"></i> Atualizar
+        </button>
+        <button class="telegram-btn telegram-btn-danger" onclick="excluirTodosAlertas()" id="btnExcluirTodosAlertas">
+          <i class="bi bi-trash"></i> Excluir Todos
+        </button>
+      </div>
+
       <!-- Tabela de alertas -->
       <div class="table-responsive">
         <table class="telegram-table" id="tabelaAlertas">
@@ -2110,16 +2120,41 @@ function uploadCalendario(numCalendario, inputElement) {
         return;
       }
 
-      // Processar dados da planilha temporariamente
-      const dadosPlanilhaTemp = dados;
-      const dadosOriginaisTemp = processarPlanilhaParaCalendario(dadosPlanilhaTemp);
+      // IMPORTANTE: Obter mês e ano do calendário específico ANTES de processar
+      const mesSelect = document.getElementById(`mesCal${numCalendario}`);
+      const anoSelect = document.getElementById(`anoCal${numCalendario}`);
 
-      // Extrair mês e ano do nome do arquivo
-      const mesAnoExtraido = extrairMesAnoDoNomeArquivo(file.name);
-      const mesCalendario = mesAnoExtraido.mes;
-      const anoCalendario = mesAnoExtraido.ano;
+      // Tentar extrair mês/ano do nome do arquivo
+      let mesCalendario = mesSelect ? parseInt(mesSelect.value) : new Date().getMonth();
+      let anoCalendario = anoSelect ? parseInt(anoSelect.value) : new Date().getFullYear();
+
+      // Tentar extrair do nome do arquivo (planilha-escala-janeiro.xlsx, escala-dezembro-2025.xlsx, etc)
+      const nomeArquivoLower = file.name.toLowerCase();
+      const mesesNomes = ['janeiro', 'fevereiro', 'marco', 'abril', 'maio', 'junho',
+                          'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+      for (let i = 0; i < mesesNomes.length; i++) {
+        if (nomeArquivoLower.includes(mesesNomes[i])) {
+          mesCalendario = i;
+          console.log(`📝 Extraído do arquivo "${file.name}": Mês=${i} (${MESES[i]})`);
+          // Atualizar select do mês
+          if (mesSelect) mesSelect.value = i;
+          break;
+        }
+      }
+
+      // Tentar extrair ano do nome do arquivo (2024, 2025, 2026)
+      const matchAno = nomeArquivoLower.match(/20(2[4-9])/);
+      if (matchAno) {
+        anoCalendario = parseInt('20' + matchAno[1]);
+        console.log(`📝 Extraído ano do arquivo: ${anoCalendario}`);
+        if (anoSelect) anoSelect.value = anoCalendario;
+      }
 
       console.log(`📅 Calendário ${numCalendario}: ${MESES[mesCalendario]}/${anoCalendario} (extraído de: ${file.name})`);
+
+      // Processar dados da planilha com mês e ano específicos
+      const dadosPlanilhaTemp = dados;
+      const dadosOriginaisTemp = processarPlanilhaParaCalendario(dadosPlanilhaTemp, mesCalendario, anoCalendario);
 
       // Salvar no calendário apropriado
       const calKey = `calendario${numCalendario}`;
@@ -2169,9 +2204,16 @@ function uploadCalendario(numCalendario, inputElement) {
 }
 
 // Processar planilha para gerar dados do calendário
-function processarPlanilhaParaCalendario(dadosPlanilhaTemp) {
+// Função para processar planilha com mês e ano específicos (não usa variáveis globais)
+function processarPlanilhaParaCalendario(dadosPlanilhaTemp, mesParam, anoParam) {
   try {
     if (!dadosPlanilhaTemp || dadosPlanilhaTemp.length === 0) return {};
+
+    // Usar parâmetros se fornecidos, senão usar globais
+    const mesUsar = mesParam !== undefined ? mesParam : mesSelecionado;
+    const anoUsar = anoParam !== undefined ? anoParam : anoSelecionado;
+
+    console.log(`🔄 Processando planilha para ${MESES[mesUsar]}/${anoUsar}`);
 
     const primeiraLinha = dadosPlanilhaTemp[0];
     const todasColunas = Object.keys(primeiraLinha);
@@ -2226,8 +2268,9 @@ function processarPlanilhaParaCalendario(dadosPlanilhaTemp) {
       const colunaDia = diaInfo.coluna;
       const diaNumero = diaInfo.dia;
 
-      const dataDia = new Date(anoSelecionado, mesSelecionado, diaNumero);
-      if (dataDia.getMonth() !== mesSelecionado) continue;
+      // Usar mês/ano dos parâmetros
+      const dataDia = new Date(anoUsar, mesUsar, diaNumero);
+      if (dataDia.getMonth() !== mesUsar) continue;
 
       let diaSemanaNumero = dataDia.getDay();
       diaSemanaNumero = diaSemanaNumero === 0 ? 6 : diaSemanaNumero - 1;
@@ -2267,6 +2310,7 @@ function processarPlanilhaParaCalendario(dadosPlanilhaTemp) {
       }
     }
 
+    console.log(`✅ Processados ${Object.keys(dadosProcessadosTemp).length} dias para ${MESES[mesUsar]}/${anoUsar}`);
     return dadosProcessadosTemp;
   } catch (error) {
     console.error('Erro ao processar planilha:', error);
@@ -3818,6 +3862,19 @@ function processarDadosPlanilha() {
   }
 }
 
+// Função auxiliar para normalizar nomes para comparação
+function normalizarNome(nome) {
+  if (!nome) return '';
+  return String(nome).trim().toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // Remove acentos
+}
+
+// Função auxiliar para encontrar pessoa na lista (comparação flexível)
+function encontrarPessoaNaLista(pessoa, lista) {
+  const pessoaNorm = normalizarNome(pessoa);
+  return lista.find(p => normalizarNome(p) === pessoaNorm);
+}
+
 function calcularDivisaoPorNumero(num, trabalhandoHoje) {
   let numPessoas = num;
   // Ajustar para os limites das regras disponíveis (2 a 6 pessoas)
@@ -3831,15 +3888,29 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
   const pessoasAlocadas = new Set();
   const pessoasDisponiveis = [...trabalhandoHoje];
 
-  Object.keys(regras).forEach(area => {
+  // Ordenar áreas para garantir que RIO seja processado antes de _RIO_2
+  const areasOrdenadas = Object.keys(regras).sort((a, b) => {
+    // Processar áreas normais primeiro, depois _RIO_2
+    if (a === '_RIO_2') return 1;
+    if (b === '_RIO_2') return -1;
+    if (a === 'RIO') return -1;
+    if (b === 'RIO') return 1;
+    return 0;
+  });
+
+  areasOrdenadas.forEach(area => {
     const prioridade = regras[area];
 
     for (let pessoa of prioridade) {
-      if (pessoasDisponiveis.includes(pessoa) && !pessoasAlocadas.has(pessoa)) {
-        divisaoTemp[area] = pessoa;
-        pessoasAlocadas.add(pessoa);
+      // Usar comparação flexível (normalizada)
+      const pessoaEncontrada = encontrarPessoaNaLista(pessoa, pessoasDisponiveis);
+      const pessoaNorm = normalizarNome(pessoa);
 
-        const index = pessoasDisponiveis.indexOf(pessoa);
+      if (pessoaEncontrada && !pessoasAlocadas.has(pessoaNorm)) {
+        divisaoTemp[area] = pessoaEncontrada; // Usar o nome original da planilha
+        pessoasAlocadas.add(pessoaNorm);
+
+        const index = pessoasDisponiveis.indexOf(pessoaEncontrada);
         if (index > -1) {
           pessoasDisponiveis.splice(index, 1);
         }
@@ -3847,10 +3918,11 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
       }
     }
 
+    // Fallback: se não encontrou ninguém da lista de prioridade, usar pessoa restante
     if (!divisaoTemp[area] && pessoasDisponiveis.length > 0) {
       const pessoaRestante = pessoasDisponiveis[0];
       divisaoTemp[area] = pessoaRestante;
-      pessoasAlocadas.add(pessoaRestante);
+      pessoasAlocadas.add(normalizarNome(pessoaRestante));
       pessoasDisponiveis.splice(0, 1);
     }
   });
@@ -3859,12 +3931,17 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
   const divisao = {};
   let rioResponsaveis = [];
 
+  // Garantir ordem: RIO primeiro, depois _RIO_2
+  if (divisaoTemp['RIO']) {
+    rioResponsaveis.push(divisaoTemp['RIO']);
+  }
+  if (divisaoTemp['_RIO_2']) {
+    rioResponsaveis.push(divisaoTemp['_RIO_2']);
+  }
+
+  // Adicionar outras áreas
   Object.keys(divisaoTemp).forEach(area => {
-    if (area === 'RIO') {
-      rioResponsaveis.push(divisaoTemp[area]);
-    } else if (area === '_RIO_2') {
-      rioResponsaveis.push(divisaoTemp[area]);
-    } else {
+    if (area !== 'RIO' && area !== '_RIO_2') {
       divisao[area] = divisaoTemp[area];
     }
   });
@@ -3872,6 +3949,11 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
   // Se temos responsáveis para RIO, adicionar ao divisão
   if (rioResponsaveis.length > 0) {
     divisao['RIO'] = rioResponsaveis.join(' / ');
+  }
+
+  console.log(`📊 Divisão calculada (${num} pessoas):`, divisao);
+  if (divisaoTemp['_RIO_2']) {
+    console.log(`   ✅ _RIO_2 alocado: ${divisaoTemp['_RIO_2']}`);
   }
 
   return divisao;
@@ -4237,41 +4319,81 @@ function aplicarConfiguracao() {
   }
 }
 
+// Função para obter os meses disponíveis nos calendários carregados
+function obterMesesDisponiveis() {
+  const mesesDisponiveis = [];
+
+  if (calendarios.calendario1 && calendarios.calendario1.dadosOriginais &&
+      Object.keys(calendarios.calendario1.dadosOriginais).length > 0) {
+    mesesDisponiveis.push({
+      mes: calendarios.calendario1.mes,
+      ano: calendarios.calendario1.ano,
+      calendario: 'calendario1',
+      chave: `${calendarios.calendario1.ano}-${calendarios.calendario1.mes}`
+    });
+  }
+
+  if (calendarios.calendario2 && calendarios.calendario2.dadosOriginais &&
+      Object.keys(calendarios.calendario2.dadosOriginais).length > 0) {
+    mesesDisponiveis.push({
+      mes: calendarios.calendario2.mes,
+      ano: calendarios.calendario2.ano,
+      calendario: 'calendario2',
+      chave: `${calendarios.calendario2.ano}-${calendarios.calendario2.mes}`
+    });
+  }
+
+  // Ordenar por data (ano, depois mês)
+  mesesDisponiveis.sort((a, b) => {
+    if (a.ano !== b.ano) return a.ano - b.ano;
+    return a.mes - b.mes;
+  });
+
+  return mesesDisponiveis;
+}
+
 function mudarMes(delta) {
-  // Obter lista de meses disponíveis (com dados carregados)
   const mesesDisponiveis = obterMesesDisponiveis();
 
+  // Se não há calendários carregados, não fazer nada
   if (mesesDisponiveis.length === 0) {
-    showToast('Nenhum calendário com dados disponível', 'info');
+    showToast('❌ Nenhum calendário carregado', 'warning');
     return;
   }
 
-  // Encontrar posição atual na lista de meses disponíveis
-  const chaveAtual = `${anoSelecionado}-${mesSelecionado}`;
-  let indiceAtual = mesesDisponiveis.findIndex(m => m.chave === chaveAtual);
+  // Encontrar o índice do mês/ano atual na lista de disponíveis
+  let indexAtual = mesesDisponiveis.findIndex(m =>
+    m.mes === mesSelecionado && m.ano === anoSelecionado
+  );
 
-  // Se não encontrar o mês atual, ir para o primeiro disponível
-  if (indiceAtual === -1) {
-    indiceAtual = 0;
-  } else {
-    // Navegar para próximo ou anterior
-    indiceAtual += delta;
-
-    // Verificar limites
-    if (indiceAtual < 0) {
-      showToast('Este é o primeiro mês disponível', 'info');
-      return;
-    }
-    if (indiceAtual >= mesesDisponiveis.length) {
-      showToast('Este é o último mês disponível', 'info');
-      return;
-    }
+  // Se o mês atual não está na lista, ir para o primeiro disponível
+  if (indexAtual === -1) {
+    indexAtual = delta > 0 ? -1 : mesesDisponiveis.length;
   }
 
-  // Definir novo mês/ano
-  const novoMes = mesesDisponiveis[indiceAtual];
+  // Calcular novo índice
+  let novoIndex = indexAtual + delta;
+
+  // Verificar limites
+  if (novoIndex < 0 || novoIndex >= mesesDisponiveis.length) {
+    showToast('❌ Não há mais meses disponíveis nesta direção', 'warning');
+    return;
+  }
+
+  // Aplicar novo mês/ano
+  const novoMes = mesesDisponiveis[novoIndex];
   mesSelecionado = novoMes.mes;
   anoSelecionado = novoMes.ano;
+
+  // Alternar para o calendário correspondente se necessário
+  if (calendarioAtivo !== novoMes.calendario) {
+    calendarioAtivo = novoMes.calendario;
+    carregarCalendarioAtivo();
+
+    // Atualizar radio buttons
+    document.getElementById('radioCalendario1').checked = (calendarioAtivo === 'calendario1');
+    document.getElementById('radioCalendario2').checked = (calendarioAtivo === 'calendario2');
+  }
 
   // Atualizar selects
   const mesSelect = document.getElementById('mesSelect');
@@ -4938,6 +5060,8 @@ let telegramConectado = false;
 let autoRefreshInterval = null;
 const AUTO_REFRESH_MS = 10000; // 10 segundos
 let alertasAnteriores = []; // Para detectar novos alertas
+let errosConsecutivos = 0; // Contador de erros para backoff
+let ultimoErroTimestamp = 0;
 
 // AudioContext persistente para evitar bloqueio do navegador
 let audioContextGlobal = null;
@@ -4968,6 +5092,28 @@ function ativarAudio() {
 document.addEventListener('click', ativarAudio, { once: true });
 document.addEventListener('keydown', ativarAudio, { once: true });
 document.addEventListener('touchstart', ativarAudio, { once: true });
+
+// ============================================
+// PAGE VISIBILITY API - MANTER REFRESH EM BACKGROUND
+// ============================================
+
+// Manter o auto-refresh funcionando mesmo quando a aba não está visível
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') {
+    console.log('[Visibility] Aba visível - verificando se precisa reconectar...');
+    // Quando voltar a ser visível, forçar uma atualização
+    if (telegramConectado) {
+      carregarCopRedeInforma(true);
+      carregarAlertas();
+    }
+    // Resumir AudioContext se estiver suspenso
+    if (audioContextGlobal && audioContextGlobal.state === 'suspended') {
+      audioContextGlobal.resume();
+    }
+  } else {
+    console.log('[Visibility] Aba em background - mantendo refresh ativo...');
+  }
+});
 
 // Função para tocar alarme sonoro (funciona mesmo em background)
 function tocarAlarme() {
@@ -5220,10 +5366,55 @@ function trocarAbasTelegram(abaId) {
 // COP REDE INFORMA - Funções
 // ============================================
 
+// Função auxiliar para fetch com retry e tratamento de CORS
+async function fetchComRetry(url, opcoes = {}, maxRetries = 3) {
+  let ultimoErro = null;
+
+  for (let tentativa = 0; tentativa < maxRetries; tentativa++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+      const response = await fetch(url, {
+        ...opcoes,
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        // Resetar contador de erros em caso de sucesso
+        errosConsecutivos = 0;
+        return response;
+      }
+
+      throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+      ultimoErro = error;
+
+      // Se for erro de abort (timeout), não mostrar como erro CORS
+      if (error.name === 'AbortError') {
+        console.warn(`[Fetch] Timeout na tentativa ${tentativa + 1}/${maxRetries}`);
+      } else if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+        console.warn(`[Fetch] Erro de rede/CORS na tentativa ${tentativa + 1}/${maxRetries}`);
+      }
+
+      // Esperar antes de tentar novamente (exponential backoff)
+      if (tentativa < maxRetries - 1) {
+        const delay = Math.min(1000 * Math.pow(2, tentativa), 5000);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  // Incrementar contador de erros
+  errosConsecutivos++;
+  throw ultimoErro;
+}
+
 async function carregarCopRedeInforma(forcarAtualizacao = false) {
   if (!backendUrl) {
-    showToast('Configure a URL do backend primeiro', 'warning');
-    return;
+    return; // Silenciosamente ignorar se não há backend configurado
   }
 
   try {
@@ -5232,11 +5423,11 @@ async function carregarCopRedeInforma(forcarAtualizacao = false) {
       ? `${backendUrl}/api/cop-rede-informa?refresh=true&t=${Date.now()}`
       : `${backendUrl}/api/cop-rede-informa`;
 
-    const response = await fetch(url, {
+    const response = await fetchComRetry(url, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store' // Não usar cache do navegador
-    });
+      cache: 'no-store'
+    }, 2); // Máximo 2 tentativas
 
     if (!response.ok) throw new Error('Erro ao carregar dados');
 
@@ -5249,8 +5440,11 @@ async function carregarCopRedeInforma(forcarAtualizacao = false) {
     console.log('[Telegram] COP Rede Informa atualizado:', dadosCopRedeInforma.length, 'mensagens');
 
   } catch (error) {
-    console.error('Erro ao carregar COP Rede Informa:', error);
-    showToast('Erro ao carregar mensagens', 'danger');
+    // Só mostrar erro se for um erro persistente (mais de 5 erros consecutivos)
+    if (errosConsecutivos > 5) {
+      console.error('Erro persistente ao carregar COP Rede Informa:', error);
+      // Não mostrar toast para não poluir a interface durante erros temporários
+    }
   }
 }
 
@@ -5603,15 +5797,14 @@ function atualizarBadgeCopRede(total) {
 
 async function carregarAlertas() {
   if (!backendUrl) {
-    showToast('Configure a URL do backend primeiro', 'warning');
-    return;
+    return; // Silenciosamente ignorar se não há backend configurado
   }
 
   try {
-    const response = await fetch(`${backendUrl}/api/alertas`, {
+    const response = await fetchComRetry(`${backendUrl}/api/alertas`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
-    });
+    }, 2); // Máximo 2 tentativas
 
     if (!response.ok) throw new Error('Erro ao carregar alertas');
 
@@ -5641,8 +5834,11 @@ async function carregarAlertas() {
     atualizarEstatisticasAlertas();
 
   } catch (error) {
-    console.error('Erro ao carregar alertas:', error);
-    showToast('Erro ao carregar alertas', 'danger');
+    // Só mostrar erro se for um erro persistente (mais de 5 erros consecutivos)
+    if (errosConsecutivos > 5) {
+      console.error('Erro persistente ao carregar alertas:', error);
+      // Não mostrar toast para não poluir a interface
+    }
   }
 }
 
@@ -5851,13 +6047,14 @@ async function excluirAlerta(alertaId) {
   }
 }
 
+// Função para excluir todos os alertas
 async function excluirTodosAlertas() {
   if (!dadosAlertas || dadosAlertas.length === 0) {
-    showToast('Não há alertas para excluir', 'info');
+    showToast('ℹ️ Não há alertas para excluir', 'info');
     return;
   }
 
-  if (!confirm(`Tem certeza que deseja excluir TODOS os ${dadosAlertas.length} alertas?`)) {
+  if (!confirm(`Tem certeza que deseja excluir TODOS os ${dadosAlertas.length} alerta(s)?`)) {
     return;
   }
 
@@ -5869,18 +6066,42 @@ async function excluirTodosAlertas() {
   showLoading();
 
   try {
-    // Excluir todos os alertas via API
-    const response = await fetch(`${backendUrl}/api/alertas`, {
+    // Primeiro tentar o endpoint de exclusão em massa
+    const response = await fetch(`${backendUrl}/api/alertas/todos`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' }
     });
 
-    if (!response.ok) throw new Error('Erro ao excluir alertas');
+    if (response.ok) {
+      showToast('✅ Todos os alertas foram excluídos!', 'success');
+      dadosAlertas = [];
+      alertasAnteriores = [];
+      atualizarTabelaAlertas(dadosAlertas);
+      atualizarBadgeAlertas();
+      atualizarEstatisticasAlertas();
+    } else if (response.status === 404) {
+      // Se o endpoint não existe, excluir um por um
+      console.log('Endpoint em massa não disponível, excluindo individualmente...');
+      let excluidos = 0;
+      const total = dadosAlertas.length;
 
-    showToast('✅ Todos os alertas foram excluídos!', 'success');
+      for (const alerta of [...dadosAlertas]) {
+        try {
+          const res = await fetch(`${backendUrl}/api/alertas/${alerta.id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          if (res.ok) excluidos++;
+        } catch (e) {
+          console.error('Erro ao excluir alerta:', alerta.id, e);
+        }
+      }
 
-    // Recarregar dados
-    await carregarAlertas();
+      showToast(`✅ ${excluidos} de ${total} alertas excluídos!`, 'success');
+      await carregarAlertas();
+    } else {
+      throw new Error('Erro ao excluir alertas');
+    }
 
   } catch (error) {
     console.error('Erro ao excluir todos os alertas:', error);
