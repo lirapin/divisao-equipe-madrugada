@@ -137,32 +137,45 @@
       color: white;
     }
 
+    /* Botão Logout - VERMELHO */
     .refresh-btn.logout-admin {
-      background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
       color: white;
     }
 
     .refresh-btn.logout-admin:hover {
-      background: linear-gradient(135deg, #7b1fa2 0%, #6a1b9a 100%);
+      background: linear-gradient(135deg, #c82333 0%, #a71d2a 100%);
     }
 
+    /* Botão Delete - Laranja/Vermelho */
     .refresh-btn.delete-admin {
-      background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
+      background: linear-gradient(135deg, #ff5722 0%, #e64a19 100%);
       color: white;
     }
 
     .refresh-btn.delete-admin:hover {
-      background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+      background: linear-gradient(135deg, #e64a19 0%, #d84315 100%);
     }
 
-    /* Botão refresh admin com degradê */
+    /* Botão refresh admin - Verde (início do degradê) */
     .admin-controls .refresh-btn:not(.upload-admin):not(.delete-admin):not(.logout-admin) {
-      background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+      background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
       color: white;
     }
 
     .admin-controls .refresh-btn:not(.upload-admin):not(.delete-admin):not(.logout-admin):hover {
-      background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+      background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%);
+    }
+
+    /* Botão Upload - Amarelo/Laranja (meio do degradê) */
+    .refresh-btn.upload-admin {
+      background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+      color: #333;
+    }
+
+    .refresh-btn.upload-admin:hover {
+      background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+      color: #fff;
     }
 
     .refresh-btn.logout-viewer {
@@ -1060,6 +1073,31 @@
       color: var(--text-dark);
     }
 
+    /* Estilos para estatísticas no modal de detalhes */
+    .detail-stat {
+      background: #fff;
+      border-radius: 8px;
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .detail-stat-label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+
+    .detail-stat-value {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
     .alerta-status {
       display: inline-flex;
       align-items: center;
@@ -1500,13 +1538,32 @@
             <strong><i class="bi bi-1-circle me-2"></i>Calendário 1</strong>
             <span class="badge bg-secondary" id="cal1Status">Vazio</span>
           </div>
-          <div class="d-flex gap-2 align-items-center">
+          <div class="d-flex gap-2 align-items-center flex-wrap">
+            <select id="mesCal1" class="form-select form-select-sm" style="width: auto;">
+              <option value="0">Janeiro</option>
+              <option value="1">Fevereiro</option>
+              <option value="2">Março</option>
+              <option value="3">Abril</option>
+              <option value="4">Maio</option>
+              <option value="5">Junho</option>
+              <option value="6">Julho</option>
+              <option value="7">Agosto</option>
+              <option value="8">Setembro</option>
+              <option value="9">Outubro</option>
+              <option value="10">Novembro</option>
+              <option value="11">Dezembro</option>
+            </select>
+            <select id="anoCal1" class="form-select form-select-sm" style="width: auto;">
+              <option value="2024">2024</option>
+              <option value="2025" selected>2025</option>
+              <option value="2026">2026</option>
+            </select>
             <button class="btn btn-sm btn-outline-primary" onclick="document.getElementById('fileInputCal1').click()">
               <i class="bi bi-upload me-1"></i>Upload planilha
             </button>
             <input type="file" id="fileInputCal1" accept=".xlsx,.xls,.csv" style="display: none;" onchange="uploadCalendario(1, this)">
-            <span class="text-muted small" id="cal1Info">Nenhuma planilha carregada</span>
           </div>
+          <span class="text-muted small d-block mt-2" id="cal1Info">Nenhuma planilha carregada</span>
         </div>
 
         <!-- Calendário 2 -->
@@ -1515,13 +1572,32 @@
             <strong><i class="bi bi-2-circle me-2"></i>Calendário 2</strong>
             <span class="badge bg-secondary" id="cal2Status">Vazio</span>
           </div>
-          <div class="d-flex gap-2 align-items-center">
+          <div class="d-flex gap-2 align-items-center flex-wrap">
+            <select id="mesCal2" class="form-select form-select-sm" style="width: auto;">
+              <option value="0">Janeiro</option>
+              <option value="1">Fevereiro</option>
+              <option value="2">Março</option>
+              <option value="3">Abril</option>
+              <option value="4">Maio</option>
+              <option value="5">Junho</option>
+              <option value="6">Julho</option>
+              <option value="7">Agosto</option>
+              <option value="8">Setembro</option>
+              <option value="9">Outubro</option>
+              <option value="10">Novembro</option>
+              <option value="11">Dezembro</option>
+            </select>
+            <select id="anoCal2" class="form-select form-select-sm" style="width: auto;">
+              <option value="2024">2024</option>
+              <option value="2025" selected>2025</option>
+              <option value="2026">2026</option>
+            </select>
             <button class="btn btn-sm btn-outline-primary" onclick="document.getElementById('fileInputCal2').click()">
               <i class="bi bi-upload me-1"></i>Upload planilha
             </button>
             <input type="file" id="fileInputCal2" accept=".xlsx,.xls,.csv" style="display: none;" onchange="uploadCalendario(2, this)">
-            <span class="text-muted small" id="cal2Info">Nenhuma planilha carregada</span>
           </div>
+          <span class="text-muted small d-block mt-2" id="cal2Info">Nenhuma planilha carregada</span>
         </div>
 
         <!-- Seleção do Calendário Ativo -->
@@ -1588,35 +1664,26 @@
         <div class="area-summary-grid" id="areaSummaryGrid">
           <!-- Preenchido via JavaScript -->
         </div>
+        <!-- Botão Ver Detalhes -->
+        <div class="text-center mt-3">
+          <button class="telegram-btn telegram-btn-primary" onclick="verDetalhesCopRedeResumo()">
+            <i class="bi bi-info-circle me-1"></i> Ver Detalhes
+          </button>
+        </div>
       </div>
 
-      <!-- Tabela de mensagens -->
-      <div class="table-responsive">
-        <table class="telegram-table" id="tabelaCopRede">
-          <thead>
-            <tr>
-              <th>Data/Hora</th>
-              <th>Área</th>
-              <th>Volume</th>
-              <th>Responsável</th>
-              <th>Descrição</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyCopRede">
-            <tr>
-              <td colspan="6">
-                <div class="telegram-empty">
-                  <i class="bi bi-inbox"></i>
-                  <p>Nenhuma mensagem COP Rede Informa encontrada</p>
-                  <button class="telegram-btn telegram-btn-primary" onclick="carregarCopRedeInforma()">
-                    <i class="bi bi-arrow-clockwise"></i> Carregar mensagens
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Área vazia quando não há dados -->
+      <div id="copRedeEmpty" class="telegram-empty">
+        <i class="bi bi-inbox"></i>
+        <p>Nenhuma mensagem COP Rede Informa encontrada</p>
+        <button class="telegram-btn telegram-btn-primary" onclick="carregarCopRedeInforma()">
+          <i class="bi bi-arrow-clockwise"></i> Carregar mensagens
+        </button>
+      </div>
+
+      <!-- Info da última atualização -->
+      <div id="copRedeInfo" class="text-center text-muted small mt-3" style="display:none;">
+        <i class="bi bi-clock me-1"></i><span id="copRedeUltimaAtualizacao"></span>
       </div>
     </div>
 
@@ -1636,9 +1703,7 @@
           <thead>
             <tr>
               <th>Data/Hora</th>
-              <th>Grupo</th>
               <th>Área</th>
-              <th>Status</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -1699,70 +1764,18 @@
     </div>
   </div>
 
-  <!-- Configuração de Mês/Ano em Acordeão -->
-  <div class="config-accordion" id="configAccordion" style="display: none;">
-    <div class="config-header collapsed" data-bs-toggle="collapse" data-bs-target="#configBody">
-      <span><i class="bi bi-calendar me-2"></i>Configurar mês de referência</span>
-      <i class="bi bi-chevron-down"></i>
-    </div>
-    <div id="configBody" class="collapse">
-      <div class="config-body">
-        <p class="mb-2 text-muted" style="font-size: 0.85rem;">
-          Selecione o mês e ano correspondente à planilha para garantir o alinhamento correto do calendário.
-        </p>
-        <div class="config-row">
-          <div class="config-group">
-            <label for="mesSelect">Mês</label>
-            <select id="mesSelect" class="form-select form-select-sm">
-              <option value="0">Janeiro</option>
-              <option value="1">Fevereiro</option>
-              <option value="2">Março</option>
-              <option value="3">Abril</option>
-              <option value="4">Maio</option>
-              <option value="5">Junho</option>
-              <option value="6">Julho</option>
-              <option value="7">Agosto</option>
-              <option value="8">Setembro</option>
-              <option value="9">Outubro</option>
-              <option value="10">Novembro</option>
-              <option value="11">Dezembro</option>
-            </select>
-          </div>
-          <div class="config-group">
-            <label for="anoSelect">Ano</label>
-            <select id="anoSelect" class="form-select form-select-sm">
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
-              <option value="2026">2026</option>
-            </select>
-          </div>
-          <button class="btn btn-primary btn-sm" onclick="aplicarConfiguracao()" style="padding: 0.4rem 1rem;">
-            Aplicar
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Calendário -->
   <div id="calendarSection" style="display: none;">
-    
-    <!-- Controles de Troca -->
-    <div class="swap-controls" id="swapControls" style="display: none;">
-      <div class="swap-toggle">
-        <input type="checkbox" id="swapModeToggle">
-        <label for="swapModeToggle">Agendar trocas</label>
-      </div>
-      <div class="swap-status" id="swapStatus">
-        Selecione o primeiro dia para troca...
-      </div>
-    </div>
 
     <!-- Cabeçalho do Calendário com Navegação -->
     <div class="calendar-container">
       <div class="calendar-header">
         <h5 class="calendar-title" id="calendarTitle"></h5>
         <div class="calendar-nav">
+          <!-- Botão Agendar Trocas dentro do calendário -->
+          <button class="btn btn-sm btn-outline-warning me-2" id="btnAgendarTrocas" style="display: none;" onclick="toggleModoTroca()">
+            <i class="bi bi-arrow-left-right me-1"></i>Agendar Trocas
+          </button>
           <button class="calendar-nav-btn" onclick="mudarMes(-1)">
             <i class="bi bi-chevron-left"></i>
           </button>
@@ -1770,6 +1783,12 @@
             <i class="bi bi-chevron-right"></i>
           </button>
         </div>
+      </div>
+
+      <!-- Status de Troca (oculto por padrão) -->
+      <div class="swap-status text-center p-2 mb-2" id="swapStatus" style="display: none; background: #fff3cd; border-radius: 6px;">
+        <i class="bi bi-info-circle me-1"></i>
+        <span id="swapStatusText">Selecione o primeiro dia para troca...</span>
       </div>
 
       <!-- Grid do Calendário -->
@@ -2072,13 +2091,21 @@ function uploadCalendario(numCalendario, inputElement) {
       const dadosPlanilhaTemp = dados;
       const dadosOriginaisTemp = processarPlanilhaParaCalendario(dadosPlanilhaTemp);
 
+      // Obter mês e ano do calendário específico
+      const mesSelect = document.getElementById(`mesCal${numCalendario}`);
+      const anoSelect = document.getElementById(`anoCal${numCalendario}`);
+      const mesCalendario = mesSelect ? parseInt(mesSelect.value) : mesSelecionado;
+      const anoCalendario = anoSelect ? parseInt(anoSelect.value) : anoSelecionado;
+
+      console.log(`📅 Calendário ${numCalendario}: ${MESES[mesCalendario]}/${anoCalendario}`);
+
       // Salvar no calendário apropriado
       const calKey = `calendario${numCalendario}`;
       calendarios[calKey] = {
         dadosPlanilha: dadosPlanilhaTemp,
         dadosOriginais: dadosOriginaisTemp,
-        mes: mesSelecionado,
-        ano: anoSelecionado,
+        mes: mesCalendario,
+        ano: anoCalendario,
         trocas: [],
         nomeArquivo: file.name,
         dataUpload: new Date().toISOString()
@@ -2917,24 +2944,7 @@ document.addEventListener('DOMContentLoaded', function() {
     btnPDF.addEventListener('click', gerarPDF);
   }
   
-  // Listener para modo de troca
-  const swapModeToggle = document.getElementById('swapModeToggle');
-  if (swapModeToggle) {
-    swapModeToggle.addEventListener('change', function() {
-      modoTroca = this.checked;
-      const swapStatus = document.getElementById('swapStatus');
-      
-      if (modoTroca) {
-        swapStatus.classList.add('active');
-        swapStatus.textContent = 'Selecione o primeiro dia para troca...';
-        resetarSelecaoTroca();
-      } else {
-        swapStatus.classList.remove('active');
-        resetarSelecaoTroca();
-        removerSelecoesCalendario();
-      }
-    });
-  }
+  // Função toggleModoTroca foi removida daqui para ser definida globalmente
   
   // Configurar botão de upload admin - abre o painel de calendários
   const btnUploadAdmin = document.getElementById('btnUploadAdmin');
@@ -3060,11 +3070,13 @@ function iniciarComoAdmin() {
   // Mostrar controles admin
   const adminControls = document.getElementById('adminControls');
   const userControls = document.getElementById('userControls');
-  const swapControls = document.getElementById('swapControls');
 
   if (adminControls) adminControls.style.display = 'flex';
   if (userControls) userControls.style.display = 'none';
-  if (swapControls) swapControls.style.display = 'flex';
+
+  // Mostrar botão de agendar trocas no calendário
+  const btnAgendarTrocas = document.getElementById('btnAgendarTrocas');
+  if (btnAgendarTrocas) btnAgendarTrocas.style.display = 'inline-flex';
 
   // Mostrar navegação de abas do admin (incluindo Telegram)
   const adminNavTabs = document.getElementById('adminNavTabs');
@@ -3074,30 +3086,55 @@ function iniciarComoAdmin() {
   const calendarioPanel = document.getElementById('calendarioPanel');
   if (calendarioPanel) calendarioPanel.style.display = 'block';
 
-  // Mostrar configuração de mês
-  const configAccordion = document.getElementById('configAccordion');
-  if (configAccordion) configAccordion.style.display = 'block';
-
   showToast('👑 Modo Administrador ativado', 'warning');
+}
+
+// Função para alternar modo de troca
+function toggleModoTroca() {
+  modoTroca = !modoTroca;
+  const swapStatus = document.getElementById('swapStatus');
+  const swapStatusText = document.getElementById('swapStatusText');
+  const btnAgendarTrocas = document.getElementById('btnAgendarTrocas');
+
+  if (modoTroca) {
+    if (swapStatus) swapStatus.style.display = 'block';
+    if (swapStatusText) swapStatusText.textContent = 'Selecione o primeiro dia para troca...';
+    if (btnAgendarTrocas) {
+      btnAgendarTrocas.classList.remove('btn-outline-warning');
+      btnAgendarTrocas.classList.add('btn-warning');
+    }
+    resetarSelecaoTroca();
+  } else {
+    if (swapStatus) swapStatus.style.display = 'none';
+    if (btnAgendarTrocas) {
+      btnAgendarTrocas.classList.remove('btn-warning');
+      btnAgendarTrocas.classList.add('btn-outline-warning');
+    }
+    resetarSelecaoTroca();
+    removerSelecoesCalendario();
+  }
 }
 
 function iniciarComoVisualizador() {
   isAdmin = false;
-  
+
   // Mostrar controles usuário
   const adminControls = document.getElementById('adminControls');
   const userControls = document.getElementById('userControls');
-  const swapControls = document.getElementById('swapControls');
-  
+
   if (adminControls) adminControls.style.display = 'none';
   if (userControls) userControls.style.display = 'flex';
-  if (swapControls) swapControls.style.display = 'none';
-  
+
+  // Esconder botão de agendar trocas e desativar modo
+  const btnAgendarTrocas = document.getElementById('btnAgendarTrocas');
+  if (btnAgendarTrocas) btnAgendarTrocas.style.display = 'none';
+
+  const swapStatus = document.getElementById('swapStatus');
+  if (swapStatus) swapStatus.style.display = 'none';
+
   // Desativar modo de troca
   modoTroca = false;
-  const swapModeToggle = document.getElementById('swapModeToggle');
-  if (swapModeToggle) swapModeToggle.checked = false;
-  
+
   showToast('👁️ Modo Visualização ativado', 'info');
 }
 
@@ -3768,7 +3805,7 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
   const regras = PRIORIDADES[numPessoas];
   if (!regras) return {};
 
-  const divisao = {};
+  const divisaoTemp = {};
   const pessoasAlocadas = new Set();
   const pessoasDisponiveis = [...trabalhandoHoje];
 
@@ -3777,7 +3814,7 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
 
     for (let pessoa of prioridade) {
       if (pessoasDisponiveis.includes(pessoa) && !pessoasAlocadas.has(pessoa)) {
-        divisao[area] = pessoa;
+        divisaoTemp[area] = pessoa;
         pessoasAlocadas.add(pessoa);
 
         const index = pessoasDisponiveis.indexOf(pessoa);
@@ -3788,13 +3825,32 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
       }
     }
 
-    if (!divisao[area] && pessoasDisponiveis.length > 0) {
+    if (!divisaoTemp[area] && pessoasDisponiveis.length > 0) {
       const pessoaRestante = pessoasDisponiveis[0];
-      divisao[area] = pessoaRestante;
+      divisaoTemp[area] = pessoaRestante;
       pessoasAlocadas.add(pessoaRestante);
       pessoasDisponiveis.splice(0, 1);
     }
   });
+
+  // Mesclar _RIO_2 com RIO para mostrar ambos responsáveis
+  const divisao = {};
+  let rioResponsaveis = [];
+
+  Object.keys(divisaoTemp).forEach(area => {
+    if (area === 'RIO') {
+      rioResponsaveis.push(divisaoTemp[area]);
+    } else if (area === '_RIO_2') {
+      rioResponsaveis.push(divisaoTemp[area]);
+    } else {
+      divisao[area] = divisaoTemp[area];
+    }
+  });
+
+  // Se temos responsáveis para RIO, adicionar ao divisão
+  if (rioResponsaveis.length > 0) {
+    divisao['RIO'] = rioResponsaveis.join(' / ');
+  }
 
   return divisao;
 }
@@ -4775,6 +4831,18 @@ let alertasAnteriores = []; // Para detectar novos alertas
 // AudioContext persistente para evitar bloqueio do navegador
 let audioContextGlobal = null;
 
+// Solicitar permissão de notificação ao carregar a página
+function solicitarPermissaoNotificacao() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().then(permission => {
+      console.log('Permissão de notificação:', permission);
+    });
+  }
+}
+
+// Chamar ao carregar
+document.addEventListener('DOMContentLoaded', solicitarPermissaoNotificacao);
+
 // Função para inicializar/ativar o AudioContext (chamada ao interagir com a página)
 function ativarAudio() {
   if (!audioContextGlobal) {
@@ -4785,11 +4853,12 @@ function ativarAudio() {
   }
 }
 
-// Adiciona listener para ativar áudio ao primeiro clique
+// Adiciona listeners para ativar áudio ao primeiro clique/tecla
 document.addEventListener('click', ativarAudio, { once: true });
 document.addEventListener('keydown', ativarAudio, { once: true });
+document.addEventListener('touchstart', ativarAudio, { once: true });
 
-// Função para tocar alarme sonoro (melhorada)
+// Função para tocar alarme sonoro (funciona mesmo em background)
 function tocarAlarme() {
   try {
     // Criar ou reutilizar AudioContext
@@ -4799,37 +4868,52 @@ function tocarAlarme() {
 
     // Tentar resumir se estiver suspenso
     if (audioContextGlobal.state === 'suspended') {
-      audioContextGlobal.resume();
+      audioContextGlobal.resume().then(() => {
+        executarBeeps();
+      });
+    } else {
+      executarBeeps();
     }
 
-    const ctx = audioContextGlobal;
+    function executarBeeps() {
+      const ctx = audioContextGlobal;
+      const now = ctx.currentTime;
 
-    // Função para criar um beep
-    function beep(startTime, frequency, duration, volume) {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+      // Função para criar um beep
+      function beep(startTime, frequency, duration, volume) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
 
-      osc.connect(gain);
-      gain.connect(ctx.destination);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
 
-      osc.frequency.value = frequency;
-      osc.type = 'square'; // Som mais alto e perceptível
+        osc.frequency.value = frequency;
+        osc.type = 'square'; // Som mais alto e perceptível
 
-      gain.gain.setValueAtTime(volume, startTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+        gain.gain.setValueAtTime(volume, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
 
-      osc.start(startTime);
-      osc.stop(startTime + duration);
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      }
+
+      // Sequência de 3 beeps de alerta (som mais alto)
+      beep(now, 880, 0.3, 0.5);        // Beep 1
+      beep(now + 0.4, 880, 0.3, 0.5);  // Beep 2
+      beep(now + 0.8, 1100, 0.5, 0.6); // Beep 3 (mais agudo e longo)
     }
-
-    const now = ctx.currentTime;
-
-    // Sequência de 3 beeps de alerta (som mais alto)
-    beep(now, 880, 0.3, 0.5);        // Beep 1
-    beep(now + 0.4, 880, 0.3, 0.5);  // Beep 2
-    beep(now + 0.8, 1100, 0.5, 0.6); // Beep 3 (mais agudo e longo)
 
     console.log('🔊 Alarme sonoro tocado!');
+
+    // Sempre tentar enviar notificação do navegador (funciona em background)
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('🚨 Novo Alerta Detectado!', {
+        body: 'Um novo alerta foi detectado no sistema COP Rede Informa.',
+        icon: '/favicon.ico',
+        tag: 'alerta-cop',
+        requireInteraction: true
+      });
+    }
 
   } catch (error) {
     console.error('Erro ao tocar alarme:', error);
@@ -4837,7 +4921,7 @@ function tocarAlarme() {
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('🚨 Novo Alerta!', {
         body: 'Um novo alerta foi detectado no sistema.',
-        icon: '🔔'
+        icon: '/favicon.ico'
       });
     }
   }
@@ -5133,34 +5217,30 @@ function extrairVolumeDaMensagem(item) {
 }
 
 function atualizarTabelaCopRede(dados) {
-  const tbody = document.getElementById('tbodyCopRede');
   const resumoDiv = document.getElementById('resumoAreasCop');
   const summaryGrid = document.getElementById('areaSummaryGrid');
+  const emptyDiv = document.getElementById('copRedeEmpty');
+  const infoDiv = document.getElementById('copRedeInfo');
+  const infoSpan = document.getElementById('copRedeUltimaAtualizacao');
 
   if (!dados || dados.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="6">
-          <div class="telegram-empty">
-            <i class="bi bi-inbox"></i>
-            <p>Nenhuma mensagem COP Rede Informa encontrada</p>
-            <button class="telegram-btn telegram-btn-primary" onclick="carregarCopRedeInforma()">
-              <i class="bi bi-arrow-clockwise"></i> Carregar mensagens
-            </button>
-          </div>
-        </td>
-      </tr>
-    `;
     if (resumoDiv) resumoDiv.style.display = 'none';
+    if (emptyDiv) emptyDiv.style.display = 'block';
+    if (infoDiv) infoDiv.style.display = 'none';
     return;
   }
 
+  // Esconder área vazia
+  if (emptyDiv) emptyDiv.style.display = 'none';
+
   // PEGAR APENAS A ÚLTIMA MENSAGEM (mais recente)
-  // Ordenar por data decrescente e pegar a primeira
   const dadosOrdenados = [...dados].sort((a, b) =>
     new Date(b.dataRecebimento) - new Date(a.dataRecebimento)
   );
   const ultimaMensagem = dadosOrdenados[0];
+
+  // Guardar referência global para o modal de detalhes
+  window.ultimaMensagemCopRede = ultimaMensagem;
 
   // Calcular resumo por área APENAS da última mensagem
   const resumoPorArea = {};
@@ -5198,58 +5278,121 @@ function atualizarTabelaCopRede(dados) {
     resumoDiv.style.display = 'none';
   }
 
-  // Atualizar tabela - mostrar dados APENAS da última mensagem
-  const linhasTabela = [];
+  // Atualizar info da última atualização
   const dataFormatada = formatarDataHora(ultimaMensagem.dataRecebimento);
+  if (infoDiv && infoSpan) {
+    infoDiv.style.display = 'block';
+    infoSpan.textContent = `Última mensagem: ${dataFormatada} | Total no banco: ${dados.length} mensagens`;
+  }
+}
 
-  if (ultimaMensagem.resumo && ultimaMensagem.resumo.grupo && Object.keys(ultimaMensagem.resumo.grupo).length > 0) {
-    // Expandir cada área do resumo da última mensagem
-    for (const [grupoNome, quantidade] of Object.entries(ultimaMensagem.resumo.grupo)) {
-      const areaKey = mapearGrupoParaAreaFrontend(grupoNome);
-      const responsavel = obterResponsavelPorArea(areaKey, ultimaMensagem.dataRecebimento);
-
-      linhasTabela.push(`
-        <tr>
-          <td>${dataFormatada}</td>
-          <td><span class="badge bg-info">${areaKey || '-'}</span></td>
-          <td><strong>${quantidade}</strong></td>
-          <td>${responsavel}</td>
-          <td class="text-truncate" style="max-width: 200px;" title="${grupoNome}">${grupoNome}</td>
-          <td>
-            <button class="telegram-btn telegram-btn-outline" onclick="verDetalhesCopRede(0)">
-              <i class="bi bi-eye"></i>
-            </button>
-          </td>
-        </tr>
-      `);
-    }
-  } else {
-    // Mensagem sem resumo
-    const volume = extrairVolumeDaMensagem(ultimaMensagem);
-    const responsavel = obterResponsavelPorArea(ultimaMensagem.areaMapeada, ultimaMensagem.dataRecebimento);
-
-    linhasTabela.push(`
-      <tr>
-        <td>${dataFormatada}</td>
-        <td><span class="badge bg-info">${ultimaMensagem.areaMapeada || '-'}</span></td>
-        <td><strong>${volume}</strong></td>
-        <td>${responsavel}</td>
-        <td class="text-truncate" style="max-width: 200px;" title="${ultimaMensagem.descricao || ''}">${ultimaMensagem.descricao || ultimaMensagem.grupo || '-'}</td>
-        <td>
-          <button class="telegram-btn telegram-btn-outline" onclick="verDetalhesCopRede(0)">
-            <i class="bi bi-eye"></i>
-          </button>
-        </td>
-      </tr>
-    `);
+// Função para mostrar detalhes do resumo COP REDE (Outage GPON, OTG HFC, etc)
+function verDetalhesCopRedeResumo() {
+  const item = window.ultimaMensagemCopRede;
+  if (!item) {
+    showToast('Nenhum dado disponível', 'warning');
+    return;
   }
 
-  // Adicionar info da última atualização
-  const ultimaAtualizacao = `<tr class="table-info"><td colspan="6" class="text-center text-muted small">
-    <i class="bi bi-clock me-1"></i>Última mensagem: ${dataFormatada} | Total no banco: ${dados.length} mensagens
-  </td></tr>`;
+  // Extrair dados do resumo
+  let outageGPON = 0;
+  let otgHFCFibra = 0;
+  let totalEventos = 0;
+  let semSinal = 0;
+  let performance = 0;
+  let interrupcao = 0;
 
-  tbody.innerHTML = linhasTabela.join('') + ultimaAtualizacao;
+  // Extrair de TIPO
+  if (item.resumo && item.resumo.tipo) {
+    for (const [tipo, qtd] of Object.entries(item.resumo.tipo)) {
+      const tipoLower = tipo.toLowerCase();
+      if (tipoLower.includes('outage') && tipoLower.includes('gpon')) {
+        outageGPON += qtd;
+      }
+      if (tipoLower.includes('otg') || (tipoLower.includes('hfc') && tipoLower.includes('fibra'))) {
+        otgHFCFibra += qtd;
+      }
+      totalEventos += qtd;
+    }
+  }
+
+  // Extrair de SINTOMA
+  if (item.resumo && item.resumo.sintoma) {
+    for (const [sintoma, qtd] of Object.entries(item.resumo.sintoma)) {
+      const sintomaLower = sintoma.toLowerCase();
+      if (sintomaLower.includes('sem sinal') || sintomaLower.includes('sinal')) {
+        semSinal += qtd;
+      }
+      if (sintomaLower.includes('performance')) {
+        performance += qtd;
+      }
+      if (sintomaLower.includes('interrup')) {
+        interrupcao += qtd;
+      }
+    }
+  }
+
+  // Se totalEventos não foi calculado, usar o total do item
+  if (totalEventos === 0 && item.totalEventos) {
+    totalEventos = item.totalEventos;
+  }
+
+  const mensagemFormatada = formatarMensagemOriginal(item.mensagemOriginal);
+
+  const body = document.getElementById('modalDetalhesCopBody');
+  body.innerHTML = `
+    <div class="telegram-detail-card">
+      <h5><i class="bi bi-clipboard-data me-2"></i>Resumo Detalhado</h5>
+      <div class="row g-3">
+        <div class="col-6">
+          <div class="detail-stat">
+            <span class="detail-stat-label">Outage GPON</span>
+            <span class="detail-stat-value">${outageGPON}</span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="detail-stat">
+            <span class="detail-stat-label">OTG HFC Fibra</span>
+            <span class="detail-stat-value">${otgHFCFibra}</span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="detail-stat">
+            <span class="detail-stat-label">Total de Eventos</span>
+            <span class="detail-stat-value text-primary">${totalEventos}</span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="detail-stat">
+            <span class="detail-stat-label">Sem Sinal</span>
+            <span class="detail-stat-value">${semSinal}</span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="detail-stat">
+            <span class="detail-stat-label">Performance</span>
+            <span class="detail-stat-value">${performance}</span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="detail-stat">
+            <span class="detail-stat-label">Interrupção</span>
+            <span class="detail-stat-value">${interrupcao}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${mensagemFormatada ? `
+    <div class="telegram-detail-card" style="border-left-color: #666;">
+      <h5><i class="bi bi-chat-quote me-2"></i>Mensagem Original</h5>
+      <pre style="white-space: pre-wrap; font-size: 0.85rem; background: #f5f5f5; padding: 1rem; border-radius: 6px; max-height: 300px; overflow-y: auto;">${mensagemFormatada}</pre>
+    </div>
+    ` : ''}
+  `;
+
+  const modal = new bootstrap.Modal(document.getElementById('modalDetalhesCop'));
+  modal.show();
 }
 
 // Mapear grupo do Telegram para área do frontend
@@ -5398,7 +5541,7 @@ function atualizarTabelaAlertas(dados) {
   if (!dados || dados.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="5">
+        <td colspan="3">
           <div class="telegram-empty">
             <i class="bi bi-bell-slash"></i>
             <p>Nenhum alerta encontrado</p>
@@ -5414,29 +5557,15 @@ function atualizarTabelaAlertas(dados) {
 
   tbody.innerHTML = dados.map((item, index) => {
     const dataFormatada = formatarDataHora(item.dataRecebimento);
-    const statusClass = obterClasseStatus(item.status);
-    const statusTexto = obterTextoStatus(item.status);
 
     return `
       <tr>
         <td>${dataFormatada}</td>
-        <td><strong>${item.grupo || '-'}</strong></td>
-        <td><span class="badge bg-info">${item.areaMapeada || '-'}</span></td>
-        <td><span class="alerta-status ${statusClass}">${statusTexto}</span></td>
+        <td>${item.areaMapeada || '-'}</td>
         <td>
           <button class="telegram-btn telegram-btn-outline" onclick="verDetalhesAlerta(${index})">
             <i class="bi bi-eye"></i> Ver
           </button>
-          ${item.status === 'novo' ? `
-            <button class="telegram-btn telegram-btn-warning" onclick="alterarStatusAlerta('${item.id}', 'em_andamento')" title="Marcar como em andamento">
-              <i class="bi bi-hourglass-split"></i>
-            </button>
-          ` : ''}
-          ${item.status === 'em_andamento' ? `
-            <button class="telegram-btn telegram-btn-success" onclick="alterarStatusAlerta('${item.id}', 'resolvido')" title="Marcar como resolvido">
-              <i class="bi bi-check-circle"></i>
-            </button>
-          ` : ''}
           <button class="telegram-btn telegram-btn-danger" onclick="excluirAlerta('${item.id}')" title="Excluir alerta">
             <i class="bi bi-trash"></i>
           </button>
@@ -5483,19 +5612,32 @@ function verDetalhesAlerta(index) {
 
   alertaAtual = item.id;
 
-  const statusClass = obterClasseStatus(item.status);
-  const statusTexto = obterTextoStatus(item.status);
-
-  // Extrair número do ticket da mensagem original (formato INM...)
+  // Extrair número do ticket - suporta formato INM... e números puros
   let ticketNumero = null;
   let ticketLink = '';
   if (item.ticket) {
     ticketNumero = item.ticket;
-    ticketLink = `https://outage.claro.com.br/inc/view/${ticketNumero}`;
   } else if (item.mensagemOriginal) {
-    const matchTicket = item.mensagemOriginal.match(/Ticket:\*?\*?\s*(INM\d+)/i);
+    // Tentar formato INM primeiro
+    let matchTicket = item.mensagemOriginal.match(/Ticket:\*?\*?\s*(INM\d+)/i);
     if (matchTicket) {
       ticketNumero = matchTicket[1];
+    } else {
+      // Tentar formato numérico puro
+      matchTicket = item.mensagemOriginal.match(/Ticket:\*?\*?\s*(\d{6,})/i);
+      if (matchTicket) {
+        ticketNumero = matchTicket[1];
+      }
+    }
+  }
+
+  // Definir URL baseado no formato do ticket
+  if (ticketNumero) {
+    if (/^\d+$/.test(ticketNumero)) {
+      // Ticket começa com números - usar newmonitor
+      ticketLink = `https://newmonitor.claro.com.br/user/outage/outage_view.php?idTicket=${ticketNumero}`;
+    } else {
+      // Ticket formato INM - usar outage.claro
       ticketLink = `https://outage.claro.com.br/inc/view/${ticketNumero}`;
     }
   }
@@ -5521,16 +5663,8 @@ function verDetalhesAlerta(index) {
       </div>
       ` : ''}
       <div class="telegram-detail-row">
-        <span class="telegram-detail-label">Grupo:</span>
-        <span class="telegram-detail-value">${item.grupo || '-'}</span>
-      </div>
-      <div class="telegram-detail-row">
         <span class="telegram-detail-label">Área:</span>
-        <span class="telegram-detail-value"><span class="badge bg-info">${item.areaMapeada || '-'}</span></span>
-      </div>
-      <div class="telegram-detail-row">
-        <span class="telegram-detail-label">Status:</span>
-        <span class="telegram-detail-value"><span class="alerta-status ${statusClass}">${statusTexto}</span></span>
+        <span class="telegram-detail-value">${item.areaMapeada || '-'}</span>
       </div>
     </div>
 
