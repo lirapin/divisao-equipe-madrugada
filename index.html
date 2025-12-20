@@ -1282,6 +1282,41 @@
       color: #888;
     }
 
+    /* Cores de alarme visual para volumetria */
+    /* 0-19: verde (OK) */
+    .area-volume-item.volume-ok {
+      border-left: 4px solid #28a745;
+      background: linear-gradient(to right, rgba(40, 167, 69, 0.1), white);
+    }
+    .area-volume-item.volume-ok .area-volume {
+      color: #28a745;
+    }
+
+    /* 20-29: amarelo (atenção) */
+    .area-volume-item.volume-atencao {
+      border-left: 4px solid #ffc107;
+      background: linear-gradient(to right, rgba(255, 193, 7, 0.15), white);
+    }
+    .area-volume-item.volume-atencao .area-volume {
+      color: #d39e00;
+    }
+
+    /* 30+: vermelho (crítico) */
+    .area-volume-item.volume-critico {
+      border-left: 4px solid #dc3545;
+      background: linear-gradient(to right, rgba(220, 53, 69, 0.15), white);
+      animation: pulse-critico 1.5s infinite;
+    }
+    .area-volume-item.volume-critico .area-volume {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    @keyframes pulse-critico {
+      0%, 100% { box-shadow: 0 1px 3px rgba(220, 53, 69, 0.3); }
+      50% { box-shadow: 0 2px 8px rgba(220, 53, 69, 0.5); }
+    }
+
     .backend-status {
       display: inline-flex;
       align-items: center;
@@ -1656,11 +1691,6 @@
         <h6><i class="bi bi-graph-up me-2"></i>Volumetria por Área</h6>
         <div class="area-volume-grid" id="areaVolumeGrid">
           <!-- Preenchido via JavaScript -->
-        </div>
-        <div class="text-center mt-3">
-          <button class="telegram-btn telegram-btn-danger" onclick="excluirTodosAlertas()">
-            <i class="bi bi-trash me-1"></i>Excluir todos os alertas
-          </button>
         </div>
       </div>
 
@@ -3051,9 +3081,13 @@ function verificarAutenticacao() {
   } else if (auth === 'admin') {
     iniciarComoAdmin();
     carregarDadosDaNuvem();
+    // Carregar alertas do Telegram ao iniciar
+    setTimeout(() => carregarAlertas(), 1000);
   } else if (auth === 'viewer') {
     iniciarComoVisualizador();
     carregarDadosDaNuvem();
+    // Carregar alertas do Telegram ao iniciar
+    setTimeout(() => carregarAlertas(), 1000);
   } else {
     setTimeout(() => {
       mostrarModalLogin();
@@ -3098,7 +3132,9 @@ function verificarPin() {
     // Iniciar como admin
     iniciarComoAdmin();
     carregarDadosDaNuvem();
-    
+    // Carregar alertas do Telegram ao iniciar
+    setTimeout(() => carregarAlertas(), 1000);
+
     showToast('✅ Acesso administrativo concedido!', 'success');
   } else {
     pinError.style.display = 'block';
@@ -3126,7 +3162,9 @@ function entrarComoVisualizador() {
   // Iniciar como visualizador
   iniciarComoVisualizador();
   carregarDadosDaNuvem();
-  
+  // Carregar alertas do Telegram ao iniciar
+  setTimeout(() => carregarAlertas(), 1000);
+
   showToast('🔍 Modo de visualização ativado', 'info');
 }
 
@@ -6190,10 +6228,18 @@ function atualizarVolumePorArea() {
     }
   });
 
+  // Função para obter a classe de cor baseada na quantidade
+  // 0-19: verde (OK), 20-29: amarelo (atenção), 30+: vermelho (crítico)
+  function getCorVolume(quantidade) {
+    if (quantidade >= 30) return 'volume-critico';
+    if (quantidade >= 20) return 'volume-atencao';
+    return 'volume-ok';
+  }
+
   // Renderizar cards de volume
   if (Object.keys(volumePorArea).length > 0) {
     volumeGrid.innerHTML = Object.entries(volumePorArea).map(([area, info]) => `
-      <div class="area-volume-item">
+      <div class="area-volume-item ${getCorVolume(info.quantidade)}">
         <span class="area-name">${area}</span>
         <span class="area-volume">${info.quantidade}</span>
         <span class="area-count">${info.novos} novos</span>
