@@ -4616,13 +4616,18 @@ function mostrarDetalhesDia(dia) {
     entradasOrdenadas.forEach(([area, pessoa]) => {
       // Verificar se esta pessoa está em alguma troca
       const pessoaEmTroca = trocasDia.some(t => t.pessoa_a === pessoa || t.pessoa_b === pessoa);
-      const primeiroNome = obterPrimeiroNome(pessoa);
+
+      // Se já contém " / " (múltiplas pessoas, ex: RIO com 2), usar valor direto
+      // Caso contrário, extrair primeiro nome
+      const nomeExibir = pessoa.includes(' / ')
+        ? pessoa.split(' / ').map(n => obterPrimeiroNome(n)).join(' / ')
+        : obterPrimeiroNome(pessoa);
 
       html += `
         <div class="area-item">
           <span class="area-label">${area}</span>
           <div class="funcionario-name" title="${pessoa}">
-            ${primeiroNome}
+            ${nomeExibir}
             ${pessoaEmTroca ? ' <i class="bi bi-arrow-left-right text-purple"></i>' : ''}
           </div>
         </div>
