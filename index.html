@@ -3869,10 +3869,20 @@ function normalizarNome(nome) {
     .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // Remove acentos
 }
 
-// Função auxiliar para encontrar pessoa na lista (comparação flexível)
-function encontrarPessoaNaLista(pessoa, lista) {
-  const pessoaNorm = normalizarNome(pessoa);
-  return lista.find(p => normalizarNome(p) === pessoaNorm);
+// Função auxiliar para extrair o primeiro nome
+function extrairPrimeiroNome(nomeCompleto) {
+  if (!nomeCompleto) return '';
+  const nome = String(nomeCompleto).trim().toUpperCase();
+  return nome.split(' ')[0];
+}
+
+// Função auxiliar para encontrar pessoa na lista por primeiro nome
+function encontrarPessoaPorPrimeiroNome(primeiroNome, lista) {
+  const primeiroNomeNorm = normalizarNome(primeiroNome);
+  return lista.find(p => {
+    const primeiroNomePessoa = normalizarNome(extrairPrimeiroNome(p));
+    return primeiroNomePessoa === primeiroNomeNorm;
+  });
 }
 
 function calcularDivisaoPorNumero(num, trabalhandoHoje) {
@@ -3881,39 +3891,57 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
   if (num < 2) numPessoas = 2;
   if (num > 6) numPessoas = 6;
 
-  const regras = PRIORIDADES[numPessoas];
-  if (!regras) return {};
+  const configPrioridades = CONFIG?.PRIORIDADES || PRIORIDADES;
+  const regrasConfig = configPrioridades[numPessoas];
+
+  if (!regrasConfig) {
+    console.warn(`Nenhuma regra encontrada para ${numPessoas} pessoas`);
+    return {};
+  }
+
+  // Suportar tanto formato antigo quanto novo
+  const regras = regrasConfig.areas || regrasConfig;
 
   const divisaoTemp = {};
   const pessoasAlocadas = new Set();
   const pessoasDisponiveis = [...trabalhandoHoje];
 
-  // Ordenar áreas para garantir que RIO seja processado antes de _RIO_2
+  console.log(`🔄 Calculando divisão para ${num} pessoas:`, trabalhandoHoje.map(extrairPrimeiroNome));
+
+  // Ordenar áreas: CO/NO primeiro, depois NE/BA, MG, RIO, e _RIO_2 por último
+  const ordemAreas = ['CO/NO', 'NE/BA', 'MG', 'RIO', '_RIO_2', 'SIR/APOIO'];
   const areasOrdenadas = Object.keys(regras).sort((a, b) => {
-    // Processar áreas normais primeiro, depois _RIO_2
-    if (a === '_RIO_2') return 1;
-    if (b === '_RIO_2') return -1;
-    if (a === 'RIO') return -1;
-    if (b === 'RIO') return 1;
-    return 0;
+    const indexA = ordemAreas.indexOf(a);
+    const indexB = ordemAreas.indexOf(b);
+    if (indexA === -1 && indexB === -1) return 0;
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
   });
+
+  console.log(`📋 Áreas a processar (em ordem):`, areasOrdenadas);
 
   areasOrdenadas.forEach(area => {
     const prioridade = regras[area];
+    if (!prioridade || !Array.isArray(prioridade)) {
+      console.warn(`Prioridade não encontrada para área: ${area}`);
+      return;
+    }
 
-    for (let pessoa of prioridade) {
-      // Usar comparação flexível (normalizada)
-      const pessoaEncontrada = encontrarPessoaNaLista(pessoa, pessoasDisponiveis);
-      const pessoaNorm = normalizarNome(pessoa);
+    // Tentar encontrar alguém da lista de prioridade
+    for (let primeiroNome of prioridade) {
+      const pessoaEncontrada = encontrarPessoaPorPrimeiroNome(primeiroNome, pessoasDisponiveis);
+      const primeiroNomeNorm = normalizarNome(primeiroNome);
 
-      if (pessoaEncontrada && !pessoasAlocadas.has(pessoaNorm)) {
-        divisaoTemp[area] = pessoaEncontrada; // Usar o nome original da planilha
-        pessoasAlocadas.add(pessoaNorm);
+      if (pessoaEncontrada && !pessoasAlocadas.has(primeiroNomeNorm)) {
+        divisaoTemp[area] = pessoaEncontrada;
+        pessoasAlocadas.add(primeiroNomeNorm);
 
         const index = pessoasDisponiveis.indexOf(pessoaEncontrada);
         if (index > -1) {
           pessoasDisponiveis.splice(index, 1);
         }
+        console.log(`   ✅ ${area}: ${extrairPrimeiroNome(pessoaEncontrada)} (prioridade: ${primeiroNome})`);
         break;
       }
     }
@@ -3922,8 +3950,9 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
     if (!divisaoTemp[area] && pessoasDisponiveis.length > 0) {
       const pessoaRestante = pessoasDisponiveis[0];
       divisaoTemp[area] = pessoaRestante;
-      pessoasAlocadas.add(normalizarNome(pessoaRestante));
+      pessoasAlocadas.add(normalizarNome(extrairPrimeiroNome(pessoaRestante)));
       pessoasDisponiveis.splice(0, 1);
+      console.log(`   ⚠️ ${area}: ${extrairPrimeiroNome(pessoaRestante)} (fallback)`);
     }
   });
 
@@ -3933,16 +3962,16 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
 
   // Garantir ordem: RIO primeiro, depois _RIO_2
   if (divisaoTemp['RIO']) {
-    rioResponsaveis.push(divisaoTemp['RIO']);
+    rioResponsaveis.push(extrairPrimeiroNome(divisaoTemp['RIO']));
   }
   if (divisaoTemp['_RIO_2']) {
-    rioResponsaveis.push(divisaoTemp['_RIO_2']);
+    rioResponsaveis.push(extrairPrimeiroNome(divisaoTemp['_RIO_2']));
   }
 
-  // Adicionar outras áreas
+  // Adicionar outras áreas (usando primeiro nome para exibição mais limpa)
   Object.keys(divisaoTemp).forEach(area => {
     if (area !== 'RIO' && area !== '_RIO_2') {
-      divisao[area] = divisaoTemp[area];
+      divisao[area] = extrairPrimeiroNome(divisaoTemp[area]);
     }
   });
 
@@ -3951,9 +3980,9 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
     divisao['RIO'] = rioResponsaveis.join(' / ');
   }
 
-  console.log(`📊 Divisão calculada (${num} pessoas):`, divisao);
+  console.log(`📊 Divisão final (${num} pessoas):`, divisao);
   if (divisaoTemp['_RIO_2']) {
-    console.log(`   ✅ _RIO_2 alocado: ${divisaoTemp['_RIO_2']}`);
+    console.log(`   ✅ RIO com 2 pessoas: ${rioResponsaveis.join(' / ')}`);
   }
 
   return divisao;
