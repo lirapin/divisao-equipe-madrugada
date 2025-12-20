@@ -1284,29 +1284,35 @@
 
     /* Cores de alarme visual para volumetria */
     /* 0-19: verde (OK) */
+    .area-summary-item.volume-ok,
     .area-volume-item.volume-ok {
       border-left: 4px solid #28a745;
       background: linear-gradient(to right, rgba(40, 167, 69, 0.1), white);
     }
+    .area-summary-item.volume-ok .area-volume,
     .area-volume-item.volume-ok .area-volume {
       color: #28a745;
     }
 
     /* 20-29: amarelo (atenção) */
+    .area-summary-item.volume-atencao,
     .area-volume-item.volume-atencao {
       border-left: 4px solid #ffc107;
       background: linear-gradient(to right, rgba(255, 193, 7, 0.15), white);
     }
+    .area-summary-item.volume-atencao .area-volume,
     .area-volume-item.volume-atencao .area-volume {
       color: #d39e00;
     }
 
     /* 30+: vermelho (crítico) */
+    .area-summary-item.volume-critico,
     .area-volume-item.volume-critico {
       border-left: 4px solid #dc3545;
       background: linear-gradient(to right, rgba(220, 53, 69, 0.15), white);
       animation: pulse-critico 1.5s infinite;
     }
+    .area-summary-item.volume-critico .area-volume,
     .area-volume-item.volume-critico .area-volume {
       color: #dc3545;
       font-weight: bold;
@@ -5641,11 +5647,19 @@ function atualizarTabelaCopRede(dados) {
     };
   }
 
+  // Função para obter a classe de cor baseada na quantidade
+  // 0-19: verde (OK), 20-29: amarelo (atenção), 30+: vermelho (crítico)
+  function getCorVolume(quantidade) {
+    if (quantidade >= 30) return 'volume-critico';
+    if (quantidade >= 20) return 'volume-atencao';
+    return 'volume-ok';
+  }
+
   // Atualizar resumo visual
   if (Object.keys(resumoPorArea).length > 0 && summaryGrid) {
     resumoDiv.style.display = 'block';
     summaryGrid.innerHTML = Object.entries(resumoPorArea).map(([area, info]) => `
-      <div class="area-summary-item">
+      <div class="area-summary-item ${getCorVolume(info.volume)}">
         <span class="area-name">${area || 'Não mapeada'}</span>
         <span class="area-volume">${info.volume}</span>
         <span class="area-responsible"><i class="bi bi-person me-1"></i>${info.responsavel}</span>
