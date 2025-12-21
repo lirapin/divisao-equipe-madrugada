@@ -5552,11 +5552,12 @@ async function carregarCopRedeInforma(forcarAtualizacao = false) {
 }
 
 // Mapeamento de áreas do Telegram para áreas da escala
+// Cada área do Telegram pode mapear para múltiplas áreas da escala (depende de quantas pessoas trabalham)
 const MAPEAMENTO_AREAS_TELEGRAM = {
   'RIO': ['RIO'],
-  'NE/BA': ['NE/BA', 'BA/MG/ES'],
+  'NE/BA': ['NE/BA', 'BA/MG/ES', 'CO/NO/NE', 'MG/ES/BA'],
   'CO/NO': ['CO/NO', 'CO/NO/NE'],
-  'MG': ['MG', 'MG/ES', 'BA/MG/ES']
+  'MG': ['MG', 'MG/ES', 'BA/MG/ES', 'MG/ES/BA']
 };
 
 // Função para obter o dia da escala considerando que a madrugada só vira às 07h
@@ -5653,9 +5654,18 @@ function atualizarTabelaCopRede(dados) {
   // Calcular resumo por área APENAS da última mensagem
   const resumoPorArea = {};
 
+  // Determinar número de pessoas trabalhando na data da mensagem
+  const dataMensagem = new Date(ultimaMensagem.dataRecebimento);
+  const diaMensagem = obterDiaEscalaMadrugada(dataMensagem);
+  let numPessoasHoje = 4; // padrão
+  if (dadosOriginais && dadosOriginais[diaMensagem]) {
+    numPessoasHoje = dadosOriginais[diaMensagem].numPessoas || 4;
+  }
+  console.log(`[COP] Dia ${diaMensagem}: ${numPessoasHoje} pessoas trabalhando`);
+
   if (ultimaMensagem.resumo && ultimaMensagem.resumo.grupo) {
     for (const [grupoNome, quantidade] of Object.entries(ultimaMensagem.resumo.grupo)) {
-      const areaKey = mapearGrupoParaAreaFrontend(grupoNome);
+      const areaKey = mapearGrupoParaAreaFrontend(grupoNome, numPessoasHoje);
       if (!resumoPorArea[areaKey]) {
         resumoPorArea[areaKey] = { volume: 0, responsavel: '-' };
       }
@@ -5665,7 +5675,7 @@ function atualizarTabelaCopRede(dados) {
       }
     }
   } else if (ultimaMensagem.areaMapeada) {
-    const areaKey = ultimaMensagem.areaMapeada;
+    const areaKey = mapearGrupoParaAreaFrontend(ultimaMensagem.areaMapeada, numPessoasHoje);
     resumoPorArea[areaKey] = {
       volume: extrairVolumeDaMensagem(ultimaMensagem),
       responsavel: obterResponsavelPorArea(areaKey, ultimaMensagem.dataRecebimento)
@@ -5812,11 +5822,40 @@ function verDetalhesCopRedeResumo() {
 }
 
 // Mapear grupo do Telegram para área do frontend
-function mapearGrupoParaAreaFrontend(grupo) {
+// Considera o número de pessoas trabalhando para usar as áreas combinadas corretas
+function mapearGrupoParaAreaFrontend(grupo, numPessoas = null) {
   if (!grupo) return null;
 
   const grupoLower = grupo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
+  // Determinar número de pessoas trabalhando hoje se não fornecido
+  if (numPessoas === null) {
+    const hoje = new Date();
+    const dia = obterDiaEscalaMadrugada(hoje);
+    if (dadosOriginais && dadosOriginais[dia]) {
+      numPessoas = dadosOriginais[dia].numPessoas || 4;
+    } else {
+      numPessoas = 4; // padrão
+    }
+  }
+
+  // Para 3 pessoas, usar áreas combinadas
+  if (numPessoas === 3) {
+    if (grupoLower.includes('rio') || grupoLower.includes('espirito santo') || grupoLower.includes('espírito santo')) {
+      return 'RIO';
+    }
+    // CO/NO e NE/BA vão para CO/NO/NE
+    if (grupoLower.includes('centro') || grupoLower.includes('norte') || grupoLower.includes('nordeste') ||
+        grupoLower.includes('bahia') || grupoLower.includes('sergipe')) {
+      return 'CO/NO/NE';
+    }
+    // MG vai para MG/ES/BA
+    if (grupoLower.includes('minas') || grupoLower.includes('mg')) {
+      return 'MG/ES/BA';
+    }
+  }
+
+  // Para outras quantidades, usar mapeamento padrão
   if (grupoLower.includes('rio') || grupoLower.includes('espirito santo') || grupoLower.includes('espírito santo')) {
     return 'RIO';
   }
