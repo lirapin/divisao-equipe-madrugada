@@ -82,8 +82,8 @@ const CONFIG = {
     3: {
       RIO_DUPLO: false,
       areas: {
-        'CO/NO': ['CRISTIANE', 'MARISTELLA', 'RAISSA', 'LEONARDO', 'THIAGO', 'ALAN'],
-        'MG': ['LEONARDO', 'RAISSA', 'CRISTIANE', 'ALAN', 'THIAGO', 'MARISTELLA'],
+        'CO/NO/NE': ['CRISTIANE', 'MARISTELLA', 'RAISSA', 'LEONARDO', 'THIAGO', 'ALAN'],
+        'MG/ES/BA': ['LEONARDO', 'RAISSA', 'CRISTIANE', 'ALAN', 'THIAGO', 'MARISTELLA'],
         'RIO': ['ALAN', 'THIAGO', 'MARISTELLA', 'RAISSA', 'CRISTIANE', 'LEONARDO']
       }
     },

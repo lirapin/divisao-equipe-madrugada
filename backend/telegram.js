@@ -259,10 +259,78 @@ async function diagnosticar() {
 }
 
 /**
- * Busca mensagens recentes (não usado no fluxo normal)
+ * Busca mensagens recentes usando getUpdates
+ * Isso busca atualizações pendentes que o bot não recebeu enquanto estava offline
  */
-async function buscarMensagensRecentes() {
-  return [];
+async function buscarMensagensRecentes(limite = 100) {
+  console.log('[Telegram] Buscando mensagens recentes...');
+
+  try {
+    // Usar getUpdates para buscar atualizações pendentes
+    const response = await fetch(
+      `https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/getUpdates?limit=${limite}&timeout=5`
+    );
+    const data = await response.json();
+
+    if (!data.ok) {
+      console.log('[Telegram] Erro ao buscar updates:', data.description);
+      return [];
+    }
+
+    const updates = data.result || [];
+    console.log(`[Telegram] ${updates.length} updates recebidos`);
+
+    const mensagensProcessadas = [];
+
+    for (const update of updates) {
+      const msg = update.message || update.channel_post;
+      if (!msg || !msg.text) continue;
+
+      // Verificar se é do grupo configurado
+      const chatId = String(msg.chat.id);
+      const groupId = TELEGRAM_CONFIG.GROUP_ID;
+
+      if (chatId !== groupId &&
+          chatId !== groupId.replace('-100', '-') &&
+          `-100${chatId.replace('-', '')}` !== groupId) {
+        continue;
+      }
+
+      console.log('[Telegram] Processando msg:', msg.text.substring(0, 50));
+
+      const resultado = processarMensagem(msg);
+
+      if (resultado) {
+        console.log('[Telegram] ✅ Tipo:', resultado.tipo);
+
+        if (resultado.tipo === 'COP_REDE_INFORMA') {
+          await adicionarCopRedeInforma(resultado.dados);
+          mensagensProcessadas.push(resultado.dados);
+          console.log('[Telegram] 💾 COP salvo via sync!');
+        } else if (resultado.tipo === 'NOVO_EVENTO') {
+          await adicionarAlerta(resultado.dados);
+          mensagensProcessadas.push(resultado.dados);
+          console.log('[Telegram] 💾 Alerta salvo via sync!');
+        }
+      }
+    }
+
+    // Marcar updates como lidos (offset = último ID + 1)
+    if (updates.length > 0) {
+      const lastUpdateId = updates[updates.length - 1].update_id;
+      await fetch(
+        `https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}&limit=1`
+      );
+      console.log('[Telegram] Updates marcados como lidos');
+    }
+
+    console.log(`[Telegram] ${mensagensProcessadas.length} mensagens processadas via sync`);
+    return mensagensProcessadas;
+
+  } catch (error) {
+    console.error('[Telegram] Erro ao buscar mensagens:', error.message);
+    return [];
+  }
 }
 
 /**
