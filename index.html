@@ -3964,8 +3964,8 @@ function calcularDivisaoPorNumero(num, trabalhandoHoje) {
 
   console.log(`🔄 Calculando divisão para ${num} pessoas:`, trabalhandoHoje.map(extrairPrimeiroNome));
 
-  // Ordenar áreas: CO/NO primeiro, depois NE/BA, MG, RIO, e _RIO_2 por último
-  const ordemAreas = ['CO/NO', 'NE/BA', 'MG', 'RIO', '_RIO_2', 'SIR/APOIO'];
+  // Ordenar áreas por prioridade de processamento
+  const ordemAreas = ['CO/NO', 'CO/NO/NE', 'NE/BA', 'MG', 'MG/ES/BA', 'RIO', '_RIO_2', 'SIR/APOIO'];
   const areasOrdenadas = Object.keys(regras).sort((a, b) => {
     const indexA = ordemAreas.indexOf(a);
     const indexB = ordemAreas.indexOf(b);
